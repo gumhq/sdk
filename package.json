@@ -1,0 +1,14 @@
+{
+  "name": "gpl-core-ts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "lerna": "^6.4.1",
+    "typescript": "^4.9.4"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "private": true
+}
