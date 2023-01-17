@@ -18,17 +18,22 @@ export class User {
     );
   }
 
-  public async create(user: anchor.web3.PublicKey, randomHash: Buffer) {
+  public async get(randomHash: Buffer) {
     const { program } = this.sdk;
     const [userAccount, _] = this.userPDA(randomHash);
+    const user = await program.account.user.fetch(userAccount);
+    return user;
+  }
+
+  public async create(user: anchor.web3.PublicKey, randomHash: Buffer) {
+    const { program } = this.sdk;
     const userIx = program.methods
-    .createUser(randomHash)
-    .accounts({
-      user: userAccount,
-      authority: user,
-      systemProgram: anchor.web3.SystemProgram.programId,
-    })
-    .instruction();
+      .createUser(randomHash)
+      .accounts({
+        authority: user,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .instruction();
     return userIx;
   }
 
@@ -39,14 +44,14 @@ export class User {
   ) {
     const { program } = this.sdk;
     const userIx = program.methods
-    .updateUser()
-    .accounts({
-      user: userAccount,
-      new_authority: newAuthority,
-      authority: user,
-      systemProgram: anchor.web3.SystemProgram.programId,
-    })
-    .instruction();
+      .updateUser()
+      .accounts({
+        user: userAccount,
+        newAuthority: newAuthority,
+        authority: user,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .instruction();
     return userIx;
   }
 
@@ -56,13 +61,13 @@ export class User {
   ) {
     const { program } = this.sdk;
     const userIx = program.methods
-    .deleteUser()
-    .accounts({
-      user: userAccount,
-      authority: user,
-      systemProgram: anchor.web3.SystemProgram.programId,
-    })
-    .instruction();
+      .deleteUser()
+      .accounts({
+        user: userAccount,
+        authority: user,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .instruction();
     return userIx;
   }
 }

@@ -12,19 +12,19 @@ export class SDK {
     readonly program: anchor.Program;
     readonly provider: anchor.AnchorProvider;
     readonly cluster: Cluster | "localnet";
-    
+
     constructor(
-    wallet: anchor.Wallet,
-    connection: anchor.web3.Connection,
-    opts: anchor.web3.ConfirmOptions,
-    cluster: Cluster | "localnet",
+        wallet: anchor.Wallet,
+        connection: anchor.web3.Connection,
+        opts: anchor.web3.ConfirmOptions,
+        cluster: Cluster | "localnet",
     ) {
-    this.cluster = cluster;
-    this.provider = new anchor.AnchorProvider(connection, wallet, opts);
-    this.program = new anchor.Program(
-        gpl_core_idl as anchor.Idl, 
-        GPLCORE_PROGRAMS[this.cluster] as anchor.web3.PublicKey, 
-        this.provider);
+        this.cluster = cluster;
+        this.provider = new anchor.AnchorProvider(connection, wallet, opts);
+        this.program = new anchor.Program(
+            gpl_core_idl as anchor.Idl,
+            GPLCORE_PROGRAMS[this.cluster] as anchor.web3.PublicKey,
+            this.provider);
     }
 
     public user = new User(this);
