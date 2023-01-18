@@ -12,7 +12,7 @@ export class Connection {
     return await this.sdk.program.account.connection.fetch(connectionAccount);
   }
 
-  public async create(
+  public create(
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
@@ -24,11 +24,10 @@ export class Connection {
         toProfile: toProfile,
         user: userAccount,
         authority: user,
-        systemProgram: anchor.web3.SystemProgram.programId,
       });
   }
 
-  public async delete(
+  public delete(
     connectionAccount: anchor.web3.PublicKey,
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
@@ -42,7 +41,6 @@ export class Connection {
         toProfile: toProfile,
         user: userAccount,
         authority: user,
-        systemProgram: anchor.web3.SystemProgram.programId,
       });
   }
 }

@@ -27,9 +27,6 @@ describe("Connection", async () => {
       "processed" as anchor.web3.ConfirmOptions,
       "localnet"
     );
-    testUser = anchor.web3.Keypair.generate();
-    testUserWallet = new NodeWallet(testUser);
-    await airdrop(testUser.publicKey);
 
     // Create a user
     const randomHash = randombytes(32);
@@ -38,7 +35,16 @@ describe("Connection", async () => {
     userPDA = userPubKeys.user as anchor.web3.PublicKey;
     await userTx.rpc();
 
+    // Create a profile
+    const profileTx = sdk.profile.create(userPDA, "Personal", user.publicKey);
+    const profilePubKeys = await profileTx.pubkeys();
+    profilePDA = profilePubKeys.profile as anchor.web3.PublicKey;
+    await profileTx.rpc();
+
     // Create a testUser
+    testUser = anchor.web3.Keypair.generate();
+    testUserWallet = new NodeWallet(testUser);
+    await airdrop(testUser.publicKey);
     const randomTestHash = randombytes(32);
     const createTestUser = sdk.user.create(testUser.publicKey, randomTestHash);
     const testUserPubKeys = await createTestUser.pubkeys();
@@ -48,12 +54,6 @@ describe("Connection", async () => {
     testUserTx.feePayer = testUser.publicKey;
     const signedTestUserTransaction = await testUserWallet.signTransaction(testUserTx);
     await sendAndConfirmTransaction(sdk.rpcConnection, signedTestUserTransaction, [testUser]);
-
-    // Create a profile
-    const profileTx = sdk.profile.create(userPDA, "Personal", user.publicKey);
-    const profilePubKeys = await profileTx.pubkeys();
-    profilePDA = profilePubKeys.profile as anchor.web3.PublicKey;
-    await profileTx.rpc();
 
     // Create a testProfile
     const testProfile = sdk.profile.create(
@@ -71,7 +71,7 @@ describe("Connection", async () => {
   });
 
   it("should create a connection", async () => {
-    const connection = await sdk.connection.create(
+    const connection = sdk.connection.create(
       profilePDA,
       testProfilePDA,
       userPDA,
@@ -87,7 +87,7 @@ describe("Connection", async () => {
   });
 
   it("should delete a connection", async () => {
-    const connection = await sdk.connection.delete(
+    const connection = sdk.connection.delete(
       connectionPDA,
       profilePDA,
       testProfilePDA,

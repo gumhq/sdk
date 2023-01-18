@@ -2,11 +2,11 @@ import * as anchor from "@project-serum/anchor";
 import { Cluster } from "@solana/web3.js";
 import { Connection } from "./connection";
 import { GPLCORE_PROGRAMS } from "./constants";
-import gpl_core_idl from "./idl/gpl_core.json";
 import { Post } from "./post";
 import { Profile } from "./profile";
 import { Reaction } from "./reaction";
 import { User } from "./user";
+const gpl_core_idl = require('./idl/gpl_core.json');
 
 export class SDK {
     readonly program: anchor.Program;
