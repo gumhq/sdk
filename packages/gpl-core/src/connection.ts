@@ -1,6 +1,5 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
-import { SEED_PREFIXES } from "./constants";
 
 export class Connection {
   readonly sdk: SDK;
@@ -9,12 +8,8 @@ export class Connection {
     this.sdk = sdk;
   }
 
-  connectionPDA(fromProfile: anchor.web3.PublicKey, toProfile: anchor.web3.PublicKey) {
-    const { program } = this.sdk;
-    return anchor.web3.PublicKey.findProgramAddressSync(
-      [SEED_PREFIXES["connection"], fromProfile.toBuffer(), toProfile.toBuffer()],
-      program.programId
-    );
+  public async get(connectionAccount: anchor.web3.PublicKey) {
+    return await this.sdk.program.account.connection.fetch(connectionAccount);
   }
 
   public async create(
@@ -22,20 +17,15 @@ export class Connection {
     toProfile: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
-    const { program } = this.sdk;
-    const [connectionAccount, _] = this.connectionPDA(fromProfile, toProfile);
-    const connectionIx = program.methods
-    .createConnection()
-    .accounts({
-      connection: connectionAccount,
-      fromProfile: fromProfile,
-      toProfile: toProfile,
-      user: userAccount,
-      authority: user,
-      systemProgram: anchor.web3.SystemProgram.programId,
-    })
-    .instruction();
-    return connectionIx;
+    return this.sdk.program.methods
+      .createConnection()
+      .accounts({
+        fromProfile: fromProfile,
+        toProfile: toProfile,
+        user: userAccount,
+        authority: user,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      });
   }
 
   public async delete(
@@ -44,18 +34,15 @@ export class Connection {
     toProfile: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
-    const { program } = this.sdk;
-    const connectionIx = program.methods
-    .deleteConnection()
-    .accounts({
-      connection: connectionAccount,
-      fromProfile: fromProfile,
-      toProfile: toProfile,
-      user: userAccount,
-      authority: user,
-      systemProgram: anchor.web3.SystemProgram.programId,
-    })
-    .instruction();
-    return connectionIx;
+    return this.sdk.program.methods
+      .deleteConnection()
+      .accounts({
+        connection: connectionAccount,
+        fromProfile: fromProfile,
+        toProfile: toProfile,
+        user: userAccount,
+        authority: user,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      });
   }
 }
