@@ -14,11 +14,3 @@ export const GPLCORE_PROGRAMS = {
     "9XZ9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z"
   ),
 };
-
-export const SEED_PREFIXES = {
-  user: Buffer.from("user"),
-  profile: Buffer.from("profile"),
-  post: Buffer.from("post"),
-  connection: Buffer.from("connection"),
-  reaction: Buffer.from("reaction"),
-};
