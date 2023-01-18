@@ -2,111 +2,57 @@ import { SDK } from "../src";
 import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import randombytes from "randombytes";
-import { airdrop } from "./utils";
-import * as dotenv from 'dotenv';
 import { expect } from "chai";
-import {
-  sendAndConfirmTransaction,
-} from "@solana/web3.js";
 
-dotenv.config()
-const opts = {
-  preflightCommitment: "processed" as anchor.web3.ConfirmOptions,
-};
+anchor.setProvider(anchor.AnchorProvider.env());
+const userWallet = (anchor.getProvider() as any).wallet;
+const user = userWallet.payer;
 
 describe("Profile", async () => {
   let sdk: SDK;
-  let user: anchor.web3.Keypair;
-  let userWallet: NodeWallet;
-  let rpcConnection: anchor.web3.Connection;
-  let provider: anchor.Provider;
-  let randomHash: Buffer;
+  let userPDA: anchor.web3.PublicKey;
   let profileAccount: anchor.web3.PublicKey;
 
   before(async () => {
-    provider = anchor.AnchorProvider.env();
-    anchor.setProvider(provider);
-    user = anchor.web3.Keypair.generate();
-    userWallet = new NodeWallet(user);
-    const preflightCommitment = "confirmed";
-    rpcConnection = new anchor.web3.Connection(
-      "http://127.0.0.1:8899",
-      preflightCommitment
-    );
     sdk = new SDK(
       userWallet as NodeWallet,
-      rpcConnection,
-      opts.preflightCommitment,
-      "localnet",
+      new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
+      "processed" as anchor.web3.ConfirmOptions,
+      "localnet"
     );
-    await airdrop(user.publicKey);
-    randomHash = randombytes(32);
 
     // Create a user
-    const userInstruction = await sdk.user.create(user.publicKey, randomHash);
-    const transaction = new anchor.web3.Transaction().add(userInstruction);
-    transaction.recentBlockhash = (
-      await rpcConnection.getLatestBlockhash()
-    ).blockhash;
-    transaction.feePayer = user.publicKey;
-    const signedTransaction = await userWallet.signTransaction(transaction);
-    await sendAndConfirmTransaction(
-      rpcConnection,
-      signedTransaction,
-      [user]
-    );
+    const randomHash = randombytes(32);
+    const tx = sdk.user.create(user.publicKey, randomHash)
+    const pubKeys = await tx.pubkeys();
+    userPDA = pubKeys.user as anchor.web3.PublicKey;
+    await tx.rpc();
   });
 
   it("should create a profile", async () => {
-    const [userAccount] = sdk.user.userPDA(randomHash);
-    const profileInstruction = await sdk.profile.create(
-      userAccount,
+    const tx = sdk.profile.create(
+      userPDA,
       "Personal",
       user.publicKey,
     );
-    const transaction = new anchor.web3.Transaction().add(profileInstruction);
-    transaction.recentBlockhash = (
-      await rpcConnection.getLatestBlockhash()
-    ).blockhash;
-    transaction.feePayer = user.publicKey;
-    const signedTransaction = await userWallet.signTransaction(transaction);
-    const tx = await sendAndConfirmTransaction(
-      rpcConnection,
-      signedTransaction,
-      [user]
-    );
-    expect(tx).to.not.be.null;
-    [profileAccount] = sdk.profile.profilePDA("Personal", userAccount);
+    const pubKeys = await tx.pubkeys();
+    profileAccount = pubKeys.profile as anchor.web3.PublicKey;
+    await tx.rpc();
     const profile = await sdk.profile.get(profileAccount);
-    expect(profile.user.toString()).is.equal(userAccount.toString());
+    expect(profile.user.toString()).is.equal(userPDA.toString());
     expect(profile.namespace.toString()).is.equal({ personal: {} }.toString());
   });
 
   it("should delete a profile", async () => {
-    const [userAccount] = sdk.user.userPDA(randomHash);
-    console.log(`userAccount: ${userAccount.toString()}`);
-    console.log(`profileAccount: ${profileAccount.toString()}`);
-    const profileInstruction = await sdk.profile.delete(
+    const tx = sdk.profile.delete(
       profileAccount,
-      userAccount,
+      userPDA,
       user.publicKey,
     );
-    const transaction = new anchor.web3.Transaction().add(profileInstruction);
-    transaction.recentBlockhash = (
-      await rpcConnection.getLatestBlockhash()
-    ).blockhash;
-    transaction.feePayer = user.publicKey;
-    const signedTransaction = await userWallet.signTransaction(transaction);
+    await tx.rpc();
     try {
-      const tx = await sendAndConfirmTransaction(
-        rpcConnection,
-        signedTransaction,
-        [user]
-      );
-      expect(tx).to.not.be.null;
       await sdk.profile.get(profileAccount);
     } catch (error: any) {
-      console.log(error);
       expect(error).to.be.an("error");
       expect(error.toString()).to.contain(`Account does not exist or has no data ${profileAccount.toString()}`);
     }

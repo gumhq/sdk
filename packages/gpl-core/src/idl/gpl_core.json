@@ -155,9 +155,7 @@
               },
               {
                 "kind": "arg",
-                "type": {
-                  "defined": "Namespace"
-                },
+                "type": "string",
                 "path": "namespace"
               },
               {
@@ -208,9 +206,7 @@
       "args": [
         {
           "name": "namespace",
-          "type": {
-            "defined": "Namespace"
-          }
+          "type": "string"
         }
       ]
     },
@@ -235,6 +231,12 @@
                 },
                 "account": "Profile",
                 "path": "profile.namespace"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Profile",
+                "path": "profile.user"
               }
             ]
           }
@@ -961,9 +963,7 @@
               },
               {
                 "kind": "arg",
-                "type": {
-                  "defined": "ReactionType"
-                },
+                "type": "string",
                 "path": "reaction_type"
               },
               {
@@ -1073,9 +1073,7 @@
       "args": [
         {
           "name": "reactionType",
-          "type": {
-            "defined": "ReactionType"
-          }
+          "type": "string"
         }
       ]
     },
@@ -1340,6 +1338,40 @@
   ],
   "types": [
     {
+      "name": "GumError",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "PostError"
+          },
+          {
+            "name": "ProfileError"
+          },
+          {
+            "name": "UserError"
+          },
+          {
+            "name": "ReactionError"
+          },
+          {
+            "name": "ConnectionError"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConnectionError",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "CannotConnectToSelf"
+          }
+        ]
+      }
+    },
+    {
       "name": "Namespace",
       "type": {
         "kind": "enum",
@@ -1528,9 +1560,309 @@
           "index": false
         }
       ]
+    },
+    {
+      "name": "PostNew",
+      "fields": [
+        {
+          "name": "post",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "bump",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "randomHash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "metadataUri",
+          "type": "string",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PostUpdated",
+      "fields": [
+        {
+          "name": "post",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "metadataUri",
+          "type": "string",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PostDeleted",
+      "fields": [
+        {
+          "name": "post",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PostCommentNew",
+      "fields": [
+        {
+          "name": "post",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "bump",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "randomHash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "metadataUri",
+          "type": "string",
+          "index": false
+        },
+        {
+          "name": "replyTo",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ConnectionNew",
+      "fields": [
+        {
+          "name": "connection",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "fromProfile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "toProfile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "bump",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ConnectionDeleted",
+      "fields": [
+        {
+          "name": "connection",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "fromProfile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "toProfile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ReactionNew",
+      "fields": [
+        {
+          "name": "reaction",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "reactionType",
+          "type": {
+            "defined": "ReactionType"
+          },
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "fromProfile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "toPost",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "bump",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ReactionDeleted",
+      "fields": [
+        {
+          "name": "reaction",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "reactionType",
+          "type": {
+            "defined": "ReactionType"
+          },
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "fromProfile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "toPost",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "URITooLong"
     }
   ],
   "metadata": {
-    "address": "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+    "address": "4KnnwKYMEsHid1NL3LKKS3z2Y2iXRVwfDSRdQPWwJ1Em"
   }
 }

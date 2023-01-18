@@ -11,6 +11,7 @@ import { User } from "./user";
 export class SDK {
     readonly program: anchor.Program;
     readonly provider: anchor.AnchorProvider;
+    readonly rpcConnection: anchor.web3.Connection;
     readonly cluster: Cluster | "localnet";
 
     constructor(
@@ -25,6 +26,7 @@ export class SDK {
             gpl_core_idl as anchor.Idl,
             GPLCORE_PROGRAMS[this.cluster] as anchor.web3.PublicKey,
             this.provider);
+        this.rpcConnection = connection;
     }
 
     public user = new User(this);
