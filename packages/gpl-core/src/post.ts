@@ -1,7 +1,5 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
-import randombytes from "randombytes";
-import { SEED_PREFIXES } from "./constants";
 
 export class Post {
   readonly sdk: SDK;
@@ -10,69 +8,55 @@ export class Post {
     this.sdk = sdk;
   }
 
-  postPDA(randomHash: Buffer) {
-    const { program } = this.sdk;
-    return anchor.web3.PublicKey.findProgramAddressSync(
-      [SEED_PREFIXES["post"], randomHash],
-      program.programId
-    );
+  public async get(postAccount: anchor.web3.PublicKey) {
+    return await this.sdk.program.account.post.fetch(postAccount);
   }
 
   public async create(
-    metadata: String, 
+    metadata: String,
     randomHash: Buffer,
-    profileAccount: anchor.web3.PublicKey, 
+    profileAccount: anchor.web3.PublicKey,
+    userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
-    const { program } = this.sdk;
-    const [postAccount, _] = this.postPDA(randombytes(32));
-    const postIx = program.methods
-    .createPost(metadata, randomHash)
-    .accounts({
-      post: postAccount,
-      profile: profileAccount,
-      authority: user,
-      systemProgram: anchor.web3.SystemProgram.programId,
-    })
-    .instruction();
-    return postIx;
+    return this.sdk.program.methods
+      .createPost(metadata, randomHash)
+      .accounts({
+        profile: profileAccount,
+        user: userAccount,
+        authority: user,
+      });
   }
 
   public async update(
+    newMetadata: String,
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    newMetadata: String,
     user: anchor.web3.PublicKey) {
-    const { program } = this.sdk;
-    const postIx = program.methods
-    .updatePost(newMetadata)
-    .accounts({
-      post: postAccount,
-      profile: profileAccount,
-      user: userAccount,
-      authority: user,
-      systemProgram: anchor.web3.SystemProgram.programId,
-    })
-    .instruction();
-    return postIx;
+    return this.sdk.program.methods
+      .updatePost(newMetadata)
+      .accounts({
+        post: postAccount,
+        profile: profileAccount,
+        user: userAccount,
+        authority: user,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      });
   }
 
 
   public async delete(
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey, 
+    userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
-    const { program } = this.sdk;
-    const postIx = program.methods
-    .deleteProfile()
-    .accounts({
-      post: postAccount,
-      profile: profileAccount,
-      user: userAccount,
-      authority: user,
-      systemProgram: anchor.web3.SystemProgram.programId,
-    })
-    return postIx;
+    return this.sdk.program.methods
+      .deletePost()
+      .accounts({
+        post: postAccount,
+        profile: profileAccount,
+        user: userAccount,
+        authority: user,
+      });
   }
 }
