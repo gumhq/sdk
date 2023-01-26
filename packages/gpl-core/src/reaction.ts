@@ -14,13 +14,13 @@ export class Reaction {
     return await this.sdk.program.account.reaction.fetch(reactionAccount);
   }
 
-  public create(
+  public async create(
     fromProfileAccount: anchor.web3.PublicKey,
     toPostAccount: anchor.web3.PublicKey,
     reactionType: ReactionType,
     userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
-    return this.sdk.program.methods
+    const program = this.sdk.program.methods
       .createReaction(reactionType)
       .accounts({
         toPost: toPostAccount,
@@ -28,6 +28,12 @@ export class Reaction {
         user: userAccount,
         authority: user,
       });
+    const pubKeys = await program.pubkeys();
+    const reactionPDA = pubKeys.reaction as anchor.web3.PublicKey;
+    return {
+      program,
+      reactionPDA,
+    };
   }
 
   public delete(

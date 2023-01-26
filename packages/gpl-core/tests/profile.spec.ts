@@ -11,7 +11,7 @@ const user = userWallet.payer;
 describe("Profile", async () => {
   let sdk: SDK;
   let userPDA: anchor.web3.PublicKey;
-  let profileAccount: anchor.web3.PublicKey;
+  let profilePDA: anchor.web3.PublicKey;
 
   before(async () => {
     sdk = new SDK(
@@ -22,39 +22,36 @@ describe("Profile", async () => {
     );
 
     // Create a user
-    const randomHash = randombytes(32);
-    const tx = sdk.user.create(user.publicKey, randomHash)
-    const pubKeys = await tx.pubkeys();
-    userPDA = pubKeys.user as anchor.web3.PublicKey;
-    await tx.rpc();
+    const tx = await sdk.user.create(user.publicKey)
+    userPDA = tx.userPDA as anchor.web3.PublicKey;
+    await tx.program.rpc();
   });
 
   it("should create a profile", async () => {
-    const tx = sdk.profile.create(
+    const profile = await sdk.profile.create(
       userPDA,
       "Personal",
       user.publicKey,
     );
-    const pubKeys = await tx.pubkeys();
-    profileAccount = pubKeys.profile as anchor.web3.PublicKey;
-    await tx.rpc();
-    const profile = await sdk.profile.get(profileAccount);
-    expect(profile.user.toString()).is.equal(userPDA.toString());
-    expect(profile.namespace.toString()).is.equal({ personal: {} }.toString());
+    profilePDA = profile.profilePDA as anchor.web3.PublicKey;
+    await profile.program.rpc();
+    const profileAccount = await sdk.profile.get(profilePDA);
+    expect(profileAccount.user.toString()).is.equal(userPDA.toString());
+    expect(profileAccount.namespace.toString()).is.equal({ personal: {} }.toString());
   });
 
   it("should delete a profile", async () => {
     const tx = sdk.profile.delete(
-      profileAccount,
+      profilePDA,
       userPDA,
       user.publicKey,
     );
     await tx.rpc();
     try {
-      await sdk.profile.get(profileAccount);
+      await sdk.profile.get(profilePDA);
     } catch (error: any) {
       expect(error).to.be.an("error");
-      expect(error.toString()).to.contain(`Account does not exist or has no data ${profileAccount.toString()}`);
+      expect(error.toString()).to.contain(`Account does not exist or has no data ${profilePDA.toString()}`);
     }
   });
 });

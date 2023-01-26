@@ -1,11 +1,7 @@
 import { SDK } from "../src";
 import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
-import randombytes from "randombytes";
 import { expect } from "chai";
-import {
-  sendAndConfirmTransaction,
-} from "@solana/web3.js";
 
 anchor.setProvider(anchor.AnchorProvider.env());
 const userWallet = (anchor.getProvider() as any).wallet;
@@ -26,38 +22,32 @@ describe("Post", async () => {
     );
 
     // Create a user
-    const randomHash = randombytes(32);
-    const userTx = sdk.user.create(user.publicKey, randomHash)
-    const userPubKeys = await userTx.pubkeys();
-    userPDA = userPubKeys.user as anchor.web3.PublicKey;
-    await userTx.rpc();
+    const userTx = await sdk.user.create(user.publicKey)
+    userPDA = userTx.userPDA as anchor.web3.PublicKey;
+    await userTx.program.rpc();
 
     // Create a profile
-    const profileTx = sdk.profile.create(userPDA, "Personal", user.publicKey);
-    const profilePubKeys = await profileTx.pubkeys();
-    profilePDA = profilePubKeys.profile as anchor.web3.PublicKey;
-    await profileTx.rpc();
+    const profile = await sdk.profile.create(userPDA, "Personal", user.publicKey);
+    profilePDA = profile.profilePDA as anchor.web3.PublicKey;
+    await profile.program.rpc();
   });
 
   it("should create a post", async () => {
-    const randomHash = randombytes(32);
     const post = await sdk.post.create(
       "This is a test post",
-      randomHash,
       profilePDA,
       userPDA,
       user.publicKey,
     );
-    const postPubKeys = await post.pubkeys();
-    postPDA = postPubKeys.post as anchor.web3.PublicKey;
-    await post.rpc();
+    postPDA = post.postPDA as anchor.web3.PublicKey;
+    await post.program.rpc();
     const postAccount = await sdk.post.get(postPDA);
     expect(postAccount.metadataUri).is.equal("This is a test post");
     expect(postAccount.profile.toString()).is.equal(profilePDA.toString());
   });
 
   it("should update a post", async () => {
-    const post = await sdk.post.update(
+    const post = sdk.post.update(
       "This is a test post updated",
       postPDA,
       profilePDA,
@@ -71,7 +61,7 @@ describe("Post", async () => {
   });
 
   it("should delete a post", async () => {
-    const post = await sdk.post.delete(
+    const post = sdk.post.delete(
       postPDA,
       profilePDA,
       userPDA,

@@ -1,4 +1,5 @@
 import * as anchor from "@project-serum/anchor";
+import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { Cluster } from "@solana/web3.js";
 import { Connection } from "./connection";
 import { GPLCORE_PROGRAMS } from "./constants";
@@ -6,7 +7,7 @@ import { Post } from "./post";
 import { Profile } from "./profile";
 import { Reaction } from "./reaction";
 import { User } from "./user";
-const gpl_core_idl = require('./idl/gpl_core.json');
+import gpl_core_idl from "./idl/gpl_core.json";
 
 export class SDK {
     readonly program: anchor.Program;
@@ -15,7 +16,7 @@ export class SDK {
     readonly cluster: Cluster | "localnet";
 
     constructor(
-        wallet: anchor.Wallet,
+        wallet: Wallet,
         connection: anchor.web3.Connection,
         opts: anchor.web3.ConfirmOptions,
         cluster: Cluster | "localnet",

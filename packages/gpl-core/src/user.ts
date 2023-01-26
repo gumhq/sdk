@@ -1,5 +1,6 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
+import randomBytes from "randombytes";
 
 export class User {
   readonly sdk: SDK;
@@ -8,17 +9,32 @@ export class User {
     this.sdk = sdk;
   }
 
+  public async userPDA(randomHash: Buffer) {
+    const { program } = this.sdk;
+    const [userPDA] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("user"), randomHash],
+      program.programId
+    );
+    return userPDA;
+  }
+
   public async get(userAccount: anchor.web3.PublicKey) {
     return await this.sdk.program.account.user.fetch(userAccount);
   }
 
-  public create(user: anchor.web3.PublicKey, randomHash: Buffer) {
-    const { program } = this.sdk;
-    return program.methods
+  public async create(user: anchor.web3.PublicKey) {
+    const randomHash = randomBytes(32);
+    const program = this.sdk.program.methods
       .createUser(randomHash)
       .accounts({
         authority: user,
       });
+    const pubKeys = await program.pubkeys();
+    const userPDA = pubKeys.user as anchor.web3.PublicKey;
+    return {
+      program,
+      userPDA,
+    };
   }
 
   public update(

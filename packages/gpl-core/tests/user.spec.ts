@@ -1,7 +1,6 @@
 import { SDK } from "../src";
 import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
-import randombytes from "randombytes";
 import { airdrop } from "./utils";
 import { expect } from "chai";
 import { sendAndConfirmTransaction } from "@solana/web3.js";
@@ -27,11 +26,9 @@ describe("User", async () => {
   });
 
   it("should create a user", async () => {
-    const randomHash = randombytes(32);
-    const tx = sdk.user.create(user.publicKey, randomHash)
-    const pubKeys = await tx.pubkeys();
-    userPDA = pubKeys.user as anchor.web3.PublicKey;
-    await tx.rpc();
+    const userIx = await sdk.user.create(user.publicKey);
+    await userIx.program.rpc();
+    userPDA = userIx.userPDA as anchor.web3.PublicKey;
     const userAccount = await sdk.user.get(userPDA);
     expect(userAccount.authority.toString()).is.equal(user.publicKey.toString());
   });

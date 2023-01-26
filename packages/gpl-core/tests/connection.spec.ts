@@ -29,41 +29,35 @@ describe("Connection", async () => {
     );
 
     // Create a user
-    const randomHash = randombytes(32);
-    const userTx = sdk.user.create(user.publicKey, randomHash)
-    const userPubKeys = await userTx.pubkeys();
-    userPDA = userPubKeys.user as anchor.web3.PublicKey;
-    await userTx.rpc();
+    const userTx = await sdk.user.create(user.publicKey)
+    userPDA = userTx.userPDA as anchor.web3.PublicKey;
+    await userTx.program.rpc();
 
     // Create a profile
-    const profileTx = sdk.profile.create(userPDA, "Personal", user.publicKey);
-    const profilePubKeys = await profileTx.pubkeys();
-    profilePDA = profilePubKeys.profile as anchor.web3.PublicKey;
-    await profileTx.rpc();
+    const profile = await sdk.profile.create(userPDA, "Personal", user.publicKey);
+    profilePDA = profile.profilePDA as anchor.web3.PublicKey;
+    await profile.program.rpc();
 
     // Create a testUser
     testUser = anchor.web3.Keypair.generate();
     testUserWallet = new NodeWallet(testUser);
     await airdrop(testUser.publicKey);
-    const randomTestHash = randombytes(32);
-    const createTestUser = sdk.user.create(testUser.publicKey, randomTestHash);
-    const testUserPubKeys = await createTestUser.pubkeys();
-    testUserPDA = testUserPubKeys.user as anchor.web3.PublicKey;
-    const testUserTx = await createTestUser.transaction();
+    const createTestUser = await sdk.user.create(testUser.publicKey);
+    testUserPDA = createTestUser.userPDA as anchor.web3.PublicKey;
+    const testUserTx = await createTestUser.program.transaction();
     testUserTx.recentBlockhash = (await sdk.rpcConnection.getLatestBlockhash()).blockhash;
     testUserTx.feePayer = testUser.publicKey;
     const signedTestUserTransaction = await testUserWallet.signTransaction(testUserTx);
     await sendAndConfirmTransaction(sdk.rpcConnection, signedTestUserTransaction, [testUser]);
 
     // Create a testProfile
-    const testProfile = sdk.profile.create(
+    const testProfile = await sdk.profile.create(
       testUserPDA,
       "Personal",
       testUser.publicKey,
     );
-    const testProfilePubKeys = await testProfile.pubkeys();
-    testProfilePDA = testProfilePubKeys.profile as anchor.web3.PublicKey;
-    const testProfileTx = await testProfile.transaction();
+    testProfilePDA = testProfile.profilePDA as anchor.web3.PublicKey;
+    const testProfileTx = await testProfile.program.transaction();
     testProfileTx.recentBlockhash = (await sdk.rpcConnection.getLatestBlockhash()).blockhash;
     testProfileTx.feePayer = testUser.publicKey;
     const signedTransaction = await testUserWallet.signTransaction(testProfileTx);
@@ -71,15 +65,14 @@ describe("Connection", async () => {
   });
 
   it("should create a connection", async () => {
-    const connection = sdk.connection.create(
+    const connection = await sdk.connection.create(
       profilePDA,
       testProfilePDA,
       userPDA,
       user.publicKey,
     );
-    const pubKeys = await connection.pubkeys();
-    connectionPDA = pubKeys.connection as anchor.web3.PublicKey;
-    await connection.rpc();
+    connectionPDA = connection.connectionPDA as anchor.web3.PublicKey;
+    await connection.program.rpc();
 
     const connectionAccount = await sdk.connection.get(connectionPDA);
     expect(connectionAccount.fromProfile.toBase58()).to.equal(profilePDA.toBase58());

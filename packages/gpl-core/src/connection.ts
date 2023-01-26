@@ -12,12 +12,12 @@ export class Connection {
     return await this.sdk.program.account.connection.fetch(connectionAccount);
   }
 
-  public create(
+  public async create(
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
-    return this.sdk.program.methods
+    const program = this.sdk.program.methods
       .createConnection()
       .accounts({
         fromProfile: fromProfile,
@@ -25,6 +25,12 @@ export class Connection {
         user: userAccount,
         authority: user,
       });
+    const pubKeys = await program.pubkeys();
+    const connectionPDA = pubKeys.connection as anchor.web3.PublicKey;
+    return {
+      program,
+      connectionPDA,
+    };
   }
 
   public delete(

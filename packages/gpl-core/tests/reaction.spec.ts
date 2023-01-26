@@ -24,44 +24,37 @@ describe("Reaction", async () => {
     );
 
     // Create a user
-    const randomHash = randombytes(32);
-    const userTx = sdk.user.create(user.publicKey, randomHash)
-    const userPubKeys = await userTx.pubkeys();
-    userPDA = userPubKeys.user as anchor.web3.PublicKey;
-    await userTx.rpc();
+    const userTx = await sdk.user.create(user.publicKey)
+    userPDA = userTx.userPDA as anchor.web3.PublicKey;
+    await userTx.program.rpc();
 
     // Create a profile
-    const profileTx = sdk.profile.create(userPDA, "Personal", user.publicKey);
-    const profilePubKeys = await profileTx.pubkeys();
-    profilePDA = profilePubKeys.profile as anchor.web3.PublicKey;
-    await profileTx.rpc();
+    const profile = await sdk.profile.create(userPDA, "Personal", user.publicKey);
+    profilePDA = profile.profilePDA as anchor.web3.PublicKey;
+    await profile.program.rpc();
 
     // Create a post
-    const postRandomHash = randombytes(32);
     const metadataUri = "This is a test post";
     const post = await sdk.post.create(
       metadataUri,
-      postRandomHash,
       profilePDA,
       userPDA,
       user.publicKey,
     );
-    const postPubKeys = await post.pubkeys();
-    postPDA = postPubKeys.post as anchor.web3.PublicKey;
-    await post.rpc();
+    postPDA = post.postPDA as anchor.web3.PublicKey;
+    await post.program.rpc();
   });
 
   it("should create a reaction", async () => {
-    const reaction = sdk.reaction.create(
+    const reaction = await sdk.reaction.create(
       profilePDA,
       postPDA,
       "Haha",
       userPDA,
       user.publicKey,
     );
-    const reactionPubKeys = await reaction.pubkeys();
-    reactionPDA = reactionPubKeys.reaction as anchor.web3.PublicKey;
-    await reaction.rpc();
+    reactionPDA = reaction.reactionPDA as anchor.web3.PublicKey;
+    await reaction.program.rpc();
 
     const reactionAccount = await sdk.reaction.get(reactionPDA);
     expect(reactionAccount.toPost.toBase58()).to.equal(postPDA.toBase58());

@@ -14,17 +14,22 @@ export class Profile {
     return await this.sdk.program.account.profile.fetch(profileAccount);
   }
 
-  public create(
+  public async create(
     userAccount: anchor.web3.PublicKey,
     namespace: Namespace,
     user: anchor.web3.PublicKey) {
-    const { program } = this.sdk;
-    return program.methods
+    const program = this.sdk.program.methods
       .createProfile(namespace)
       .accounts({
         user: userAccount,
         authority: user,
       });
+    const pubKeys = await program.pubkeys();
+    const profilePDA = pubKeys.profile as anchor.web3.PublicKey;
+    return {
+      program,
+      profilePDA,
+    };
   }
 
   public delete(

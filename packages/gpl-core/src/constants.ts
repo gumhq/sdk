@@ -5,7 +5,7 @@ export const GPLCORE_PROGRAMS = {
     "EXzAYHZ8xS6QJ6xGRsdKZXixoQBLsuMbmwJozm85jHp"
   ),
   devnet: new anchor.web3.PublicKey(
-    "D9JJgeRf2rKq5LNMHLBMb92g4ZpeMgCyvZkd7QKwSCzg"
+    "4KnnwKYMEsHid1NL3LKKS3z2Y2iXRVwfDSRdQPWwJ1Em"
   ),
   localnet: new anchor.web3.PublicKey(
     "4KnnwKYMEsHid1NL3LKKS3z2Y2iXRVwfDSRdQPWwJ1Em"
