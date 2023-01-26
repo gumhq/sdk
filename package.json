@@ -1,8 +1,11 @@
 {
-  "name": "gpl-core-ts",
+  "name": "gpl-ts",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/index.js",
   "license": "MIT",
+  "files": [
+    "lib"
+  ],
   "devDependencies": {
     "lerna": "^6.4.1",
     "typescript": "^4.9.4"
@@ -10,5 +13,9 @@
   "workspaces": [
     "packages/*"
   ],
-  "private": true
+  "private": true,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }

@@ -1,10 +1,12 @@
 {
-  "name": "gpl-core",
+  "name": "@gumhq/sdk",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/index.js",
   "license": "MIT",
+  "description": "Gum Protocol SDK",
   "scripts": {
-    "build": "tsc ",
+    "clean": "rimraf lib",
+    "build": "npm run clean && tsc && cp -r src/idl/*json lib/",
     "test": "ts-mocha -p tsconfig.json tests/**/*.spec.ts"
   },
   "devDependencies": {
@@ -20,5 +22,9 @@
   "dependencies": {
     "@project-serum/anchor": "^0.26.0",
     "randombytes": "^2.1.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }
