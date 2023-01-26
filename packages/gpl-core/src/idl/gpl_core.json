@@ -1219,10 +1219,6 @@
           {
             "name": "toProfile",
             "type": "publicKey"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }
@@ -1239,10 +1235,6 @@
           {
             "name": "metadataUri",
             "type": "string"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           },
           {
             "name": "randomHash",
@@ -1276,10 +1268,6 @@
             "type": {
               "defined": "Namespace"
             }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }
@@ -1302,10 +1290,6 @@
             "type": {
               "defined": "ReactionType"
             }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }
@@ -1327,10 +1311,6 @@
                 32
               ]
             }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }
@@ -1441,11 +1421,6 @@
           "index": false
         },
         {
-          "name": "bump",
-          "type": "u8",
-          "index": false
-        },
-        {
           "name": "authority",
           "type": "publicKey",
           "index": false
@@ -1523,11 +1498,6 @@
           "index": false
         },
         {
-          "name": "bump",
-          "type": "u8",
-          "index": false
-        },
-        {
           "name": "timestamp",
           "type": "i64",
           "index": false
@@ -1577,11 +1547,6 @@
         {
           "name": "user",
           "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "bump",
-          "type": "u8",
           "index": false
         },
         {
@@ -1680,11 +1645,6 @@
           "index": false
         },
         {
-          "name": "bump",
-          "type": "u8",
-          "index": false
-        },
-        {
           "name": "randomHash",
           "type": {
             "array": [
@@ -1732,11 +1692,6 @@
         {
           "name": "toProfile",
           "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "bump",
-          "type": "u8",
           "index": false
         },
         {
@@ -1804,11 +1759,6 @@
         {
           "name": "toPost",
           "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "bump",
-          "type": "u8",
           "index": false
         },
         {
