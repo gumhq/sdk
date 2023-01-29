@@ -1,6 +1,8 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
+import { PostMetadata } from "./postmetadata";
+import axios from "axios";
 
 export class Post {
   readonly sdk: SDK;
@@ -14,13 +16,20 @@ export class Post {
   }
 
   public async create(
-    metadata: String,
+    metadataUri: String,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
+
+    const metadata = await axios.get(metadataUri as string);
+    const postMetadata = new PostMetadata(metadata);
+    if (!postMetadata.validate()) {
+      throw new Error("Invalid post metadata");
+    }
+
     const randomHash = randomBytes(32);
     const program = this.sdk.program.methods
-      .createPost(metadata, randomHash)
+      .createPost(metadataUri, randomHash)
       .accounts({
         profile: profileAccount,
         user: userAccount,
@@ -34,14 +43,21 @@ export class Post {
     };
   }
 
-  public update(
-    newMetadata: String,
+  public async update(
+    newMetadataUri: String,
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
+
+    const metadata = await axios.get(newMetadataUri as string);
+    const postMetadata = new PostMetadata(metadata);
+    if (!postMetadata.validate()) {
+      throw new Error("Invalid post metadata");
+    }
+
     return this.sdk.program.methods
-      .updatePost(newMetadata)
+      .updatePost(newMetadataUri)
       .accounts({
         post: postAccount,
         profile: profileAccount,
