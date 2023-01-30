@@ -49,16 +49,10 @@ describe("ProfileMetadata", async () => {
     const profileMetadataAccount = await sdk.profileMetadata.get(profileMetadataPDA);
     expect(profileMetadataAccount.profile.toString()).is.equal(profilePDA.toString());
     expect(profileMetadataAccount.metadataUri.toString()).is.equal(metadataUri);
-    console.log(`Created profile metadata: ${profileMetadataPDA.toString()}`);
   });
 
   it("it should update a profile metadata", async () => {
-    const metadataUri = "https://example.com";
-    console.log(`Updating profile metadata: ${profileMetadataPDA.toString()}
-      with metadataUri: ${metadataUri}
-      profile: ${profilePDA.toString()}
-      user: ${userPDA.toString()}
-      user authority: ${user.publicKey.toString()}`);
+    const metadataUri = "https://example.com/updated";
     const profileMetadata = sdk.profileMetadata.update(
       metadataUri,
       profileMetadataPDA,
