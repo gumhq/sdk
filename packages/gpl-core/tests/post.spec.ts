@@ -33,8 +33,9 @@ describe("Post", async () => {
   });
 
   it("should create a post", async () => {
+    const metadataUri = "https://da3z62f3lqfkdsdfhl5cssin2hrfcnec6qlhkyxg4aiwp23c3xea.arweave.net/GDefaLtcCqHIZTr6KUkN0eJRNIL0FnVi5uARZ-ti3cg";
     const post = await sdk.post.create(
-      "This is a test post",
+      metadataUri,
       profilePDA,
       userPDA,
       user.publicKey,
@@ -42,13 +43,14 @@ describe("Post", async () => {
     postPDA = post.postPDA as anchor.web3.PublicKey;
     await post.program.rpc();
     const postAccount = await sdk.post.get(postPDA);
-    expect(postAccount.metadataUri).is.equal("This is a test post");
+    expect(postAccount.metadataUri).is.equal(metadataUri);
     expect(postAccount.profile.toString()).is.equal(profilePDA.toString());
   });
 
   it("should update a post", async () => {
-    const post = sdk.post.update(
-      "This is a test post updated",
+    const metadataUri = "https://da3z62f3lqfkdsdfhl5cssin2hrfcnec6qlhkyxg4aiwp23c3xea.arweave.net/GDefaLtcCqHIZTr6KUkN0eJRNIL0FnVi5uARZ-ti3cg";
+    const post = await sdk.post.update(
+      metadataUri,
       postPDA,
       profilePDA,
       userPDA,
@@ -56,7 +58,7 @@ describe("Post", async () => {
     );
     await post.rpc();
     const postAccount = await sdk.post.get(postPDA);
-    expect(postAccount.metadataUri).is.equal("This is a test post updated");
+    expect(postAccount.metadataUri).is.equal(metadataUri);
     expect(postAccount.profile.toString()).is.equal(profilePDA.toString());
   });
 

@@ -45,16 +45,16 @@ export class Text {
 export class PostMetadata {
   content: Blocks | Image | Video | Json | Text;
   type: "blocks" | "image" | "video" | "json" | "text";
-  image_preview: string;
-  text_preview: string;
+  image_preview?: string;
+  text_preview?: string;
   authorship: {
     signature: string;
     publicKey: string;
   }
-  contentDigest: string;
-  signatureEncoding: string;
-  digestEncoding: string;
-  parentDigest: string;
+  contentDigest?: string;
+  signatureEncoding?: string;
+  digestEncoding?: string;
+  parentDigest?: string;
 
   constructor(data: any) {
     Object.assign(this, data);
@@ -62,19 +62,19 @@ export class PostMetadata {
   }
 
   validate() {
-    if (!this.content || !this.type || !this.image_preview || !this.text_preview || !this.authorship || !this.contentDigest || !this.signatureEncoding || !this.digestEncoding || !this.parentDigest) {
+    if (!this.content || !this.type || !this.authorship) {
       throw new Error("Missing required fields in PostMetadata");
     }
 
     if (
       typeof this.content !== "object" ||
-      typeof this.image_preview !== "string" ||
-      typeof this.text_preview !== "string" ||
+      (typeof this.image_preview !== "string" && typeof this.image_preview !== "undefined") ||
+      typeof this.text_preview !== "string" && typeof this.text_preview !== "undefined" ||
       typeof this.authorship !== "object" ||
-      typeof this.contentDigest !== "string" ||
-      typeof this.signatureEncoding !== "string" ||
-      typeof this.digestEncoding !== "string" ||
-      typeof this.parentDigest !== "string"
+      (typeof this.contentDigest !== "string" && typeof this.contentDigest !== "undefined") ||
+      (typeof this.signatureEncoding !== "string" && typeof this.signatureEncoding !== "undefined") ||
+      (typeof this.digestEncoding !== "string" && typeof this.digestEncoding !== "undefined") ||
+      (typeof this.parentDigest !== "string" && typeof this.parentDigest !== "undefined")
     ) throw new Error("Invalid type for fields in PostMetadata");
 
     if (this.type !== "blocks" && this.type !== "image" && this.type !== "video" && this.type !== "json" && this.type !== "text") {

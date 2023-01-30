@@ -34,7 +34,7 @@ describe("Reaction", async () => {
     await profile.program.rpc();
 
     // Create a post
-    const metadataUri = "This is a test post";
+    const metadataUri = "https://da3z62f3lqfkdsdfhl5cssin2hrfcnec6qlhkyxg4aiwp23c3xea.arweave.net/GDefaLtcCqHIZTr6KUkN0eJRNIL0FnVi5uARZ-ti3cg";
     const post = await sdk.post.create(
       metadataUri,
       profilePDA,

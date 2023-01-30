@@ -22,7 +22,7 @@ export class Post {
     user: anchor.web3.PublicKey) {
 
     const metadata = await axios.get(metadataUri as string);
-    const postMetadata = new PostMetadata(metadata);
+    const postMetadata = new PostMetadata(metadata.data);
     if (!postMetadata.validate()) {
       throw new Error("Invalid post metadata");
     }
@@ -51,7 +51,7 @@ export class Post {
     user: anchor.web3.PublicKey) {
 
     const metadata = await axios.get(newMetadataUri as string);
-    const postMetadata = new PostMetadata(metadata);
+    const postMetadata = new PostMetadata(metadata.data);
     if (!postMetadata.validate()) {
       throw new Error("Invalid post metadata");
     }
