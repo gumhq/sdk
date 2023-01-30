@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@project-serum/anchor": "^0.26.0",
+    "axios": "^1.2.6",
     "randombytes": "^2.1.0"
   },
   "publishConfig": {
