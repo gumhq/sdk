@@ -15,9 +15,7 @@ describe("ProfileMetadata", async () => {
 
   before(async () => {
     sdk = new SDK(
-      userWallet as NodeWallet,
       new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
-      "processed" as anchor.web3.ConfirmOptions,
       "localnet"
     );
 
