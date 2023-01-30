@@ -275,6 +275,283 @@
       "args": []
     },
     {
+      "name": "createProfileMetadata",
+      "accounts": [
+        {
+          "name": "profileMetadata",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile_metadata"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Profile",
+                "path": "profile"
+              }
+            ]
+          }
+        },
+        {
+          "name": "profile",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "defined": "Namespace"
+                },
+                "account": "Profile",
+                "path": "profile.namespace"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "User",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "user"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "User",
+                "path": "user.random_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "updateProfileMetadata",
+      "accounts": [
+        {
+          "name": "profileMetadata",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile_metadata"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Profile",
+                "path": "profile"
+              }
+            ]
+          }
+        },
+        {
+          "name": "profile",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "defined": "Namespace"
+                },
+                "account": "Profile",
+                "path": "profile.namespace"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "User",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "user"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "User",
+                "path": "user.random_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteProfileMetadata",
+      "accounts": [
+        {
+          "name": "profileMetadata",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile_metadata"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Profile",
+                "path": "profile"
+              }
+            ]
+          }
+        },
+        {
+          "name": "profile",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "defined": "Namespace"
+                },
+                "account": "Profile",
+                "path": "profile.namespace"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "User",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "user"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "User",
+                "path": "user.random_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "createPost",
       "accounts": [
         {
@@ -1255,6 +1532,22 @@
       }
     },
     {
+      "name": "ProfileMetadata",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "profile",
+            "type": "publicKey"
+          },
+          {
+            "name": "metadataUri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "Profile",
       "type": {
         "kind": "struct",
@@ -1336,6 +1629,17 @@
           },
           {
             "name": "ConnectionError"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProfileMetadataError",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "URITooLong"
           }
         ]
       }
@@ -1795,6 +2099,91 @@
         },
         {
           "name": "toPost",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ProfileMetadataNew",
+      "fields": [
+        {
+          "name": "profileMetadata",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "metadataUri",
+          "type": "string",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ProfileMetadataUpdated",
+      "fields": [
+        {
+          "name": "profileMetadata",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "metadataUri",
+          "type": "string",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ProfileMetadataDeleted",
+      "fields": [
+        {
+          "name": "profileMetadata",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
           "type": "publicKey",
           "index": false
         },
