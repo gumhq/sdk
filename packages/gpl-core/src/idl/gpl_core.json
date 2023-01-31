@@ -1001,13 +1001,13 @@
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "from_profile.user"
+                "path": "from_profile"
               },
               {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "to_profile.user"
+                "path": "to_profile"
               }
             ]
           }
@@ -1124,13 +1124,13 @@
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "from_profile.user"
+                "path": "from_profile"
               },
               {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "to_profile.user"
+                "path": "to_profile"
               }
             ]
           }
@@ -2200,8 +2200,5 @@
       "code": 6000,
       "name": "URITooLong"
     }
-  ],
-  "metadata": {
-    "address": "4KnnwKYMEsHid1NL3LKKS3z2Y2iXRVwfDSRdQPWwJ1Em"
-  }
+  ]
 }

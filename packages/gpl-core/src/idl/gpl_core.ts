@@ -1001,13 +1001,13 @@ export type GplCore = {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "from_profile.user"
+                "path": "from_profile"
               },
               {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "to_profile.user"
+                "path": "to_profile"
               }
             ]
           }
@@ -1124,13 +1124,13 @@ export type GplCore = {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "from_profile.user"
+                "path": "from_profile"
               },
               {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "to_profile.user"
+                "path": "to_profile"
               }
             ]
           }
@@ -3206,13 +3206,13 @@ export const IDL: GplCore = {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "from_profile.user"
+                "path": "from_profile"
               },
               {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "to_profile.user"
+                "path": "to_profile"
               }
             ]
           }
@@ -3329,13 +3329,13 @@ export const IDL: GplCore = {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "from_profile.user"
+                "path": "from_profile"
               },
               {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Profile",
-                "path": "to_profile.user"
+                "path": "to_profile"
               }
             ]
           }
