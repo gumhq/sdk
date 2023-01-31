@@ -22,6 +22,12 @@ export class User {
     return await this.sdk.program.account.user.fetch(userAccount);
   }
 
+  public async getUserAccountsInfo(user: anchor.web3.PublicKey) {
+    return await this.sdk.program.account.user.all([
+      { memcmp: { offset: 8, bytes: user.toBase58() } },
+    ]);
+  }
+
   public async create(user: anchor.web3.PublicKey) {
     const randomHash = randomBytes(32);
     const program = this.sdk.program.methods
