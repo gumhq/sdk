@@ -1,4 +1,5 @@
 import * as anchor from "@project-serum/anchor";
+import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { Cluster } from "@solana/web3.js";
 import { Connection } from "./connection";
 import { GPLCORE_PROGRAMS } from "./constants";
@@ -16,13 +17,17 @@ export class SDK {
     readonly cluster: Cluster | "localnet";
 
     constructor(
+        wallet: Wallet,
         connection: anchor.web3.Connection,
+        opts: anchor.web3.ConfirmOptions,
         cluster: Cluster | "localnet",
     ) {
         this.cluster = cluster;
+        this.provider = new anchor.AnchorProvider(connection, wallet, opts);
         this.program = new anchor.Program(
             gpl_core_idl as anchor.Idl,
-            GPLCORE_PROGRAMS[this.cluster] as anchor.web3.PublicKey);
+            GPLCORE_PROGRAMS[this.cluster] as anchor.web3.PublicKey,
+            this.provider);
         this.rpcConnection = connection;
     }
 
