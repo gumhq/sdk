@@ -22,9 +22,9 @@ describe("ProfileMetadata", async () => {
     );
 
     // Create a user
-    const tx = await sdk.user.create(user.publicKey);
-    userPDA = tx.userPDA as anchor.web3.PublicKey;
-    await tx.program.rpc();
+    const createUser = await sdk.user.create(user.publicKey);
+    userPDA = createUser.userPDA as anchor.web3.PublicKey;
+    await createUser.instructionMethodBuilder.rpc();
 
     // Create a profile
     const profile = await sdk.profile.create(
@@ -33,7 +33,7 @@ describe("ProfileMetadata", async () => {
       user.publicKey,
     );
     profilePDA = profile.profilePDA as anchor.web3.PublicKey;
-    await profile.program.rpc();
+    await profile.instructionMethodBuilder.rpc();
   });
 
   it("should create a profile metadata", async () => {
@@ -45,7 +45,7 @@ describe("ProfileMetadata", async () => {
       user.publicKey,
     );
     profileMetadataPDA = profileMetadata.profileMetadataPDA as anchor.web3.PublicKey;
-    await profileMetadata.program.rpc();
+    await profileMetadata.instructionMethodBuilder.rpc();
     const profileMetadataAccount = await sdk.profileMetadata.get(profileMetadataPDA);
     expect(profileMetadataAccount.profile.toString()).is.equal(profilePDA.toString());
     expect(profileMetadataAccount.metadataUri.toString()).is.equal(metadataUri);

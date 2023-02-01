@@ -20,7 +20,6 @@ export class Post {
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
-
     const metadata = await axios.get(metadataUri as string);
     const postMetadata = new PostMetadata(metadata.data);
     if (!postMetadata.validate()) {
@@ -28,17 +27,17 @@ export class Post {
     }
 
     const randomHash = randomBytes(32);
-    const program = this.sdk.program.methods
+    const instructionMethodBuilder = this.sdk.program.methods
       .createPost(metadataUri, randomHash)
       .accounts({
         profile: profileAccount,
         user: userAccount,
         authority: user,
       });
-    const pubKeys = await program.pubkeys();
+    const pubKeys = await instructionMethodBuilder.pubkeys();
     const postPDA = pubKeys.post as anchor.web3.PublicKey;
     return {
-      program,
+      instructionMethodBuilder,
       postPDA,
     };
   }

@@ -30,15 +30,15 @@ export class User {
 
   public async create(user: anchor.web3.PublicKey) {
     const randomHash = randomBytes(32);
-    const program = this.sdk.program.methods
+    const instructionMethodBuilder = this.sdk.program.methods
       .createUser(randomHash)
       .accounts({
         authority: user,
       });
-    const pubKeys = await program.pubkeys();
+    const pubKeys = await instructionMethodBuilder.pubkeys();
     const userPDA = pubKeys.user as anchor.web3.PublicKey;
     return {
-      program,
+      instructionMethodBuilder,
       userPDA,
     };
   }

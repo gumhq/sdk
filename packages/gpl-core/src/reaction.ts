@@ -20,7 +20,7 @@ export class Reaction {
     reactionType: ReactionType,
     userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
-    const program = this.sdk.program.methods
+    const instructionMethodBuilder = this.sdk.program.methods
       .createReaction(reactionType)
       .accounts({
         toPost: toPostAccount,
@@ -28,10 +28,10 @@ export class Reaction {
         user: userAccount,
         authority: user,
       });
-    const pubKeys = await program.pubkeys();
+    const pubKeys = await instructionMethodBuilder.pubkeys();
     const reactionPDA = pubKeys.reaction as anchor.web3.PublicKey;
     return {
-      program,
+      instructionMethodBuilder,
       reactionPDA,
     };
   }

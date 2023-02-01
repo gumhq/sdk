@@ -22,14 +22,14 @@ describe("Post", async () => {
     );
 
     // Create a user
-    const userTx = await sdk.user.create(user.publicKey)
-    userPDA = userTx.userPDA as anchor.web3.PublicKey;
-    await userTx.program.rpc();
+    const createUser = await sdk.user.create(user.publicKey)
+    userPDA = createUser.userPDA as anchor.web3.PublicKey;
+    await createUser.instructionMethodBuilder.rpc();
 
     // Create a profile
     const profile = await sdk.profile.create(userPDA, "Personal", user.publicKey);
     profilePDA = profile.profilePDA as anchor.web3.PublicKey;
-    await profile.program.rpc();
+    await profile.instructionMethodBuilder.rpc();
   });
 
   it("should create a post", async () => {
@@ -41,7 +41,7 @@ describe("Post", async () => {
       user.publicKey,
     );
     postPDA = post.postPDA as anchor.web3.PublicKey;
-    await post.program.rpc();
+    await post.instructionMethodBuilder.rpc();
     const postAccount = await sdk.post.get(postPDA);
     expect(postAccount.metadataUri).is.equal(metadataUri);
     expect(postAccount.profile.toString()).is.equal(profilePDA.toString());

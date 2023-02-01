@@ -31,16 +31,16 @@ export class Profile {
     userAccount: anchor.web3.PublicKey,
     namespace: Namespace,
     user: anchor.web3.PublicKey) {
-    const program = this.sdk.program.methods
+    const instructionMethodBuilder = this.sdk.program.methods
       .createProfile(namespace)
       .accounts({
         user: userAccount,
         authority: user,
       });
-    const pubKeys = await program.pubkeys();
+    const pubKeys = await instructionMethodBuilder.pubkeys();
     const profilePDA = pubKeys.profile as anchor.web3.PublicKey;
     return {
-      program,
+      instructionMethodBuilder,
       profilePDA,
     };
   }

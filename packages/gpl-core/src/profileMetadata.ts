@@ -17,17 +17,17 @@ export class ProfileMetadata {
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     user: anchor.web3.PublicKey) {
-    const program = this.sdk.program.methods
+    const instructionMethodBuilder = this.sdk.program.methods
       .createProfileMetadata(metadataUri)
       .accounts({
         profile: profileAccount,
         user: userAccount,
         authority: user,
       });
-    const pubKeys = await program.pubkeys();
+    const pubKeys = await instructionMethodBuilder.pubkeys();
     const profileMetadataPDA = pubKeys.profileMetadata as anchor.web3.PublicKey;
     return {
-      program,
+      instructionMethodBuilder,
       profileMetadataPDA,
     };
   }

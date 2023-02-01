@@ -1,7 +1,6 @@
 import { SDK } from "../src";
 import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
-import randombytes from "randombytes";
 import { expect } from "chai";
 
 anchor.setProvider(anchor.AnchorProvider.env());
@@ -24,14 +23,14 @@ describe("Reaction", async () => {
     );
 
     // Create a user
-    const userTx = await sdk.user.create(user.publicKey)
-    userPDA = userTx.userPDA as anchor.web3.PublicKey;
-    await userTx.program.rpc();
+    const createUser = await sdk.user.create(user.publicKey)
+    userPDA = createUser.userPDA as anchor.web3.PublicKey;
+    await createUser.instructionMethodBuilder.rpc();
 
     // Create a profile
     const profile = await sdk.profile.create(userPDA, "Personal", user.publicKey);
     profilePDA = profile.profilePDA as anchor.web3.PublicKey;
-    await profile.program.rpc();
+    await profile.instructionMethodBuilder.rpc();
 
     // Create a post
     const metadataUri = "https://da3z62f3lqfkdsdfhl5cssin2hrfcnec6qlhkyxg4aiwp23c3xea.arweave.net/GDefaLtcCqHIZTr6KUkN0eJRNIL0FnVi5uARZ-ti3cg";
@@ -42,7 +41,7 @@ describe("Reaction", async () => {
       user.publicKey,
     );
     postPDA = post.postPDA as anchor.web3.PublicKey;
-    await post.program.rpc();
+    await post.instructionMethodBuilder.rpc();
   });
 
   it("should create a reaction", async () => {
@@ -54,7 +53,7 @@ describe("Reaction", async () => {
       user.publicKey,
     );
     reactionPDA = reaction.reactionPDA as anchor.web3.PublicKey;
-    await reaction.program.rpc();
+    await reaction.instructionMethodBuilder.rpc();
 
     const reactionAccount = await sdk.reaction.get(reactionPDA);
     expect(reactionAccount.toPost.toBase58()).to.equal(postPDA.toBase58());

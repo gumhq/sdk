@@ -26,28 +26,28 @@ describe("User", async () => {
   });
 
   it("should create a user", async () => {
-    const userIx = await sdk.user.create(user.publicKey);
-    await userIx.program.rpc();
-    userPDA = userIx.userPDA as anchor.web3.PublicKey;
+    const createUser = await sdk.user.create(user.publicKey);
+    await createUser.instructionMethodBuilder.rpc();
+    userPDA = createUser.userPDA;
     const userAccount = await sdk.user.get(userPDA);
     expect(userAccount.authority.toString()).is.equal(user.publicKey.toString());
   });
 
   it("should update a user", async () => {
-    const tx = sdk.user.update(userPDA, randomUser.publicKey, user.publicKey);
-    const pubKeys = await tx.pubkeys();
+    const instructionMethodBuilder = sdk.user.update(userPDA, randomUser.publicKey, user.publicKey);
+    const pubKeys = await instructionMethodBuilder.pubkeys();
     const randomUserPDA = pubKeys.user as anchor.web3.PublicKey;
-    await tx.rpc();
+    await instructionMethodBuilder.rpc();
     const userAccount = await sdk.user.get(randomUserPDA);
     expect(userAccount.authority.toString()).is.equal(randomUser.publicKey.toString());
   });
 
   it("should delete a user", async () => {
     const randomUserWallet = new NodeWallet(randomUser);
-    const tx = sdk.user.delete(userPDA, randomUser.publicKey);
-    const pubKeys = await tx.pubkeys();
+    const instructionMethodBuilder = sdk.user.delete(userPDA, randomUser.publicKey);
+    const pubKeys = await instructionMethodBuilder.pubkeys();
     const randomUserPDA = pubKeys.user as anchor.web3.PublicKey;
-    const transaction = await tx.transaction();
+    const transaction = await instructionMethodBuilder.transaction();
     transaction.recentBlockhash = (await sdk.rpcConnection.getLatestBlockhash()).blockhash;
     transaction.feePayer = randomUser.publicKey;
     const signedTransaction = await randomUserWallet.signTransaction(transaction);

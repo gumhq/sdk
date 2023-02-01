@@ -21,9 +21,9 @@ describe("Profile", async () => {
     );
 
     // Create a user
-    const tx = await sdk.user.create(user.publicKey)
-    userPDA = tx.userPDA as anchor.web3.PublicKey;
-    await tx.program.rpc();
+    const createUser = await sdk.user.create(user.publicKey)
+    userPDA = createUser.userPDA as anchor.web3.PublicKey;
+    await createUser.instructionMethodBuilder.rpc();
   });
 
   it("should create a profile", async () => {
@@ -33,7 +33,7 @@ describe("Profile", async () => {
       user.publicKey,
     );
     profilePDA = profile.profilePDA as anchor.web3.PublicKey;
-    await profile.program.rpc();
+    await profile.instructionMethodBuilder.rpc();
     const profileAccount = await sdk.profile.get(profilePDA);
     expect(profileAccount.user.toString()).is.equal(userPDA.toString());
     expect(profileAccount.namespace.toString()).is.equal({ personal: {} }.toString());

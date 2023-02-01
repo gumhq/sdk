@@ -29,14 +29,14 @@ describe("Connection", async () => {
     );
 
     // Create a user
-    const userTx = await sdk.user.create(user.publicKey)
-    userPDA = userTx.userPDA as anchor.web3.PublicKey;
-    await userTx.program.rpc();
+    const createUser = await sdk.user.create(user.publicKey)
+    userPDA = createUser.userPDA;
+    await createUser.instructionMethodBuilder.rpc();
 
     // Create a profile
     const profile = await sdk.profile.create(userPDA, "Personal", user.publicKey);
-    profilePDA = profile.profilePDA as anchor.web3.PublicKey;
-    await profile.program.rpc();
+    profilePDA = profile.profilePDA;
+    await profile.instructionMethodBuilder.rpc();
 
     // Create a testUser
     testUser = anchor.web3.Keypair.generate();
@@ -44,7 +44,7 @@ describe("Connection", async () => {
     await airdrop(testUser.publicKey);
     const createTestUser = await sdk.user.create(testUser.publicKey);
     testUserPDA = createTestUser.userPDA as anchor.web3.PublicKey;
-    const testUserTx = await createTestUser.program.transaction();
+    const testUserTx = await createTestUser.instructionMethodBuilder.transaction();
     testUserTx.recentBlockhash = (await sdk.rpcConnection.getLatestBlockhash()).blockhash;
     testUserTx.feePayer = testUser.publicKey;
     const signedTestUserTransaction = await testUserWallet.signTransaction(testUserTx);
@@ -57,7 +57,7 @@ describe("Connection", async () => {
       testUser.publicKey,
     );
     testProfilePDA = testProfile.profilePDA as anchor.web3.PublicKey;
-    const testProfileTx = await testProfile.program.transaction();
+    const testProfileTx = await testProfile.instructionMethodBuilder.transaction();
     testProfileTx.recentBlockhash = (await sdk.rpcConnection.getLatestBlockhash()).blockhash;
     testProfileTx.feePayer = testUser.publicKey;
     const signedTransaction = await testUserWallet.signTransaction(testProfileTx);
@@ -72,7 +72,7 @@ describe("Connection", async () => {
       user.publicKey,
     );
     connectionPDA = connection.connectionPDA as anchor.web3.PublicKey;
-    await connection.program.rpc();
+    await connection.instructionMethodBuilder.rpc();
 
     const connectionAccount = await sdk.connection.get(connectionPDA);
     expect(connectionAccount.fromProfile.toBase58()).to.equal(profilePDA.toBase58());
