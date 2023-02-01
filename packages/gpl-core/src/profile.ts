@@ -1,7 +1,7 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 
-type Namespace = "Professional" | "Personal" | "Gaming" | "Degen";
+export type Namespace = "Professional" | "Personal" | "Gaming" | "Degen";
 
 export class Profile {
   readonly sdk: SDK;
