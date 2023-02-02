@@ -4,6 +4,10 @@ import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { airdrop } from "./utils";
 import { expect } from "chai";
 import { sendAndConfirmTransaction } from "@solana/web3.js";
+import { GraphQLClient } from "graphql-request";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 anchor.setProvider(anchor.AnchorProvider.env());
 const userWallet = (anchor.getProvider() as any).wallet;
@@ -15,11 +19,14 @@ describe("User", async () => {
   let randomUser: anchor.web3.Keypair;
 
   before(async () => {
+    const gqlClient = new GraphQLClient(process.env.GRAPHQL_ENDPOINT as string);
+    gqlClient.setHeader("x-hasura-admin-secret", process.env.HASURA_ADMIN_SECRET as string);
     sdk = new SDK(
       userWallet as NodeWallet,
       new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
       { preflightCommitment: "processed" },
-      "localnet"
+      "localnet",
+      gqlClient
     );
     randomUser = anchor.web3.Keypair.generate();
     await airdrop(randomUser.publicKey);
@@ -62,5 +69,33 @@ describe("User", async () => {
       expect(error).to.be.an("error");
       expect(error.toString()).to.contain(`Account does not exist or has no data ${randomUserPDA.toString()}`);
     }
+  });
+
+  describe("GraphQL User Queries", async () => {
+    it("get all user accounts", async () => {
+      const users = await sdk.user.getAllUsersAccounts();
+      expect(users).to.be.an("array");
+      expect(users.length).to.be.greaterThan(0);
+      users.forEach(user => {
+        expect(user).to.have.property("authority");
+        expect(user).to.have.property("cl_pubkey");
+        expect(user).to.have.property("randomhash");
+      });
+    });
+
+    it("get user account by authority", async () => {
+      const userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn");
+      const userAccount = await sdk.user.getUserAccountsByAuthority(
+        userPubKey
+      );
+      expect(userAccount).to.be.an("array");
+      expect(userAccount.length).to.be.greaterThan(0);
+      userAccount.forEach(user => {
+        expect(user).to.have.property("authority");
+        expect(user).to.have.property("cl_pubkey");
+        expect(user).to.have.property("randomhash");
+        expect(user.authority).to.equal(userPubKey.toBase58());
+      });
+    });
   });
 });
