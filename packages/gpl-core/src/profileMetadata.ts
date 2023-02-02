@@ -1,5 +1,6 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
+import { gql } from "graphql-request";
 
 export class ProfileMetadata {
   readonly sdk: SDK;
@@ -10,6 +11,19 @@ export class ProfileMetadata {
 
   public async get(profileMetadataAccount: anchor.web3.PublicKey) {
     return await this.sdk.program.account.profileMetadata.fetch(profileMetadataAccount);
+  }
+
+  public async getProfileMetadataAccountsByUser(user: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
+    const profiles = await this.sdk.profile.getProfileAccountsByUser(user);
+    const profilePDAs = profiles.map((p) => p.publicKey);
+    let profileMetadataList: any[] = [];
+    for (const profilePDA of profilePDAs) {
+      const profileMetadata = await this.sdk.program.account.profileMetadata.all([
+        { memcmp: { offset: 8, bytes: profilePDA.toBase58() } },
+      ])
+      profileMetadataList = [...profileMetadataList, profileMetadata];
+    }
+    return profileMetadataList;
   }
 
   public async create(
@@ -61,5 +75,35 @@ export class ProfileMetadata {
         user: userAccount,
         authority: user,
       });
+  }
+
+  // GraphQL Query methods
+
+  public async getAllProfileMetadata(): Promise<any> {
+    const query = gql`
+      query GetAllProfileMetadata {
+        gum_0_1_0_decoded_profilemetadata {
+          cl_pubkey
+          metadatauri
+          profile
+        }
+      }`
+    const data = await this.sdk.gqlClient.request(query);
+    return data.gum_0_1_0_decoded_profilemetadata;
+  }
+
+  public async getProfileMetadataByUser(userPubKey: anchor.web3.PublicKey): Promise<any> {
+    const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
+    const profilePDAs = profiles.map((p) => p.cl_pubkey) as anchor.web3.PublicKey[];
+    const query = gql`
+      query GetProfileMetadataByUser {
+        gum_0_1_0_decoded_profilemetadata(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+          cl_pubkey
+          metadatauri
+          profile
+        }
+      }`
+    const data = await this.sdk.gqlClient.request(query);
+    return data.gum_0_1_0_decoded_profilemetadata;
   }
 }

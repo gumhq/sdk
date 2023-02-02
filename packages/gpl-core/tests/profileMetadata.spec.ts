@@ -2,6 +2,10 @@ import { SDK } from "../src";
 import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { expect } from "chai";
+import dotenv from "dotenv";
+import { GraphQLClient } from "graphql-request";
+
+dotenv.config();
 
 anchor.setProvider(anchor.AnchorProvider.env());
 const userWallet = (anchor.getProvider() as any).wallet;
@@ -14,11 +18,14 @@ describe("ProfileMetadata", async () => {
   let profileMetadataPDA: anchor.web3.PublicKey;
 
   before(async () => {
+    const gqlClient = new GraphQLClient(process.env.GRAPHQL_ENDPOINT as string);
+    gqlClient.setHeader("x-hasura-admin-secret", process.env.HASURA_ADMIN_SECRET as string);
     sdk = new SDK(
       userWallet as NodeWallet,
       new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
       { preflightCommitment: "processed" },
-      "localnet"
+      "localnet",
+      gqlClient
     );
 
     // Create a user
@@ -80,5 +87,53 @@ describe("ProfileMetadata", async () => {
       expect(error).to.be.an("error");
       expect(error.toString()).to.contain(`Account does not exist or has no data ${profileMetadataPDA.toString()}`);
     }
+  });
+
+  describe("GraphQL ProfileMetadata queries", async () => {
+    let userPubKey: anchor.web3.PublicKey;
+
+    before(async () => {
+      userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn");
+    });
+
+    describe("getAllProfileMetadata", async () => {
+      let profileMetadatas: any;
+
+      before(async () => {
+        profileMetadatas = await sdk.profileMetadata.getAllProfileMetadata();
+      });
+
+      it("should return an array of posts", async () => {
+        expect(profileMetadatas).to.be.an("array");
+      });
+
+      it("should return at least one post", async () => {
+        expect(profileMetadatas.length).to.be.greaterThan(0);
+      });
+
+      it("should return a post with a metadataUri", async () => {
+        expect(profileMetadatas[0].metadatauri).to.be.a("string");
+      });
+    });
+
+    describe("getProfileMetadataByUser", async () => {
+      let profileMetadatas: any;
+
+      before(async () => {
+        profileMetadatas = await sdk.profileMetadata.getProfileMetadataByUser(userPubKey);
+      });
+
+      it("should return an array of posts", async () => {
+        expect(profileMetadatas).to.be.an("array");
+      });
+
+      it("should return at least one post", async () => {
+        expect(profileMetadatas.length).to.be.greaterThan(0);
+      });
+
+      it("should return a post with a metadataUri", async () => {
+        expect(profileMetadatas[0].metadatauri).to.be.a("string");
+      });
+    });
   });
 });
