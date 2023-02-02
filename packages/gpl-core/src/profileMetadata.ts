@@ -16,12 +16,12 @@ export class ProfileMetadata {
   public async getProfileMetadataAccountsByUser(user: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
     const profiles = await this.sdk.profile.getProfileAccountsByUser(user);
     const profilePDAs = profiles.map((p) => p.publicKey);
-    let profileMetadataList: any[] = [];
+    let profileMetadataList = [];
     for (const profilePDA of profilePDAs) {
       const profileMetadata = await this.sdk.program.account.profileMetadata.all([
         { memcmp: { offset: 8, bytes: profilePDA.toBase58() } },
       ])
-      profileMetadataList = [...profileMetadataList, profileMetadata];
+      if (profileMetadata.length > 0) profileMetadataList = [...profileMetadataList, profileMetadata];
     }
     return profileMetadataList;
   }

@@ -1,5 +1,6 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
+import { gql } from "graphql-request";
 
 export type ReactionType = "Like" | "Dislike" | "Love" | "Haha" | "Wow" | "Sad" | "Angry";
 
@@ -52,4 +53,34 @@ export class Reaction {
         authority: user,
       });
   }
-}
+
+  // GraphQL Query methods
+
+  public async getAllReactions() {
+    const query = gql`
+      query GetAllReactions {
+        gum_0_1_0_decoded_reaction {
+          topost
+          reactiontype
+          fromprofile
+          cl_pubkey
+        }
+    }`;
+    const result = await this.sdk.gqlClient.request(query);
+    return result.gum_0_1_0_decoded_reaction;
+  }
+
+  public async getReactionsByPost(postAccount: anchor.web3.PublicKey) {
+    const query = gql`
+      query GetReactionsByPost($postAccount: String!) {
+        gum_0_1_0_decoded_reaction(where: {topost: {_eq: $postAccount}}) {
+          topost
+          reactiontype
+          fromprofile
+          cl_pubkey
+        }
+    }`;
+    const result = await this.sdk.gqlClient.request(query, { postAccount: postAccount.toBase58() });
+    return result.gum_0_1_0_decoded_reaction;
+  }
+} 
