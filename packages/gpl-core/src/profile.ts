@@ -21,8 +21,8 @@ export class Profile {
     return await this.sdk.program.account.profile.fetch(profileAccount);
   }
 
-  public async getProfileAccountsInfo(user: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
-    const users = await this.sdk.user.getUserAccountsInfo(user);
+  public async getProfileAccountsByUser(user: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
+    const users = await this.sdk.user.getUserAccountsByUser(user);
     const userPDAs = users.map((u) => u.publicKey);
     let profiles = [];
     for (const userPDA of userPDAs) {

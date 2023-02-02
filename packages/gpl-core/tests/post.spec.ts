@@ -2,6 +2,10 @@ import { SDK } from "../src";
 import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { expect } from "chai";
+import { GraphQLClient } from "graphql-request";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 anchor.setProvider(anchor.AnchorProvider.env());
 const userWallet = (anchor.getProvider() as any).wallet;
@@ -14,11 +18,14 @@ describe("Post", async () => {
   let postPDA: anchor.web3.PublicKey;
 
   before(async () => {
+    const gqlClient = new GraphQLClient(process.env.GRAPHQL_ENDPOINT as string);
+    gqlClient.setHeader("x-hasura-admin-secret", process.env.HASURA_ADMIN_SECRET as string);
     sdk = new SDK(
       userWallet as NodeWallet,
       new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
       { preflightCommitment: "processed" },
-      "localnet"
+      "localnet",
+      gqlClient
     );
 
     // Create a user
@@ -76,5 +83,53 @@ describe("Post", async () => {
       expect(error).to.be.an("error");
       expect(error.toString()).to.contain(`Account does not exist or has no data ${postPDA.toString()}`);
     }
+  });
+
+  describe("GraphQL Post Queries", async () => {
+    let userPubKey: anchor.web3.PublicKey;
+
+    before(async () => {
+      userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn");
+    });
+
+    describe("getAllPosts", async () => {
+      let posts: any;
+
+      before(async () => {
+        posts = await sdk.post.getAllPosts();
+      });
+
+      it("should return an array of posts", async () => {
+        expect(posts).to.be.an("array");
+      });
+
+      it("should return at least one post", async () => {
+        expect(posts.length).to.be.greaterThan(0);
+      });
+
+      it("should return a post with a metadataUri", async () => {
+        expect(posts[0].metadatauri).to.be.a("string");
+      });
+    });
+
+    describe("getPostsByUser", async () => {
+      let posts: any;
+
+      before(async () => {
+        posts = await sdk.post.getPostsByUser(userPubKey);
+      });
+
+      it("should return an array of posts", async () => {
+        expect(posts).to.be.an("array");
+      });
+
+      it("should return at least one post", async () => {
+        expect(posts.length).to.be.greaterThan(0);
+      });
+
+      it("should return a post with a metadataUri", async () => {
+        expect(posts[0].metadatauri).to.be.a("string");
+      });
+    });
   });
 });

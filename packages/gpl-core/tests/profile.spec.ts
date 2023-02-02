@@ -65,7 +65,7 @@ describe("Profile", async () => {
     let userPubKey: anchor.web3.PublicKey;
 
     beforeEach(async () => {
-      userPubKey = new anchor.web3.PublicKey("9psZBS7GHNrFxADh93Gv1Qnr9TTCP9GAdfrvDFzgLJUf");
+      userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn");
     });
 
     describe("get profiles by user", () => {

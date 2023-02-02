@@ -3,6 +3,7 @@ import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
 import { PostMetadata } from "./postmetadata";
 import axios from "axios";
+import { gql } from "graphql-request";
 
 export class Post {
   readonly sdk: SDK;
@@ -13,6 +14,19 @@ export class Post {
 
   public async get(postAccount: anchor.web3.PublicKey) {
     return await this.sdk.program.account.post.fetch(postAccount);
+  }
+
+  public async getPostAccountsByUser(userPubKey: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
+    const profiles = await this.sdk.profile.getProfileAccountsByUser(userPubKey);
+    const profilePDAs = profiles.map((p) => p.publicKey);
+    let posts = [];
+    for (const profilePDA of profilePDAs) {
+      const post = await this.sdk.program.account.post.all([
+        { memcmp: { offset: 8, bytes: profilePDA.toBase58() } },
+      ]);
+      posts = [...posts, ...post];
+    }
+    return posts;
   }
 
   public async create(
@@ -79,5 +93,37 @@ export class Post {
         user: userAccount,
         authority: user,
       });
+  }
+
+  // GraphQL Query methods
+
+  public async getAllPosts() {
+    const query = gql`
+      query GetAllPosts {
+        gum_0_1_0_decoded_post {
+          cl_pubkey
+          metadatauri
+          profile
+          randomhash
+        }
+      }`
+    const data = await this.sdk.gqlClient.request(query);
+    return data.gum_0_1_0_decoded_post;
+  }
+
+  public async getPostsByUser(userPubKey: anchor.web3.PublicKey) {
+    const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
+    const profilePDAs = profiles.map((p) => p.cl_pubkey) as anchor.web3.PublicKey[];
+    const query = gql`
+      query GetPostsByUser {
+        gum_0_1_0_decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+          cl_pubkey
+          metadatauri
+          profile
+          randomhash
+        }
+      }`
+    const data = await this.sdk.gqlClient.request(query);
+    return data.gum_0_1_0_decoded_post;
   }
 }

@@ -3,7 +3,7 @@ import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
 import { gql } from "graphql-request";
 
-interface GumDecodedUser {
+export interface GumDecodedUser {
   authority: anchor.web3.PublicKey;
   cl_pubkey: anchor.web3.PublicKey;
   randomhash: number[];
@@ -29,7 +29,7 @@ export class User {
     return await this.sdk.program.account.user.fetch(userAccount);
   }
 
-  public async getUserAccountsInfo(user: anchor.web3.PublicKey) {
+  public async getUserAccountsByUser(user: anchor.web3.PublicKey) {
     return await this.sdk.program.account.user.all([
       { memcmp: { offset: 8, bytes: user.toBase58() } },
     ]);
