@@ -9,18 +9,21 @@ import { Reaction } from "./reaction";
 import { User } from "./user";
 import gpl_core_idl from "./idl/gpl_core.json";
 import { ProfileMetadata } from "./profileMetadata";
+import { GraphQLClient } from "graphql-request";
 
 export class SDK {
     readonly program: anchor.Program;
     readonly provider: anchor.AnchorProvider;
     readonly rpcConnection: anchor.web3.Connection;
     readonly cluster: Cluster | "localnet";
+    readonly gqlClient?: GraphQLClient;
 
     constructor(
         wallet: Wallet,
         connection: anchor.web3.Connection,
         opts: anchor.web3.ConfirmOptions,
         cluster: Cluster | "localnet",
+        gqlClient?: GraphQLClient
     ) {
         this.cluster = cluster;
         this.provider = new anchor.AnchorProvider(connection, wallet, opts);
@@ -29,6 +32,7 @@ export class SDK {
             GPLCORE_PROGRAMS[this.cluster] as anchor.web3.PublicKey,
             this.provider);
         this.rpcConnection = connection;
+        this.gqlClient = gqlClient;
     }
 
     public user = new User(this);
