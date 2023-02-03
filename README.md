@@ -2,11 +2,11 @@
 
 ## Documentation
 
-- [Overview](https://gumhq.github.io/gum-sdk/overview)
-- [Getting Started Guide](https://gumhq.github.io/gum-sdk/getting-started)
-- [FAQ](https://gumhq.github.io/gum-sdk/faq)
+- [Overview](https://docs.gum.fun/introduction/overview)
+- [Getting Started Guide](https://docs.gum.fun/protocol-overview/quickstart)
+- [FAQ](https://docs.gum.fun/introduction/faqs)
 
-You can find the complete documentation for the Gum SDK at https://gumhq.github.io/gum-sdk/.
+You can find the complete documentation for the Gum SDK at https://docs.gum.fun/
 
 ## Example App
 
@@ -18,7 +18,7 @@ We welcome contributions to improve the SDK. Please raise an issue or submit a p
 
 ## License
 
-The Gum SDK is licensed under the [GNU General Public License v3.0] (https://github.com/gumhq/sdk/blob/master/LICENSE).
+The Gum SDK is licensed under the [GNU General Public License v3.0](https://github.com/gumhq/sdk/blob/master/LICENSE).
 
 ## Support
 
