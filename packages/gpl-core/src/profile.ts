@@ -99,11 +99,33 @@ export class Profile {
     return data.gum_0_1_0_decoded_profile;
   }
 
-  public async getProfilesByNamespace(namespace: string): Promise<GumDecodedProfile[]> {
+  public async getProfilesByNamespace(namespace: Namespace): Promise<GumDecodedProfile[]> {
     const namespaceString = JSON.stringify({ [namespace.toLowerCase()]: {} });
     const query = gql`
       query ProfilesByNamespace ($namespace: String) {
         gum_0_1_0_decoded_profile(where: { namespace: { _eq: $namespace } }) {
+          username
+          namespace
+          cl_pubkey
+        }
+      }
+    `;
+    const data = await this.sdk.gqlClient.request(query, { namespace: namespaceString });
+    return data.gum_0_1_0_decoded_profile;
+  }
+
+  public async getProfilesByUserAndNamespace(userPubkey: anchor.web3.PublicKey, namespace: Namespace): Promise<GumDecodedProfile[]> {
+    const users = await this.sdk.user.getUserAccountsByAuthority(userPubkey);
+    const userPDAs = users.map(user => user.cl_pubkey) as anchor.web3.PublicKey[];
+    const namespaceString = JSON.stringify({ [namespace.toLowerCase()]: {} });
+    const query = gql`
+      query ProfileByUserAndNamespace ($namespace: String) {
+        gum_0_1_0_decoded_profile(
+          where: {
+            username: {_in: [${userPDAs.map(pda => `"${pda}"`).join(',')}] },
+            namespace: { _eq: $namespace }
+          }
+        ) {
           username
           namespace
           cl_pubkey

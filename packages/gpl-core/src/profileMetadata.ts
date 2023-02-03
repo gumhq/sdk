@@ -1,6 +1,7 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import { gql } from "graphql-request";
+import { Namespace } from "./profile";
 
 export class ProfileMetadata {
   readonly sdk: SDK;
@@ -97,6 +98,21 @@ export class ProfileMetadata {
     const profilePDAs = profiles.map((p) => p.cl_pubkey) as anchor.web3.PublicKey[];
     const query = gql`
       query GetProfileMetadataByUser {
+        gum_0_1_0_decoded_profilemetadata(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+          cl_pubkey
+          metadatauri
+          profile
+        }
+      }`
+    const data = await this.sdk.gqlClient.request(query);
+    return data.gum_0_1_0_decoded_profilemetadata;
+  }
+
+  public async getProfileMetadataByUserAndNamespace(userPubKey: anchor.web3.PublicKey, namespace: Namespace): Promise<any> {
+    const profiles = await this.sdk.profile.getProfilesByUserAndNamespace(userPubKey, namespace);
+    const profilePDAs = profiles.map((p) => p.cl_pubkey) as anchor.web3.PublicKey[];
+    const query = gql`
+      query GetProfileMetadataByUserAndNamespace {
         gum_0_1_0_decoded_profilemetadata(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
           cl_pubkey
           metadatauri

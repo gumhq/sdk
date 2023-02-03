@@ -65,7 +65,7 @@ describe("Profile", async () => {
     let userPubKey: anchor.web3.PublicKey;
 
     beforeEach(async () => {
-      userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn");
+      userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn"); // This user is valid on devnet
     });
 
     describe("get profiles by user", () => {
@@ -110,6 +110,23 @@ describe("Profile", async () => {
       it("should return an array of profiles", () => {
         expect(profiles).to.be.an("array");
       })
+
+      it("should have the namespace Personal", () => {
+        const namespace = JSON.stringify({ "personal": {} });
+        expect(profiles[0].namespace).to.be.equal(namespace);
+      });
+    });
+
+    describe("get profile by namespace and user", () => {
+      let profiles: any;
+
+      beforeEach(async () => {
+        profiles = await sdk.profile.getProfilesByUserAndNamespace(userPubKey, "Personal");
+      });
+
+      it("should return an array of profiles", () => {
+        expect(profiles).to.be.an("array");
+      });
 
       it("should have the namespace Personal", () => {
         const namespace = JSON.stringify({ "personal": {} });

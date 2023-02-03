@@ -93,7 +93,7 @@ describe("ProfileMetadata", async () => {
     let userPubKey: anchor.web3.PublicKey;
 
     before(async () => {
-      userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn");
+      userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn"); // This user is valid on devnet
     });
 
     describe("getAllProfileMetadata", async () => {
@@ -121,6 +121,26 @@ describe("ProfileMetadata", async () => {
 
       before(async () => {
         profileMetadatas = await sdk.profileMetadata.getProfileMetadataByUser(userPubKey);
+      });
+
+      it("should return an array of posts", async () => {
+        expect(profileMetadatas).to.be.an("array");
+      });
+
+      it("should return at least one post", async () => {
+        expect(profileMetadatas.length).to.be.greaterThan(0);
+      });
+
+      it("should return a post with a metadataUri", async () => {
+        expect(profileMetadatas[0].metadatauri).to.be.a("string");
+      });
+    });
+
+    describe("getProfileMetadataByUserAndNamespace", async () => {
+      let profileMetadatas: any;
+
+      before(async () => {
+        profileMetadatas = await sdk.profileMetadata.getProfileMetadataByUserAndNamespace(userPubKey, "Personal");
       });
 
       it("should return an array of posts", async () => {
