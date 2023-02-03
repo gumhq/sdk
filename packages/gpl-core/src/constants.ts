@@ -2,7 +2,7 @@ import * as anchor from "@project-serum/anchor";
 
 export const GPLCORE_PROGRAMS = {
   "mainnet-beta": new anchor.web3.PublicKey(
-    "EXzAYHZ8xS6QJ6xGRsdKZXixoQBLsuMbmwJozm85jHp"
+    "CDDMdCAWB5AXgvEy7XJRggAu37QPG1b9aJXndZoPUkkm"
   ),
   devnet: new anchor.web3.PublicKey(
     "CE5LZTE7SZeaf65qid8zcvqJCM2nPJmhzMFW9C1y54WB"
