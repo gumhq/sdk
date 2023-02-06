@@ -17,14 +17,14 @@ export class Connection {
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
     const instructionMethodBuilder = this.sdk.program.methods
       .createConnection()
       .accounts({
         fromProfile: fromProfile,
         toProfile: toProfile,
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const connectionPDA = pubKeys.connection as anchor.web3.PublicKey;
@@ -39,7 +39,7 @@ export class Connection {
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
     return this.sdk.program.methods
       .deleteConnection()
       .accounts({
@@ -47,7 +47,7 @@ export class Connection {
         fromProfile: fromProfile,
         toProfile: toProfile,
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
   }
 

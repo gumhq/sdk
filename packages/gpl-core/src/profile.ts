@@ -37,12 +37,12 @@ export class Profile {
   public async create(
     userAccount: anchor.web3.PublicKey,
     namespace: Namespace,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
     const instructionMethodBuilder = this.sdk.program.methods
       .createProfile(namespace)
       .accounts({
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const profilePDA = pubKeys.profile as anchor.web3.PublicKey;
@@ -55,14 +55,14 @@ export class Profile {
   public delete(
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
     const { program } = this.sdk;
     return program.methods
       .deleteProfile()
       .accounts({
         profile: profileAccount,
         user: userAccount,
-        authority: user,
+        authority: owner,
       })
   }
 

@@ -33,7 +33,7 @@ export class Post {
     metadataUri: String,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
     const metadata = await axios.get(metadataUri as string);
     const postMetadata = new PostMetadata(metadata.data);
     if (!postMetadata.validate()) {
@@ -46,7 +46,7 @@ export class Post {
       .accounts({
         profile: profileAccount,
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const postPDA = pubKeys.post as anchor.web3.PublicKey;
@@ -61,7 +61,7 @@ export class Post {
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
 
     const metadata = await axios.get(newMetadataUri as string);
     const postMetadata = new PostMetadata(metadata.data);
@@ -75,7 +75,7 @@ export class Post {
         post: postAccount,
         profile: profileAccount,
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
   }
 
@@ -84,14 +84,14 @@ export class Post {
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
     return this.sdk.program.methods
       .deletePost()
       .accounts({
         post: postAccount,
         profile: profileAccount,
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
   }
 

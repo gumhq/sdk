@@ -35,12 +35,12 @@ export class User {
     ]);
   }
 
-  public async create(user: anchor.web3.PublicKey) {
+  public async create(owner: anchor.web3.PublicKey) {
     const randomHash = randomBytes(32);
     const instructionMethodBuilder = this.sdk.program.methods
       .createUser(randomHash)
       .accounts({
-        authority: user,
+        authority: owner,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const userPDA = pubKeys.user as anchor.web3.PublicKey;
@@ -53,7 +53,7 @@ export class User {
   public update(
     userAccount: anchor.web3.PublicKey,
     newAuthority: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey
+    owner: anchor.web3.PublicKey
   ) {
     const { program } = this.sdk;
     return program.methods
@@ -61,20 +61,20 @@ export class User {
       .accounts({
         user: userAccount,
         newAuthority: newAuthority,
-        authority: user,
+        authority: owner,
       });
   }
 
   public delete(
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey
+    owner: anchor.web3.PublicKey
   ) {
     const { program } = this.sdk;
     return program.methods
       .deleteUser()
       .accounts({
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
   }
 

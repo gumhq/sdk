@@ -31,13 +31,13 @@ export class ProfileMetadata {
     metadataUri: String,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
     const instructionMethodBuilder = this.sdk.program.methods
       .createProfileMetadata(metadataUri)
       .accounts({
         profile: profileAccount,
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const profileMetadataPDA = pubKeys.profileMetadata as anchor.web3.PublicKey;
@@ -52,14 +52,14 @@ export class ProfileMetadata {
     profileMetadataAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
     return this.sdk.program.methods
       .updateProfileMetadata(metadataUri)
       .accounts({
         profileMetadata: profileMetadataAccount,
         profile: profileAccount,
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
   }
 
@@ -67,14 +67,14 @@ export class ProfileMetadata {
     profileMetadataAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    user: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey) {
     return this.sdk.program.methods
       .deleteProfileMetadata()
       .accounts({
         profileMetadata: profileMetadataAccount,
         profile: profileAccount,
         user: userAccount,
-        authority: user,
+        authority: owner,
       });
   }
 
