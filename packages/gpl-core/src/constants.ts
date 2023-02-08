@@ -14,3 +14,7 @@ export const GPLCORE_PROGRAMS = {
     "9XZ9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z"
   ),
 };
+
+export const GRAPHQL_ENDPOINTS = {
+  devnet: "https://aware-earwig-49.hasura.app/v1/graphql",
+};

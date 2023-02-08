@@ -3,6 +3,7 @@ import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { expect } from "chai";
 import { GraphQLClient } from "graphql-request";
+import { GRAPHQL_ENDPOINTS } from "../src/constants";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -18,8 +19,7 @@ describe("Post", async () => {
   let postPDA: anchor.web3.PublicKey;
 
   before(async () => {
-    const gqlClient = new GraphQLClient(process.env.GRAPHQL_ENDPOINT as string);
-    gqlClient.setHeader("x-hasura-admin-secret", process.env.HASURA_ADMIN_SECRET as string);
+    const gqlClient = new GraphQLClient(GRAPHQL_ENDPOINTS["devnet"]);
     sdk = new SDK(
       userWallet as NodeWallet,
       new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
