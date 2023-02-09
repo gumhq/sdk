@@ -2,7 +2,7 @@
   "name": "gpl-ts",
   "version": "1.0.0",
   "main": "lib/index.js",
-  "license": "MIT",
+  "license": "GPL-V3",
   "files": [
     "lib"
   ],
