@@ -3,14 +3,28 @@ import { useState, useEffect, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { Namespace } from "@gumhq/sdk/lib/profile";
 
-const useCreateProfile = (sdk: SDK, metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
-  const [profile, setProfile] = useState<any>(null);
+const useCreateProfile = (sdk: SDK) => {
+  const [profilePDA, setProfilePDA] = useState<PublicKey | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const createProfile = useCallback(
-    async () => {
+  const create = useCallback(
+    async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
       setLoading(true);
+      setError(null);
+      try {
+
+        const ixMethodBuilder = await createProfileIxMethodBuilder(metadataUri, namespace, userAccount, owner);
+        await ixMethodBuilder?.rpc();
+      } catch (err: any) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    }, [sdk]);
+
+  const createProfileIxMethodBuilder = useCallback(
+    async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
       setError(null);
 
       try {
@@ -18,42 +32,24 @@ const useCreateProfile = (sdk: SDK, metadataUri: String, namespace: Namespace, u
         const profileMetadata = await sdk.profileMetadata.create(metadataUri, createProfile.profilePDA, userAccount, owner);
         const profileMetadataIx = await profileMetadata.instructionMethodBuilder.instruction();
 
-        const profile = {
+        const data = {
           instructionMethodBuilder: createProfile.instructionMethodBuilder.postInstructions(
-          [profileMetadataIx]),
+            [profileMetadataIx]),
           profilePDA: createProfile.profilePDA,
         }
-        setProfile(profile);
+        setProfilePDA(data.profilePDA);
+        return data.instructionMethodBuilder;
       } catch (err: any) {
         setError(err);
-      } finally {
-        setLoading(false);
       }
-    }, [sdk, owner]);
+    }, [sdk]);
 
-    const handleSubmitTransaction = useCallback(
-      async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          await profile.instructionMethodBuilder.rpc();
-        } catch (err: any) {
-          setError(err);
-        } finally {
-          setLoading(false);
-        }
-      }, [profile]);
-
-  useEffect(() => {
-  createProfile();
-  }, [createProfile]);
-
-  return { 
-    instructionMethodBuilder: profile ? profile.instructionMethodBuilder : undefined,
-    submitTransaction: handleSubmitTransaction,
-    profilePDA: profile ? profile.profilePDA : undefined,
-    loading, 
-    error 
+  return {
+    create,
+    createProfileIxMethodBuilder,
+    profilePDA,
+    loading,
+    error
   };
 };
 

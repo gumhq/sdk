@@ -1,50 +1,70 @@
 import { SDK } from "@gumhq/sdk";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
 
-const useUnfollow = (sdk: SDK, connectionAccount: PublicKey, fromProfile: PublicKey, toProfile: PublicKey, userAccount: PublicKey, owner: PublicKey) => {
-  const [connection, setConnection] = useState<any>(null);
+const useUnfollow = (sdk: SDK) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const deleteConnection = useCallback(
-    async () => {
+  const unfollow = useCallback(
+    async (
+      connectionAccount: PublicKey,
+      fromProfile: PublicKey,
+      toProfile: PublicKey,
+      userAccount: PublicKey,
+      owner: PublicKey
+    ) => {
       setLoading(true);
       setError(null);
 
       try {
-        const data = sdk.connection.delete(connectionAccount, fromProfile, toProfile, userAccount, owner);
-        setConnection(data);
+        const instructionMethodBuilder = await deleteConnectionIxMethodBuilder(
+          connectionAccount,
+          fromProfile,
+          toProfile,
+          userAccount,
+          owner
+        );
+        await instructionMethodBuilder?.rpc();
       } catch (err: any) {
         setError(err);
       } finally {
         setLoading(false);
       }
-    }, [sdk, connectionAccount, fromProfile, toProfile, userAccount, owner]
+    },
+    [sdk]);
+
+  const deleteConnectionIxMethodBuilder = useCallback(
+    async (
+      connectionAccount: PublicKey,
+      fromProfile: PublicKey,
+      toProfile: PublicKey,
+      userAccount: PublicKey,
+      owner: PublicKey
+    ) => {
+      setError(null);
+
+      try {
+        const data = sdk.connection.delete(
+          connectionAccount,
+          fromProfile,
+          toProfile,
+          userAccount,
+          owner
+        );
+        return data;
+      } catch (err: any) {
+        setError(err);
+      }
+    },
+    [sdk]
   );
 
-  const handleSubmitTransaction = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await connection.instructionMethodBuilder.rpc();
-    } catch (err: any) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [connection]);
-
-  useEffect(() => {
-    deleteConnection();
-  }, [deleteConnection]);
-
-  return { 
-    instructionMethodBuilder: connection?.instructionMethodBuilder,
-    submitTransaction: connection?.instructionMethodBuilder ? handleSubmitTransaction : undefined,
-    loading, 
-    error 
+  return {
+    unfollow,
+    deleteConnectionIxMethodBuilder,
+    loading,
+    error
   };
 };
 
