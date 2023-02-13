@@ -2,7 +2,8 @@
   "name": "@gumhq/react-sdk",
   "version": "1.0.0",
   "main": "lib/index.js",
-  "private": true,
+  "license": "GPL-3.0",
+  "description": "React SDK for Gum",
   "dependencies": {
     "@gumhq/sdk": "^1.0.3",
     "@types/node": "^16.18.12",
@@ -21,9 +22,8 @@
     "start": "tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

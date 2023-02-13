@@ -2,7 +2,7 @@
   "name": "@gumhq/sdk",
   "version": "1.0.5",
   "main": "lib/index.js",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "description": "Gum Protocol SDK",
   "scripts": {
     "clean": "rimraf lib",
