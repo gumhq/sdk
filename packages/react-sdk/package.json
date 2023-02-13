@@ -1,6 +1,6 @@
 {
   "name": "@gumhq/react-sdk",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "main": "lib/index.js",
   "license": "GPL-3.0",
   "description": "React SDK for Gum",
