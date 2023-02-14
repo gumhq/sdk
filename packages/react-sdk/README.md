@@ -1,8 +1,8 @@
 # Gum React SDK
 
 <p align="center">
-  <img alt="npm" src="https://img.shields.io/npm/v/@gumhq/sdk?color=%23d45bff">
-  <img alt="npm" src="https://img.shields.io/npm/dt/@gumhq/sdk?color=%23d45bff">
+  <img alt="npm" src="https://img.shields.io/npm/v/@gumhq/react-sdk?color=%23d45bff">
+  <img alt="npm" src="https://img.shields.io/npm/dt/@gumhq/react-sdk?color=%23d45bff">
 </p>
 
 ## Installation
