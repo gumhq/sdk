@@ -13,6 +13,10 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "build": "lerna run build --stream",
+    "test": "lerna run test"
+  },
   "private": true,
   "publishConfig": {
     "access": "public",

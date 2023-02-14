@@ -5,7 +5,8 @@
   "license": "GPL-3.0",
   "description": "Gum Protocol SDK",
   "scripts": {
-    "build": "lerna run build",
+    "clean": "rimraf lib",
+    "build": "npm run clean && tsc && cp -r src/idl/*json lib/",
     "test": "ts-mocha -p tsconfig.json tests/**/*.spec.ts"
   },
   "devDependencies": {

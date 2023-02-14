@@ -17,7 +17,8 @@
     "react": "^18.2.0"
   },
   "scripts": {
-    "build": "lerna run build",
+    "clean": "rimraf lib",
+    "build": "npm run clean && tsc",
     "start": "tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
