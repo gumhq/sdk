@@ -54,6 +54,7 @@ const useFollow = (sdk: SDK) => {
         return connection.instructionMethodBuilder;
       } catch (err: any) {
         setError(err);
+        return null;
       }
     },
     [sdk]

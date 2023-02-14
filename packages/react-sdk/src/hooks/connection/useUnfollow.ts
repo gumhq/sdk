@@ -55,6 +55,7 @@ const useUnfollow = (sdk: SDK) => {
         return data;
       } catch (err: any) {
         setError(err);
+        return null;
       }
     },
     [sdk]

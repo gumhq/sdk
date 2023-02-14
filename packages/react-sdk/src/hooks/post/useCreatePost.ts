@@ -32,6 +32,7 @@ const useCreatePost = (sdk: SDK) => {
         return data.instructionMethodBuilder;
       } catch (err: any) {
         setError(err);
+        return null;
       }
     }, [sdk]
   );

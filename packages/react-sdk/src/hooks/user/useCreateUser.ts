@@ -34,6 +34,7 @@ const useCreateUser = (sdk: SDK) => {
         return user.instructionMethodBuilder;
       } catch (err: any) {
         setError(err);
+        return null;
       }
     },
     [sdk]

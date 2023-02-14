@@ -1,5 +1,5 @@
 import { SDK } from "@gumhq/sdk";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { Namespace } from "@gumhq/sdk/lib/profile";
 
@@ -41,6 +41,7 @@ const useCreateProfile = (sdk: SDK) => {
         return data.instructionMethodBuilder;
       } catch (err: any) {
         setError(err);
+        return null;
       }
     }, [sdk]);
 
