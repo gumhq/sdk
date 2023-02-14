@@ -30,4 +30,4 @@ const usePost = (sdk: SDK, postAccount: PublicKey) => {
   return { post, loading, error };
 };
 
-export default usePost;
+export { usePost };

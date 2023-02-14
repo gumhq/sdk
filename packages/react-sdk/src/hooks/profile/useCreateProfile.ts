@@ -54,4 +54,4 @@ const useCreateProfile = (sdk: SDK) => {
   };
 };
 
-export default useCreateProfile;
+export { useCreateProfile };

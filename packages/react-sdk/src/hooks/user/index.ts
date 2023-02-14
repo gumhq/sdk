@@ -1,2 +1,2 @@
-export { default as useUser } from "./useUser";
-export { default as useCreateUser } from "./useCreateUser";
+export { useUser } from "./useUser";
+export { useCreateUser } from "./useCreateUser";

@@ -14,4 +14,4 @@ const useGum = (wallet: AnchorWallet, connection: Connection, opts: ConfirmOptio
   return sdk;
 };
 
-export default useGum;
+export { useGum };

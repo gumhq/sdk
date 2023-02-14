@@ -46,4 +46,4 @@ const useCreatePost = (sdk: SDK) => {
   };
 };
 
-export default useCreatePost;
+export { useCreatePost };

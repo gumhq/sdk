@@ -1,2 +1,2 @@
-export { default as useFollow } from "./useFollow";
-export { default as useUnfollow } from "./useUnfollow";
+export { useFollow } from "./useFollow";
+export { useUnfollow } from "./useUnfollow";

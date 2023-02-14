@@ -1,1 +1,1 @@
-export { default as useReaction } from "./useReaction";
+export { useReaction } from "./useReaction";

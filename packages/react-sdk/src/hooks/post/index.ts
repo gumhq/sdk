@@ -1,2 +1,2 @@
-export { default as usePost } from "./usePost";
-export { default as useCreatePost } from "./useCreatePost";
+export { usePost } from "./usePost";
+export { useCreatePost } from "./useCreatePost";

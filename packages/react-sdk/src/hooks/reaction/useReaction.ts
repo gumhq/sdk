@@ -80,4 +80,4 @@ const useReaction = (sdk: SDK, ) => {
   };
 };
 
-export default useReaction;
+export { useReaction };

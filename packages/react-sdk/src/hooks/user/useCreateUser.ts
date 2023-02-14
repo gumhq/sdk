@@ -49,4 +49,4 @@ const useCreateUser = (sdk: SDK) => {
   };
 };
 
-export default useCreateUser;
+export { useCreateUser };

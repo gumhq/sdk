@@ -69,4 +69,4 @@ const useUnfollow = (sdk: SDK) => {
   };
 };
 
-export default useUnfollow;
+export { useUnfollow };

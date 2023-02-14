@@ -30,4 +30,4 @@ const useUser = (sdk: SDK, userAccount: PublicKey) => {
   return { user, loading, error };
 };
 
-export default useUser;
+export { useUser };

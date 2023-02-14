@@ -69,4 +69,4 @@ const useFollow = (sdk: SDK) => {
   };
 };
 
-export default useFollow;
+export { useFollow };

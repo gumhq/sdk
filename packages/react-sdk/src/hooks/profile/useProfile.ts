@@ -31,4 +31,4 @@ const useProfile = (sdk: SDK, profileAccount: PublicKey) => {
   return { profile, loading, error };
 };
 
-export default useProfile;
+export { useProfile };
