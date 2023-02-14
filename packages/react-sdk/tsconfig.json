@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ESNext", "DOM"],
     "outDir": "lib",
     "rootDir": "src",
     "baseUrl": "./",
@@ -10,13 +14,12 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "importHelpers": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "declaration": true,
     "declarationMap": true,
-    "noEmit": false,
+    "emitDeclarationOnly": true,
   },
   "include": [
     "src/**/*"
