@@ -1,8 +1,13 @@
 {
   "name": "@gumhq/react-sdk",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": "GPL-3.0",
   "description": "React SDK for Gum",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gumhq/sdk.git",
+    "directory": "packages/react-sdk"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -35,6 +40,11 @@
     "dev": "DEV=true tsup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "gum",
+    "react",
+    "sdk"
+  ],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
