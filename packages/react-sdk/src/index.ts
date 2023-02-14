@@ -10,3 +10,7 @@ export {
   useCreateProfile,
   useCreatePost,
 } from "./hooks";
+
+export {
+  SDK
+} from "@gumhq/sdk";
