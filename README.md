@@ -1,4 +1,41 @@
-# @gumhq/sdk
+# gum-sdk-monorepo
+
+## Getting Started
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/gumhq/sdk.git
+```
+
+2. Install Lerna (if you haven't already):
+
+```bash
+npm install -g lerna
+```
+
+3. Install dependencies and link packages:
+
+```bash
+cd sdk
+npx lerna bootstrap
+```
+
+4. Build the packages:
+
+```bash
+npx lerna run build
+```
+
+## Packages
+
+### [gumhq/sdk](https://github.com/gumhq/sdk/tree/master/packages/gpl-core)
+
+The Gum SDK is a JavaScript library for interacting with the Gum protocol. It provides a simple interface for creating and managing users, profiles, and posts. To use the @gumhq/sdk package in your project, import it and refer to the code in the gpl-core folder.
+
+### [gumhq/react-sdk](https://github.com/gumhq/sdk/tree/master/packages/react-sdk)
+
+The Gum React SDK is built on top of the Gum SDK and provides a set of React Hooks for interacting with the Gum protocol.
 
 ## Documentation
 
