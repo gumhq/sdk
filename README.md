@@ -29,13 +29,10 @@ npx lerna run build
 
 ## Packages
 
-### [gumhq/sdk](https://github.com/gumhq/sdk/tree/master/packages/gpl-core)
-
-The Gum SDK is a JavaScript library for interacting with the Gum protocol. It provides a simple interface for creating and managing users, profiles, and posts. To use the @gumhq/sdk package in your project, import it and refer to the code in the gpl-core folder.
-
-### [gumhq/react-sdk](https://github.com/gumhq/sdk/tree/master/packages/react-sdk)
-
-The Gum React SDK is built on top of the Gum SDK and provides a set of React Hooks for interacting with the Gum protocol.
+| Name                                                                              | Description                                      | Version                                                                                                   |
+| --------------------------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| [`@gumhq/sdk`](https://github.com/gumhq/sdk/tree/master/packages/gpl-core)        | Typescript client to interact with Gum protocol. | <p align="center"><img alt="npm" src="https://img.shields.io/npm/v/@gumhq/sdk?color=%23d45bff"></p>       |
+| [`@gumhq/react-sdk`](https://github.com/gumhq/sdk/tree/master/packages/react-sdk) | React Hooks for Gum protocol                     | <p align="center"><img alt="npm" src="https://img.shields.io/npm/v/@gumhq/react-sdk?color=%23d45bff"></p> |
 
 ## Documentation
 
