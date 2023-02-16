@@ -2,6 +2,8 @@ import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
 import { gql } from "graphql-request";
+import { MethodsBuilder } from "@project-serum/anchor/dist/cjs/program/namespace/methods";
+import { IdlInstruction } from "@project-serum/anchor/dist/cjs/idl";
 
 export interface GumDecodedUser {
   authority: anchor.web3.PublicKey;
@@ -34,6 +36,34 @@ export class User {
       { memcmp: { offset: 8, bytes: user.toBase58() } },
     ]);
   }
+
+  public async getOrCreateUser(owner: anchor.web3.PublicKey): Promise<{
+    instructionMethodBuilder?: MethodsBuilder<anchor.Idl, IdlInstruction>;
+    userPDA: anchor.web3.PublicKey;
+    authority?: anchor.web3.PublicKey;
+    randomHash?: number[];
+  }> {
+    try {
+      const user = await this.getUser(owner);
+      if (user?.authority && user?.cl_pubkey && user?.randomhash) {
+        const { authority: authorityStr, cl_pubkey: userPDAstr, randomhash } = user;
+        return {
+          authority: new anchor.web3.PublicKey(authorityStr),
+          userPDA: new anchor.web3.PublicKey(userPDAstr),
+          randomHash: randomhash,
+        };
+      }
+
+      const { instructionMethodBuilder, userPDA } = await this.create(owner);
+      return {
+        instructionMethodBuilder,
+        userPDA
+      };
+    } catch (err) {
+      throw new Error(`Error getting or creating user: ${err.message}`);
+    }
+  }
+
 
   public async create(owner: anchor.web3.PublicKey) {
     const randomHash = randomBytes(32);
@@ -79,6 +109,23 @@ export class User {
   }
 
   // GraphQL API methods
+
+  public async getUser(owner: anchor.web3.PublicKey): Promise<GumDecodedUser> {
+    const query = gql`
+      query GetUser ($owner: String!) {
+        gum_0_1_0_decoded_user(where: { authority: { _eq: $owner } }) {
+          authority
+          cl_pubkey
+          randomhash
+        }
+      }
+    `;
+    const variables = {
+      owner: owner.toBase58(),
+    };
+    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_user: GumDecodedUser[] }>(query, variables);
+    return data.gum_0_1_0_decoded_user[0];
+  }
 
   public async getAllUsersAccounts(): Promise<GumDecodedUser[]> {
     const query = gql`
