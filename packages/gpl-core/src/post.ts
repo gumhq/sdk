@@ -127,4 +127,17 @@ export class Post {
     const data = await this.sdk.gqlClient.request(query);
     return data.gum_0_1_0_decoded_post;
   }
+
+  public async getPostsByProfile(profilePubKey: anchor.web3.PublicKey) {
+    const query = gql`
+      query GetPostsByProfile {
+        gum_0_1_0_decoded_post(where: {profile: {_eq: "${profilePubKey}"}}) {
+          cl_pubkey
+          metadatauri
+          profile
+        }
+      }`
+    const data = await this.sdk.gqlClient.request(query);
+    return data.gum_0_1_0_decoded_post;
+  }
 }
