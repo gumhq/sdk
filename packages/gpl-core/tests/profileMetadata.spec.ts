@@ -44,7 +44,7 @@ describe("ProfileMetadata", async () => {
   });
 
   it("should create a profile metadata", async () => {
-    const metadataUri = "https://example.com";
+    const metadataUri = "https://raw.githubusercontent.com/gumhq/sdk/master/packages/gpl-core/tests/utils/profile.json";
     const profileMetadata = await sdk.profileMetadata.create(
       metadataUri,
       profilePDA,
