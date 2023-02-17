@@ -17,6 +17,7 @@ export class Post {
   }
 
   public async getPostAccountsByUser(userPubKey: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
+    console.warn('Warning: getPostAccountsByUser is slow and may cause performance issues. Consider using getPostsByUser instead.');
     const profiles = await this.sdk.profile.getProfileAccountsByUser(userPubKey);
     const profilePDAs = profiles.map((p) => p.publicKey);
     let posts = [];

@@ -23,6 +23,7 @@ export class ProfileMetadata {
   }
 
   public async getProfileMetadataAccountsByUser(user: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
+    console.warn('Warning: getProfileMetadataAccountsByUser is slow and may cause performance issues. Consider using getProfileMetadataByUser instead.');
     const profiles = await this.sdk.profile.getProfileAccountsByUser(user);
     const profilePDAs = profiles.map((p) => p.publicKey);
     let profileMetadataList = [];
