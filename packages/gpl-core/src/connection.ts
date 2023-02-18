@@ -81,4 +81,36 @@ export class Connection {
     const result = await this.sdk.gqlClient.request(query);
     return result.gum_0_1_0_decoded_connection;
   }
+
+  public async getFollowersByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
+    const query = gql`
+      query GetFollowersByProfile ($profileAccount: String!) {
+        gum_0_1_0_decoded_connection(where: {toprofile: {_eq: $profileAccount}}) {
+          fromprofile
+        }
+      }`;
+    const variables = {
+      profileAccount: profileAccount.toBase58(),
+    };
+    const result = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_connection: { fromprofile: string }[] }>(query, variables);
+    const followers = result.gum_0_1_0_decoded_connection.map((follower) => follower.fromprofile);
+    return followers;
+  }
+
+  public async getFollowingsByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
+    const query = gql`
+      query GetFollowingsByProfile ($profileAccount: String!) {
+        gum_0_1_0_decoded_connection(where: {fromprofile: {_eq: $profileAccount}}) {
+          toprofile
+        }
+      }
+    `;
+    const variables = {
+      profileAccount: profileAccount.toBase58(),
+    };
+    const result = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_connection: { toprofile: string }[] }>(query, variables);
+    const followings = result.gum_0_1_0_decoded_connection.map((following) => following.toprofile);
+    return followings;
+  }
+
 }

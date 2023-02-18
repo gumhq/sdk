@@ -11,6 +11,9 @@ import gpl_core_idl from "./idl/gpl_core.json";
 import { ProfileMetadata } from "./profileMetadata";
 import { GraphQLClient } from "graphql-request";
 
+export { GPLCORE_PROGRAMS } from "./constants";
+export { GRAPHQL_ENDPOINTS } from "./constants";
+
 export class SDK {
     readonly program: anchor.Program;
     readonly provider: anchor.AnchorProvider;
