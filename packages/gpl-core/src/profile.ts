@@ -23,6 +23,9 @@ export class Profile {
     return await this.sdk.program.account.profile.fetch(profileAccount);
   }
 
+  /**
+   * @deprecated This function is slow and may cause performance issues. Consider using getProfilesByUser instead.
+   */
   public async getProfileAccountsByUser(user: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
     console.warn('Warning: getProfileAccountsByUser is slow and may cause performance issues. Consider using getProfilesByUser instead.');
     const users = await this.sdk.user.getUserAccountsByUser(user);

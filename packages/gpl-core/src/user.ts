@@ -31,6 +31,9 @@ export class User {
     return await this.sdk.program.account.user.fetch(userAccount);
   }
 
+  /**
+   * @deprecated This function is slow and may cause performance issues. Consider using getUserAccountsByAuthority instead.
+   */
   public async getUserAccountsByUser(user: anchor.web3.PublicKey) {
     console.warn('Warning: getUserAccountsByUser is slow and may cause performance issues. Consider using getUserAccountsByAuthority instead.');
     return await this.sdk.program.account.user.all([

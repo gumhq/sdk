@@ -22,6 +22,9 @@ export class ProfileMetadata {
     return await this.sdk.program.account.profileMetadata.fetch(profileMetadataAccount);
   }
 
+  /**
+   * @deprecated This function is slow and may cause performance issues. Consider using getProfileMetadataByUser instead.
+   */
   public async getProfileMetadataAccountsByUser(user: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
     console.warn('Warning: getProfileMetadataAccountsByUser is slow and may cause performance issues. Consider using getProfileMetadataByUser instead.');
     const profiles = await this.sdk.profile.getProfileAccountsByUser(user);
