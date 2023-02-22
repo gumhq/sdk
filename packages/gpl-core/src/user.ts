@@ -2,8 +2,6 @@ import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
 import { gql } from "graphql-request";
-import { MethodsBuilder } from "@project-serum/anchor/dist/cjs/program/namespace/methods";
-import { IdlInstruction } from "@project-serum/anchor/dist/cjs/idl";
 
 export interface GumDecodedUser {
   authority: anchor.web3.PublicKey;
@@ -35,39 +33,33 @@ export class User {
    * @deprecated This function is slow and may cause performance issues. Consider using getUserAccountsByAuthority instead.
    */
   public async getUserAccountsByUser(user: anchor.web3.PublicKey) {
-    console.warn('Warning: getUserAccountsByUser is slow and may cause performance issues. Consider using getUserAccountsByAuthority instead.');
     return await this.sdk.program.account.user.all([
       { memcmp: { offset: 8, bytes: user.toBase58() } },
     ]);
   }
 
-  public async getOrCreateUser(owner: anchor.web3.PublicKey): Promise<{
-    instructionMethodBuilder?: MethodsBuilder<anchor.Idl, IdlInstruction>;
-    userPDA: anchor.web3.PublicKey;
-    authority?: anchor.web3.PublicKey;
-    randomHash?: number[];
-  }> {
+  /**
+   * Gets or creates a user account for a given owner.
+   * 
+   * To use this method, you must first initialize an instance of the SDK and pass a GraphQL client to the constructor.
+   * The client will be used to fetch profile information.
+   */
+  public async getOrCreate(owner: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> {
     try {
       const user = await this.getUser(owner);
       if (user?.authority && user?.cl_pubkey && user?.randomhash) {
-        const { authority: authorityStr, cl_pubkey: userPDAstr, randomhash } = user;
-        return {
-          authority: new anchor.web3.PublicKey(authorityStr),
-          userPDA: new anchor.web3.PublicKey(userPDAstr),
-          randomHash: randomhash,
-        };
+        const { cl_pubkey: userPDAstr } = user;
+        return new anchor.web3.PublicKey(userPDAstr);
       }
 
       const { instructionMethodBuilder, userPDA } = await this.create(owner);
-      return {
-        instructionMethodBuilder,
-        userPDA
-      };
+      await instructionMethodBuilder.rpc();
+
+      return userPDA;
     } catch (err) {
       throw new Error(`Error getting or creating user: ${err.message}`);
     }
   }
-
 
   public async create(owner: anchor.web3.PublicKey) {
     const randomHash = randomBytes(32);

@@ -27,7 +27,6 @@ export class Profile {
    * @deprecated This function is slow and may cause performance issues. Consider using getProfilesByUser instead.
    */
   public async getProfileAccountsByUser(user: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
-    console.warn('Warning: getProfileAccountsByUser is slow and may cause performance issues. Consider using getProfilesByUser instead.');
     const users = await this.sdk.user.getUserAccountsByUser(user);
     const userPDAs = users.map((u) => u.publicKey);
     let profiles = [];
@@ -40,31 +39,26 @@ export class Profile {
     return profiles;
   }
 
-  public async getOrCreateProfile(
+  /**
+   * Gets or creates a profile for a given user account and namespace.
+   * 
+   * To use this method, you must first initialize an instance of the SDK and pass a GraphQL client to the constructor.
+   * The client will be used to fetch profile information.
+   */
+  public async getOrCreate(
+    metadataUri: String,
     userAccount: anchor.web3.PublicKey,
     namespace: Namespace,
-    owner: anchor.web3.PublicKey): Promise<{
-      instructionMethodBuilder?: MethodsBuilder<anchor.Idl, IdlInstruction>;
-      profilePDA: anchor.web3.PublicKey;
-      username?: anchor.web3.PublicKey;
-      namespace?: Namespace;
-    }> {
+    owner: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> {
     try {
       const profile = await this.getProfile(userAccount, namespace);
       if (profile?.username && profile?.namespace && profile?.cl_pubkey) {
-        const { username: usernameStr, namespace: namespaceStr, cl_pubkey: profilePDAstr } = profile;
-        return {
-          username: new anchor.web3.PublicKey(usernameStr),
-          profilePDA: new anchor.web3.PublicKey(profilePDAstr),
-          namespace: namespaceStr as Namespace,
-        };
+        const { cl_pubkey: profilePDAstr } = profile;
+        return new anchor.web3.PublicKey(profilePDAstr);
       }
 
-      const { instructionMethodBuilder, profilePDA } = await this.create(userAccount, namespace, owner);
-      return {
-        instructionMethodBuilder,
-        profilePDA
-      };
+      const profilePDA = await this.createProfileWithProfileMetadata(metadataUri, userAccount, namespace, owner);
+      return profilePDA;
     } catch (e) {
       throw new Error(`Error getting or creating profile: ${e.message}`);
     }
@@ -86,6 +80,22 @@ export class Profile {
       instructionMethodBuilder,
       profilePDA,
     };
+  }
+
+  public async createProfileWithProfileMetadata(
+    metadataUri: String,
+    userAccount: anchor.web3.PublicKey,
+    namespace: Namespace,
+    owner: anchor.web3.PublicKey) {
+    const createProfile = await this.create(userAccount, namespace, owner);
+    const profilePDA = createProfile.profilePDA;
+
+    const profileMetadata = await this.sdk.profileMetadata.create(metadataUri, profilePDA, userAccount, owner);
+    const profileMetadataIx = await profileMetadata.instructionMethodBuilder.instruction();
+    
+    await createProfile.instructionMethodBuilder.postInstructions([profileMetadataIx]).rpc();
+
+    return profilePDA;
   }
 
   public delete(
