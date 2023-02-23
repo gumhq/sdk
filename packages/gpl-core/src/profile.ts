@@ -1,8 +1,6 @@
 import { SDK } from ".";
 import { gql } from "graphql-request";
 import * as anchor from "@project-serum/anchor";
-import { MethodsBuilder } from "@project-serum/anchor/dist/cjs/program/namespace/methods";
-import { IdlInstruction } from "@project-serum/anchor/dist/cjs/idl";
 
 export type Namespace = "Professional" | "Personal" | "Gaming" | "Degen";
 
