@@ -24,6 +24,22 @@ const useCreateUser = (sdk: SDK) => {
     [sdk]
   );
 
+  const getOrCreate = useCallback(
+    async (owner: PublicKey) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const userPDA = await sdk.user.getOrCreate(owner);
+        setUserPDA(userPDA);
+      } catch (err: any) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [sdk]);
+
   const createUserIxMethodBuilder = useCallback(
     async (owner: PublicKey) => {
       setError(null);
@@ -42,6 +58,7 @@ const useCreateUser = (sdk: SDK) => {
 
   return {
     create,
+    getOrCreate,
     createUserIxMethodBuilder,
     userPDA,
     loading,

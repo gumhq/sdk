@@ -23,6 +23,21 @@ const useCreateProfile = (sdk: SDK) => {
       }
     }, [sdk]);
 
+  const getOrCreate = useCallback(
+    async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const profilePDA = await sdk.profile.getOrCreate(metadataUri, userAccount, namespace, owner);
+        setProfilePDA(profilePDA);
+      }
+      catch (err: any) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    }, [sdk]);
+
   const createProfileIxMethodBuilder = useCallback(
     async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
       setError(null);
@@ -47,6 +62,7 @@ const useCreateProfile = (sdk: SDK) => {
 
   return {
     create,
+    getOrCreate,
     createProfileIxMethodBuilder,
     profilePDA,
     loading,
