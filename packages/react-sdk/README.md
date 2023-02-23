@@ -20,7 +20,7 @@ For more detailed documentation, please visit the [Gum documentation](https://do
 The `useGum` hook provides the Gum SDK instance and the `useCreateUser` hook provides a function to create a new user.
 
 ```tsx
-import { useGum, useCreateUser } from "@gum-protocol/react-sdk";
+import { useGum, useCreateUser } from "@gumhq/react-sdk";
 import { AnchorWallet, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { useMemo } from "react";
