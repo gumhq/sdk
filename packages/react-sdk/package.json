@@ -36,7 +36,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "npm run clean && tsup",
-    "start": "tsc -w",
+    "start": "tsup --watch",
     "dev": "DEV=true tsup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
