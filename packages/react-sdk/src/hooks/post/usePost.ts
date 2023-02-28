@@ -25,7 +25,7 @@ const usePost = (sdk: SDK, postAccount: PublicKey) => {
 
   useEffect(() => {
   fetchPost();
-  }, [fetchPost]);
+  }, []);
 
   return { post, loading, error };
 };

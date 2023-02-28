@@ -25,7 +25,7 @@ const useFeed = (sdk: SDK, profileAccount: PublicKey) => {
 
   useEffect(() => {
     fetchFeed();
-  }, [fetchFeed]);
+  }, []);
 
   return { feedData, feedLoading, feedError };
 };

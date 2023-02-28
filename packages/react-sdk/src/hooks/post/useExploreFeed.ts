@@ -25,7 +25,7 @@ const useExploreFeed = (sdk: SDK, namespace: Namespace) => {
 
   useEffect(() => {
     fetchExploreFeed();
-  }, [fetchExploreFeed]);
+  }, []);
 
   return { exploreFeedData, exploreFeedLoading, exploreFeedError };
 };

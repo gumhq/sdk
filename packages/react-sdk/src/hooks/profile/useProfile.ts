@@ -26,7 +26,7 @@ const useProfile = (sdk: SDK, profileAccount: PublicKey) => {
 
   useEffect(() => {
   fetchProfile();
-  }, [fetchProfile]);
+  }, []);
 
   return { profile, loading, error };
 };

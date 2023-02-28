@@ -25,7 +25,7 @@ const useUser = (sdk: SDK, userAccount: PublicKey) => {
 
   useEffect(() => {
   fetchUser();
-  }, [fetchUser]);
+  }, []);
 
   return { user, loading, error };
 };
