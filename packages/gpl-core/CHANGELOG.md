@@ -1,7 +1,8 @@
-# Change Log
+## [1.0.12](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.12) (2023-03-01)
 
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+### Bug Fixes
+
+- **@gumhq-react-sdk:** usage code in readme ([41929b8](https://github.com/gumhq/sdk/commit/41929b8af6ad0bbf0ffb2ec0b39777bd93cabc29))
 
 ## [1.0.11](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.11) (2023-02-23)
 

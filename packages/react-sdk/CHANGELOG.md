@@ -1,7 +1,12 @@
-# Change Log
+## [1.0.8](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.8) (2023-03-01)
 
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+### Bug Fixes
+
+- **react-sdk hooks:** remove unnecessary dependency in hooks ([214a595](https://github.com/gumhq/sdk/commit/214a595f50ab35d129c662cd20e495801d5329f9))
+
+### Features
+
+- **@gumhq/react-sdk:** export feed hooks ([cafaef3](https://github.com/gumhq/sdk/commit/cafaef3cd255b38819d805950f918a434afbc1be))
 
 ## [1.0.7](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.7) (2023-02-23)
 
