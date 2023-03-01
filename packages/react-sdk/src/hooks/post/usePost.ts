@@ -4,22 +4,22 @@ import { PublicKey } from "@solana/web3.js";
 
 const usePost = (sdk: SDK, postAccount: PublicKey) => {
   const [post, setPost] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [postLoading, setPostLoading] = useState(false);
+  const [postError, setPostError] = useState<Error | null>(null);
 
   const fetchPost = useCallback(
     async () => {
-      setLoading(true);
-      setError(null);
+      setPostLoading(true);
+      setPostError(null);
 
       try {
         const data = await sdk.post.get(postAccount);
 
         setPost(data);
       } catch (err: any) {
-        setError(err);
+        setPostError(err);
       } finally {
-        setLoading(false);
+        setPostLoading(false);
       }
     }, [sdk, postAccount]);
 
@@ -27,7 +27,7 @@ const usePost = (sdk: SDK, postAccount: PublicKey) => {
   fetchPost();
   }, []);
 
-  return { post, loading, error };
+  return { post, postLoading, postError };
 };
 
 export { usePost };

@@ -5,42 +5,42 @@ import { Namespace } from "@gumhq/sdk/lib/profile";
 
 const useCreateProfile = (sdk: SDK) => {
   const [profilePDA, setProfilePDA] = useState<PublicKey | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const [createProfileError, setCreateProfileError] = useState<Error | null>(null);
 
   const create = useCallback(
     async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
-      setLoading(true);
-      setError(null);
+      setIsCreatingProfile(true);
+      setCreateProfileError(null);
       try {
 
         const ixMethodBuilder = await createProfileIxMethodBuilder(metadataUri, namespace, userAccount, owner);
         await ixMethodBuilder?.rpc();
       } catch (err: any) {
-        setError(err);
+        setCreateProfileError(err);
       } finally {
-        setLoading(false);
+        setIsCreatingProfile(false);
       }
     }, [sdk]);
 
   const getOrCreate = useCallback(
     async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
-      setLoading(true);
-      setError(null);
+      setIsCreatingProfile(true);
+      setCreateProfileError(null);
       try {
         const profilePDA = await sdk.profile.getOrCreate(metadataUri, userAccount, namespace, owner);
         setProfilePDA(profilePDA);
       }
       catch (err: any) {
-        setError(err);
+        setCreateProfileError(err);
       } finally {
-        setLoading(false);
+        setIsCreatingProfile(false);
       }
     }, [sdk]);
 
   const createProfileIxMethodBuilder = useCallback(
     async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
-      setError(null);
+      setCreateProfileError(null);
 
       try {
         const createProfile = await sdk.profile.create(userAccount, namespace, owner);
@@ -55,7 +55,7 @@ const useCreateProfile = (sdk: SDK) => {
         setProfilePDA(data.profilePDA);
         return data.instructionMethodBuilder;
       } catch (err: any) {
-        setError(err);
+        setCreateProfileError(err);
         return null;
       }
     }, [sdk]);
@@ -65,8 +65,8 @@ const useCreateProfile = (sdk: SDK) => {
     getOrCreate,
     createProfileIxMethodBuilder,
     profilePDA,
-    loading,
-    error
+    isCreatingProfile,
+    createProfileError
   };
 };
 
