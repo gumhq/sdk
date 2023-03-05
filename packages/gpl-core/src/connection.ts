@@ -2,6 +2,12 @@ import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import { gql } from "graphql-request";
 
+interface GraphQLConnection {
+  fromprofile: string;
+  toprofile: string;
+  cl_pubkey: string;
+}
+
 export class Connection {
   readonly sdk: SDK;
 
@@ -53,7 +59,7 @@ export class Connection {
 
   // GraphQL Query methods
 
-  public async getAllConnections() {
+  public async getAllConnections(): Promise<GraphQLConnection[]> {
     const query = gql`
       query GetAllConnections {
       gum_0_1_0_decoded_connection {
@@ -62,11 +68,11 @@ export class Connection {
         cl_pubkey
       }
     `;
-    const result = await this.sdk.gqlClient.request(query);
+    const result = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_connection: GraphQLConnection[] }>(query);
     return result.gum_0_1_0_decoded_connection;
   }
 
-  public async getConnectionsByUser(userPubKey: anchor.web3.PublicKey) {
+  public async getConnectionsByUser(userPubKey: anchor.web3.PublicKey): Promise<GraphQLConnection[]> {
     const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
     const profilePDAs = profiles.map((p) => p.cl_pubkey) as anchor.web3.PublicKey[];
     const query = gql`
@@ -78,7 +84,7 @@ export class Connection {
         }
       }
     `;
-    const result = await this.sdk.gqlClient.request(query);
+    const result = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_connection: GraphQLConnection[] }>(query);
     return result.gum_0_1_0_decoded_connection;
   }
 
