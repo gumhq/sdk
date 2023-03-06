@@ -140,19 +140,15 @@ describe("ProfileMetadata", async () => {
       let profileMetadatas: any;
 
       before(async () => {
-        profileMetadatas = await sdk.profileMetadata.getProfileMetadataByUserAndNamespace(userPubKey, "Personal");
+        profileMetadatas = await sdk.profileMetadata.getProfileMetadataByUserAndNamespace(userPubKey, "Professional");
       });
 
       it("should return an array of posts", async () => {
-        expect(profileMetadatas).to.be.an("array");
-      });
-
-      it("should return at least one post", async () => {
-        expect(profileMetadatas.length).to.be.greaterThan(0);
+        expect(profileMetadatas).to.be.an("object");
       });
 
       it("should return a post with a metadataUri", async () => {
-        expect(profileMetadatas[0].metadatauri).to.be.a("string");
+        expect(profileMetadatas.metadatauri).to.be.a("string");
       });
     });
   });

@@ -121,16 +121,12 @@ describe("Profile", async () => {
       let profiles: any;
 
       beforeEach(async () => {
-        profiles = await sdk.profile.getProfilesByUserAndNamespace(userPubKey, "Personal");
+        profiles = await sdk.profile.getProfilesByUserAndNamespace(userPubKey, "Professional");
       });
 
-      it("should return an array of profiles", () => {
-        expect(profiles).to.be.an("array");
-      });
-
-      it("should have the namespace Personal", () => {
-        const namespace = JSON.stringify({ "personal": {} });
-        expect(profiles[0].namespace).to.be.equal(namespace);
+      it("should have the namespace Professional", () => {
+        const namespace = JSON.stringify({ "professional": {} });
+        expect(profiles.namespace).to.be.equal(namespace);
       });
     });
   });
