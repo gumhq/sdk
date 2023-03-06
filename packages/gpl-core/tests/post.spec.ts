@@ -54,6 +54,22 @@ describe("Post", async () => {
     expect(postAccount.profile.toString()).is.equal(profilePDA.toString());
   });
 
+  it("should create a comment", async () => {
+    const metadataUri = "https://da3z62f3lqfkdsdfhl5cssin2hrfcnec6qlhkyxg4aiwp23c3xea.arweave.net/GDefaLtcCqHIZTr6KUkN0eJRNIL0FnVi5uARZ-ti3cg";
+    const comment = await sdk.post.reply(
+      postPDA,
+      metadataUri,
+      profilePDA,
+      userPDA,
+      user.publicKey,
+    );
+    await comment.instructionMethodBuilder.rpc();
+    const commentPDA = comment.postPDA as anchor.web3.PublicKey;
+    const commentAccount = await sdk.post.get(commentPDA);
+    expect(commentAccount.metadataUri).is.equal(metadataUri);
+    expect(commentAccount.profile.toString()).is.equal(profilePDA.toString());
+  });
+
   it("should update a post", async () => {
     const metadataUri = "https://da3z62f3lqfkdsdfhl5cssin2hrfcnec6qlhkyxg4aiwp23c3xea.arweave.net/GDefaLtcCqHIZTr6KUkN0eJRNIL0FnVi5uARZ-ti3cg";
     const post = await sdk.post.update(
