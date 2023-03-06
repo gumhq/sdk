@@ -4,8 +4,8 @@ import { PublicKey } from "@solana/web3.js";
 
 const useFollow = (sdk: SDK) => {
   const [connectionPDA, setConnectionPDA] = useState<PublicKey | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [connectionLoading, setConnectionLoading] = useState(false);
+  const [connectionError, setConnectionError] = useState<Error | null>(null);
 
   const follow = useCallback(
     async (
@@ -14,8 +14,8 @@ const useFollow = (sdk: SDK) => {
       userAccount: PublicKey,
       owner: PublicKey
     ) => {
-      setLoading(true);
-      setError(null);
+      setConnectionLoading(true);
+      setConnectionError(null);
 
       try {
         const instructionMethodBuilder = await createConnectionIxMethodBuilder(
@@ -26,9 +26,9 @@ const useFollow = (sdk: SDK) => {
         );
         await instructionMethodBuilder?.rpc();
       } catch (err: any) {
-        setError(err);
+        setConnectionError(err);
       } finally {
-        setLoading(false);
+        setConnectionLoading(false);
       }
     },
     [sdk]
@@ -41,7 +41,7 @@ const useFollow = (sdk: SDK) => {
       userAccount: PublicKey,
       owner: PublicKey
     ) => {
-      setError(null);
+      setConnectionError(null);
 
       try {
         const connection = await sdk.connection.create(
@@ -53,7 +53,7 @@ const useFollow = (sdk: SDK) => {
         setConnectionPDA(connection.connectionPDA);
         return connection.instructionMethodBuilder;
       } catch (err: any) {
-        setError(err);
+        setConnectionError(err);
         return null;
       }
     },
@@ -64,8 +64,8 @@ const useFollow = (sdk: SDK) => {
     follow,
     createConnectionIxMethodBuilder,
     connectionPDA,
-    loading,
-    error
+    connectionLoading,
+    connectionError
   };
 };
 

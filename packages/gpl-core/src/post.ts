@@ -4,6 +4,7 @@ import randomBytes from "randombytes";
 import { PostMetadata } from "./postmetadata";
 import axios from "axios";
 import { gql } from "graphql-request";
+import { Namespace } from "./profile";
 
 export class Post {
   readonly sdk: SDK;
@@ -20,7 +21,6 @@ export class Post {
    * @deprecated This function is slow and may cause performance issues. Consider using getPostsByUser instead.
    */
   public async getPostAccountsByUser(userPubKey: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
-    console.warn('Warning: getPostAccountsByUser is slow and may cause performance issues. Consider using getPostsByUser instead.');
     const profiles = await this.sdk.profile.getProfileAccountsByUser(userPubKey);
     const profilePDAs = profiles.map((p) => p.publicKey);
     let posts = [];
@@ -137,6 +137,37 @@ export class Post {
         gum_0_1_0_decoded_post(where: {profile: {_eq: "${profilePubKey}"}}) {
           cl_pubkey
           metadatauri
+          profile
+        }
+      }`
+    const data = await this.sdk.gqlClient.request(query);
+    return data.gum_0_1_0_decoded_post;
+  }
+
+  public async getPostsByNamespace(namespace: Namespace) {
+    const profiles = await this.sdk.profile.getProfilesByNamespace(namespace);
+    const profilePDAs = profiles.map((p) => p.cl_pubkey) as anchor.web3.PublicKey[];
+    const query = gql`
+      query GetPostsByNamespace {
+        gum_0_1_0_decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+          cl_pubkey
+          metadatauri
+          metadata
+          profile
+        }
+      }`
+    const data = await this.sdk.gqlClient.request(query);
+    return data.gum_0_1_0_decoded_post;
+  }
+
+  public async getPostsByFollowedUsers(profileAccount: anchor.web3.PublicKey) {
+    const followedUsersProfileAccounts = await this.sdk.connection.getFollowingsByProfile(profileAccount);
+    const query = gql`
+      query GetPostsByFollowedUsers {
+        gum_0_1_0_decoded_post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
+          cl_pubkey
+          metadatauri
+          metadata
           profile
         }
       }`

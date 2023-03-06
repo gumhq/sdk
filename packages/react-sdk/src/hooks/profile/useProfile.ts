@@ -5,30 +5,30 @@ import { Namespace } from "@gumhq/sdk/lib/profile";
 
 const useProfile = (sdk: SDK, profileAccount: PublicKey) => {
   const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState<Error | null>(null);
 
   const fetchProfile = useCallback(
     async () => {
-      setLoading(true);
-      setError(null);
+      setProfileLoading(true);
+      setProfileError(null);
 
       try {
         const data = await sdk.profile.get(profileAccount);
 
         setProfile(data);
       } catch (err: any) {
-        setError(err);
+        setProfileError(err);
       } finally {
-        setLoading(false);
+        setProfileLoading(false);
       }
     }, [sdk, profileAccount]);
 
   useEffect(() => {
   fetchProfile();
-  }, [fetchProfile]);
+  }, []);
 
-  return { profile, loading, error };
+  return { profile, profileLoading, profileError };
 };
 
 export { useProfile };

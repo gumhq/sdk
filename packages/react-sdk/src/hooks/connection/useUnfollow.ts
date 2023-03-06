@@ -3,8 +3,8 @@ import { useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
 
 const useUnfollow = (sdk: SDK) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [connectionLoading, setConnectionLoading] = useState(false);
+  const [connectionError, setConnectionError] = useState<Error | null>(null);
 
   const unfollow = useCallback(
     async (
@@ -14,8 +14,8 @@ const useUnfollow = (sdk: SDK) => {
       userAccount: PublicKey,
       owner: PublicKey
     ) => {
-      setLoading(true);
-      setError(null);
+      setConnectionLoading(true);
+      setConnectionError(null);
 
       try {
         const instructionMethodBuilder = await deleteConnectionIxMethodBuilder(
@@ -27,9 +27,9 @@ const useUnfollow = (sdk: SDK) => {
         );
         await instructionMethodBuilder?.rpc();
       } catch (err: any) {
-        setError(err);
+        setConnectionError(err);
       } finally {
-        setLoading(false);
+        setConnectionLoading(false);
       }
     },
     [sdk]);
@@ -42,7 +42,7 @@ const useUnfollow = (sdk: SDK) => {
       userAccount: PublicKey,
       owner: PublicKey
     ) => {
-      setError(null);
+      setConnectionError(null);
 
       try {
         const data = sdk.connection.delete(
@@ -54,7 +54,7 @@ const useUnfollow = (sdk: SDK) => {
         );
         return data;
       } catch (err: any) {
-        setError(err);
+        setConnectionError(err);
         return null;
       }
     },
@@ -64,8 +64,8 @@ const useUnfollow = (sdk: SDK) => {
   return {
     unfollow,
     deleteConnectionIxMethodBuilder,
-    loading,
-    error
+    connectionLoading,
+    connectionError
   };
 };
 

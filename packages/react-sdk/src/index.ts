@@ -3,6 +3,8 @@ export {
   useUser,
   useProfile,
   usePost,
+  useFeed,
+  useExploreFeed,
   useReaction,
   useFollow,
   useUnfollow,

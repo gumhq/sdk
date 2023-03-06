@@ -16,5 +16,5 @@ export const GPLCORE_PROGRAMS = {
 };
 
 export const GRAPHQL_ENDPOINTS = {
-  devnet: "https://aware-earwig-49.hasura.app/v1/graphql",
+  devnet: "https://light-pelican-32.hasura.app/v1/graphql",
 };
