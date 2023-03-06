@@ -117,7 +117,7 @@ export class Post {
 
   public async getPostsByUser(userPubKey: anchor.web3.PublicKey) {
     const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
-    const profilePDAs = profiles.map((p) => p.cl_pubkey) as anchor.web3.PublicKey[];
+    const profilePDAs = profiles.map((p) => p.cl_pubkey) as string[];
     const query = gql`
       query GetPostsByUser {
         gum_0_1_0_decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
@@ -146,7 +146,7 @@ export class Post {
 
   public async getPostsByNamespace(namespace: Namespace) {
     const profiles = await this.sdk.profile.getProfilesByNamespace(namespace);
-    const profilePDAs = profiles.map((p) => p.cl_pubkey) as anchor.web3.PublicKey[];
+    const profilePDAs = profiles.map((p) => p.cl_pubkey) as string[];
     const query = gql`
       query GetPostsByNamespace {
         gum_0_1_0_decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
