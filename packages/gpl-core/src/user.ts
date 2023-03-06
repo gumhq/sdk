@@ -4,8 +4,8 @@ import randomBytes from "randombytes";
 import { gql } from "graphql-request";
 
 export interface GumDecodedUser {
-  authority: anchor.web3.PublicKey;
-  cl_pubkey: anchor.web3.PublicKey;
+  authority: string;
+  cl_pubkey: string;
   randomhash: number[];
 }
 
