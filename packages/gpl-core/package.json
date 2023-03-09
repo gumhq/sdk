@@ -1,6 +1,6 @@
 {
   "name": "@gumhq/sdk",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "main": "lib/index.js",
   "license": "GPL-3.0",
   "description": "Gum Protocol SDK",
