@@ -13,7 +13,7 @@ const useFeed = (sdk: SDK, profileAccount: PublicKey) => {
       setFeedError(null);
 
       try {
-        const data = await sdk.post.getPostsByFollowedUsers(profileAccount);
+        const data = await sdk.post.getFeedsByFollowedUsers(profileAccount);
 
         setFeedData(data);
       } catch (err: any) {
