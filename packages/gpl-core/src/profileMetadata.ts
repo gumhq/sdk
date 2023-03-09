@@ -11,7 +11,7 @@ export type ProfileMetadataType = {
   avatar: string;
 };
 
-interface GraphQLProfileMetadata {
+export interface GraphQLProfileMetadata {
   metadatauri: string;
   metadata: string;
   profile: string;

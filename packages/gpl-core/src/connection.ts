@@ -2,7 +2,7 @@ import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import { gql } from "graphql-request";
 
-interface GraphQLConnection {
+export interface GraphQLConnection {
   fromprofile: string;
   toprofile: string;
   cl_pubkey: string;
