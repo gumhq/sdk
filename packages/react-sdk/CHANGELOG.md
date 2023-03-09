@@ -1,3 +1,9 @@
+## [1.0.9](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.9) (2023-03-09)
+
+### Features
+
+- **@gumhq/react-sdk:** feat(deps): bump up @gumhq/sdk to 1.0.13
+
 ## [1.0.8](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.8) (2023-03-01)
 
 ### Bug Fixes
