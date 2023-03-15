@@ -2,12 +2,13 @@ import * as anchor from "@project-serum/anchor";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { Cluster } from "@solana/web3.js";
 import { Connection } from "./connection";
-import { GPLCORE_PROGRAMS } from "./constants";
+import { GPLCORE_PROGRAMS, GPLSESSION_PROGRAMS } from "./constants";
 import { Post } from "./post";
 import { Profile } from "./profile";
 import { Reaction } from "./reaction";
 import { User } from "./user";
 import gpl_core_idl from "./idl/gpl_core.json";
+import gpl_session_idl from "./idl/gpl_session.json";
 import { ProfileMetadata } from "./profileMetadata";
 import { GraphQLClient } from "graphql-request";
 
@@ -16,6 +17,7 @@ export { GRAPHQL_ENDPOINTS } from "./constants";
 
 export class SDK {
     readonly program: anchor.Program;
+    readonly session_program: anchor.Program;
     readonly provider: anchor.AnchorProvider;
     readonly rpcConnection: anchor.web3.Connection;
     readonly cluster: Cluster | "localnet";
@@ -33,6 +35,10 @@ export class SDK {
         this.program = new anchor.Program(
             gpl_core_idl as anchor.Idl,
             GPLCORE_PROGRAMS[this.cluster] as anchor.web3.PublicKey,
+            this.provider);
+        this.session_program = new anchor.Program(
+            gpl_session_idl as anchor.Idl,
+            GPLSESSION_PROGRAMS[this.cluster] as anchor.web3.PublicKey,
             this.provider);
         this.rpcConnection = connection;
         this.gqlClient = gqlClient;
