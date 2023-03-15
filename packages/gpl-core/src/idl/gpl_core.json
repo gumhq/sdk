@@ -78,7 +78,10 @@
                 "path": "user.random_hash"
               }
             ]
-          }
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "newAuthority",
@@ -124,7 +127,10 @@
                 "path": "user.random_hash"
               }
             ]
-          }
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -190,7 +196,10 @@
                 "path": "user.random_hash"
               }
             ]
-          }
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -239,7 +248,10 @@
                 "path": "profile.user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -264,7 +276,10 @@
                 "path": "user.random_hash"
               }
             ]
-          }
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -323,7 +338,10 @@
                 "path": "user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -348,7 +366,10 @@
                 "path": "user.random_hash"
               }
             ]
-          }
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -389,7 +410,10 @@
                 "path": "profile"
               }
             ]
-          }
+          },
+          "relations": [
+            "profile"
+          ]
         },
         {
           "name": "profile",
@@ -417,7 +441,10 @@
                 "path": "user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -442,7 +469,10 @@
                 "path": "user.random_hash"
               }
             ]
-          }
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -483,7 +513,10 @@
                 "path": "profile"
               }
             ]
-          }
+          },
+          "relations": [
+            "profile"
+          ]
         },
         {
           "name": "profile",
@@ -511,7 +544,10 @@
                 "path": "user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -536,7 +572,10 @@
                 "path": "user.random_hash"
               }
             ]
-          }
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -604,7 +643,10 @@
                 "path": "user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -630,6 +672,12 @@
               }
             ]
           }
+        },
+        {
+          "name": "sessionToken",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "authority",
@@ -684,7 +732,10 @@
                 "path": "post.random_hash"
               }
             ]
-          }
+          },
+          "relations": [
+            "profile"
+          ]
         },
         {
           "name": "profile",
@@ -712,7 +763,10 @@
                 "path": "user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -738,6 +792,12 @@
               }
             ]
           }
+        },
+        {
+          "name": "sessionToken",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "authority",
@@ -810,7 +870,10 @@
                 "path": "user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -861,6 +924,12 @@
               }
             ]
           }
+        },
+        {
+          "name": "sessionToken",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "authority",
@@ -915,7 +984,10 @@
                 "path": "post.random_hash"
               }
             ]
-          }
+          },
+          "relations": [
+            "profile"
+          ]
         },
         {
           "name": "profile",
@@ -943,7 +1015,10 @@
                 "path": "user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -971,9 +1046,20 @@
           }
         },
         {
+          "name": "sessionToken",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "refundReceiver",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "systemProgram",
@@ -1038,7 +1124,10 @@
                 "path": "from_profile.user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "toProfile",
@@ -1092,6 +1181,12 @@
               }
             ]
           }
+        },
+        {
+          "name": "sessionToken",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "authority",
@@ -1133,7 +1228,11 @@
                 "path": "to_profile"
               }
             ]
-          }
+          },
+          "relations": [
+            "from_profile",
+            "to_profile"
+          ]
         },
         {
           "name": "fromProfile",
@@ -1161,7 +1260,10 @@
                 "path": "from_profile.user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "toProfile",
@@ -1217,9 +1319,25 @@
           }
         },
         {
+          "name": "sessionToken",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "refundReceiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -1309,7 +1427,10 @@
                 "path": "user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -1335,6 +1456,12 @@
               }
             ]
           }
+        },
+        {
+          "name": "sessionToken",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "authority",
@@ -1389,7 +1516,11 @@
                 "path": "reaction.from_profile"
               }
             ]
-          }
+          },
+          "relations": [
+            "to_post",
+            "from_profile"
+          ]
         },
         {
           "name": "toPost",
@@ -1442,7 +1573,10 @@
                 "path": "user"
               }
             ]
-          }
+          },
+          "relations": [
+            "user"
+          ]
         },
         {
           "name": "user",
@@ -1470,9 +1604,20 @@
           }
         },
         {
+          "name": "sessionToken",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "refundReceiver",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "systemProgram",
@@ -2200,5 +2345,8 @@
       "code": 6000,
       "name": "URITooLong"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "GgFpUxrTfYwNZXwCZtWN9rutCPi46m8fk2MEJ7YpnhoZ"
+  }
 }
