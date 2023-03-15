@@ -1,3 +1,15 @@
+## [1.0.13](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.13) (2023-03-09)
+
+### Bug Fixes
+
+- **sdk:** updated graphql function with proper return types ([125e8d2](https://github.com/gumhq/sdk/commit/125e8d2e51a16b2c8e9be451f1fec49a8fecaffa))
+
+### Features
+
+- **sdk:** Return connections as objects with proper return types ([a01fe1b](https://github.com/gumhq/sdk/commit/a01fe1bca51d7807a5c0b05a31c49b695c813857))
+- **sdk:** updated graphql function for profile with proper return types ([475a909](https://github.com/gumhq/sdk/commit/475a9098f1bac949490d88968ba28f7a64ca320b))
+- **sdk:** updated graphql function for reaction with proper return types ([abd85f9](https://github.com/gumhq/sdk/commit/abd85f95c8028db34c21790e1e5309f03f1dd73d))
+
 ## [1.0.12](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.12) (2023-03-01)
 
 ### Bug Fixes

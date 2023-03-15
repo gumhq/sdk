@@ -4,7 +4,7 @@ import { gql } from "graphql-request";
 
 export type ReactionType = "Like" | "Dislike" | "Love" | "Haha" | "Wow" | "Sad" | "Angry";
 
-interface GraphQLReaction {
+export interface GraphQLReaction {
   fromprofile: string;
   topost: string;
   reactiontype: string;

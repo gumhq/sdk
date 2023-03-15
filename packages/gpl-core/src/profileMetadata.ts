@@ -11,7 +11,7 @@ export type ProfileMetadataType = {
   avatar: string;
 };
 
-interface GraphQLProfileMetadata {
+export interface GraphQLProfileMetadata {
   metadatauri: string;
   metadata: string;
   profile: string;
@@ -202,6 +202,22 @@ export class ProfileMetadata {
       }
     `;
     const variables = { profilePDA: profilePDA };
+    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_profilemetadata: GraphQLProfileMetadata[] }>(query, variables);
+    return data.gum_0_1_0_decoded_profilemetadata[0];
+  }
+
+  public async getProfileMetadataByProfile(profileAccount: anchor.web3.PublicKey): Promise<GraphQLProfileMetadata> {
+    const query = gql`
+      query GetProfileMetadataByProfile($profileAccount: String) {
+        gum_0_1_0_decoded_profilemetadata(where: { profile: { _eq: $profileAccount } }) {
+          cl_pubkey
+          metadatauri
+          metadata
+          profile
+        }
+      }
+    `;
+    const variables = { profileAccount: profileAccount.toString() };
     const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_profilemetadata: GraphQLProfileMetadata[] }>(query, variables);
     return data.gum_0_1_0_decoded_profilemetadata[0];
   }
