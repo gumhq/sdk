@@ -7,6 +7,7 @@ import { Post } from "./post";
 import { Profile } from "./profile";
 import { Reaction } from "./reaction";
 import { User } from "./user";
+import { Session } from "./session";
 import gpl_core_idl from "./idl/gpl_core.json";
 import gpl_session_idl from "./idl/gpl_session.json";
 import { ProfileMetadata } from "./profileMetadata";
@@ -50,4 +51,5 @@ export class SDK {
     public connection = new Connection(this);
     public post = new Post(this);
     public reaction = new Reaction(this);
+    public session = new Session(this);
 }
