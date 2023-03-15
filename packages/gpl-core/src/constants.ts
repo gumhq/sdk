@@ -15,6 +15,18 @@ export const GPLCORE_PROGRAMS = {
   ),
 };
 
+export const GPLSESSION_PROGRAMS = {
+  "mainnet-beta": new anchor.web3.PublicKey(
+    "2AfeS4zYgZoBK33xED7opF1gPxZMWjj8cAJiGqjtFnLH"
+  ),
+  devnet: new anchor.web3.PublicKey(
+    "2AfeS4zYgZoBK33xED7opF1gPxZMWjj8cAJiGqjtFnLH"
+  ),
+  localnet: new anchor.web3.PublicKey(
+    "2AfeS4zYgZoBK33xED7opF1gPxZMWjj8cAJiGqjtFnLH"
+  ),
+};
+
 export const GRAPHQL_ENDPOINTS = {
   devnet: "https://light-pelican-32.hasura.app/v1/graphql",
 };
