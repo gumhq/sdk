@@ -3,6 +3,7 @@ export {
   useUser,
   useProfile,
   usePost,
+  useSession,
   useFeed,
   useExploreFeed,
   useReaction,
@@ -14,5 +15,6 @@ export {
 } from "./hooks";
 
 export {
-  SDK
+  SDK,
+  GRAPHQL_ENDPOINTS,
 } from "@gumhq/sdk";
