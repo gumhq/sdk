@@ -1,23 +1,21 @@
 import { useState, useEffect } from 'react';
 import { SDK } from '@gumhq/sdk';
-import bs58 from 'bs58';
 import { PublicKey, Keypair } from "@solana/web3.js";
-import CryptoJS from 'crypto-js';
+import { getItemFromIndexedDB, setItemToIndexedDB, deleteItemFromIndexedDB } from '../../utils/indexedDB';
+import { generateEncryptionKey, encrypt, decrypt } from '../../utils/crypto';
 
-export type UseSessionReturnType = [
+export type UseSessionReturnType = {
   sessionToken: string | null,
   keypair: Keypair | null,
   encryptionKey: string,
   error: string | null,
   createSession: (targetProgram: PublicKey, owner: PublicKey, topUp?: boolean, expiry?: number | null)
     => Promise<{ sessionToken: string; keypair: Keypair; encryptionKey: string; } | undefined>
-];
+};
 
 // Constants
-const SESSION_STORAGE_KEY = 'q3s1m8t9-session-tkn';
-const ENCRYPTION_KEY_STORAGE_KEY = 'd8b5n6m2-id';
-const ENCRYPTION_KEY_LENGTH = 32; // 256 bits
-const EXPIRY_TIME_IN_MS = 1000 * 60 * 60; // 1 hour
+const SESSION_OBJECT_STORE = 'sessions';
+const ENCRYPTION_KEY_OBJECT_STORE = 'user_preferences';
 
 const useSession = (sdk: SDK): UseSessionReturnType => {
   const [sessionToken, setSessionToken] = useState<string | null>(null);
@@ -27,61 +25,62 @@ const useSession = (sdk: SDK): UseSessionReturnType => {
 
   useEffect(() => {
     const getSessionData = async () => {
-      const sessionDataString = localStorage.getItem(SESSION_STORAGE_KEY);
-      const encryptionKeyDataString = localStorage.getItem(ENCRYPTION_KEY_STORAGE_KEY);
+      try {
+        const [sessionData, encryptionKeyData] = await Promise.all([
+          getItemFromIndexedDB(SESSION_OBJECT_STORE),
+          getItemFromIndexedDB(ENCRYPTION_KEY_OBJECT_STORE),
+        ]);
 
-      const sessionData = sessionDataString ? JSON.parse(sessionDataString) : null;
-      const encryptionKeyData = encryptionKeyDataString ? JSON.parse(encryptionKeyDataString) : null;
+        if (sessionData && encryptionKeyData) {
+          const { encryptedToken, encryptedKeypair, expiry } = sessionData;
+          const { encryptionKey: storedEncryptionKey, expiry: encryptionKeyExpiry } = encryptionKeyData;
 
-      if (sessionData && encryptionKeyData) {
-        const { encryptedToken, encryptedKeypair, expiry } = sessionData;
-        const { encryptionKey: storedEncryptionKey, expiry: encryptionKeyExpiry } = encryptionKeyData;
+          if (Date.now() > encryptionKeyExpiry || Date.now() > expiry) {
+            await deleteSessionData();
+            return;
+          }
 
-        if (Date.now() > encryptionKeyExpiry || Date.now() > expiry) {
-          localStorage.removeItem(ENCRYPTION_KEY_STORAGE_KEY);
-          localStorage.removeItem(SESSION_STORAGE_KEY);
-          return;
-        }
-
-        try {
           const decryptedToken = decrypt(encryptedToken, storedEncryptionKey);
           const decryptedKeypair = decrypt(encryptedKeypair, storedEncryptionKey);
 
-          const keypair = Keypair.fromSecretKey(bs58.decode(decryptedKeypair));
+          const keypair = Keypair.fromSecretKey(new Uint8Array(Buffer.from(decryptedKeypair, 'base64')));
 
           setSessionToken(decryptedToken);
           setKeypair(keypair);
           setEncryptionKey(storedEncryptionKey);
-        } catch (error) {
-          console.error("Error decrypting session data:", error);
-          setError("Error decrypting session data");
         }
+      } catch (error: any) {
+        console.error("Error getting session data from IndexedDB:", error);
+        setError(error);
       }
     };
 
     getSessionData();
   }, []);
 
-  const createSession = async (targetProgram: PublicKey, owner: PublicKey, topUp = false, expiry?: number | null) => {
+  const createSession = async (targetProgram: PublicKey, owner: PublicKey, topUp = false, validUntil?: number | null) => {
     try {
-      // if the expiry param is null or undefined, then the session will expire in 1 hour
-      expiry = expiry || Date.now() + EXPIRY_TIME_IN_MS;
 
-      const { sessionPDA: sessionToken, sessionSigner: keypair } = await sdk.session.create(targetProgram, owner, topUp, expiry);
+      // if the expiry param is null or undefined, then the session will be valid for 1 hour
+      if (!validUntil) {
+      validUntil = Math.ceil((Date.now() + 60 * 60 * 1000) / 1000);
+      }
+
+      const { sessionPDA: sessionToken, sessionSignerKeypair: keypair, instructionMethodBuilder } = await sdk.session.create(targetProgram, owner, topUp, validUntil);
+
+      await instructionMethodBuilder.signers([keypair]).rpc();
+      await deleteSessionData();
 
       const encryptionKey = generateEncryptionKey();
 
       const sessionTokenString = sessionToken.toBase58();
-      const keypairSecretBase58String = bs58.encode(keypair.secretKey);
+      const keypairSecretBase64String = Buffer.from(keypair.secretKey).toString('base64');
 
       const encryptedToken = encrypt(sessionTokenString, encryptionKey);
-      const encryptedKeypair = encrypt(keypairSecretBase58String, encryptionKey);
+      const encryptedKeypair = encrypt(keypairSecretBase64String, encryptionKey);
 
-      localStorage.setItem(
-        SESSION_STORAGE_KEY,
-        JSON.stringify({ encryptedToken, encryptedKeypair, expiry })
-      );
-      localStorage.setItem(ENCRYPTION_KEY_STORAGE_KEY, JSON.stringify({ encryptionKey, expiry }));
+      await setItemToIndexedDB(SESSION_OBJECT_STORE, { encryptedToken, encryptedKeypair, validUntil });
+      await setItemToIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, { 'userPreferences': encryptionKey, validUntil });
 
       setSessionToken(sessionTokenString);
       setKeypair(keypair);
@@ -91,31 +90,18 @@ const useSession = (sdk: SDK): UseSessionReturnType => {
         keypair,
         encryptionKey,
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating session:", error);
-      setError("Error creating session");
+      setError(error);
     }
   };
 
+  const deleteSessionData = async () => {
+    await deleteItemFromIndexedDB(ENCRYPTION_KEY_OBJECT_STORE);
+    await deleteItemFromIndexedDB(SESSION_OBJECT_STORE);
+  };
 
-  return [sessionToken, keypair, encryptionKey, error, createSession];
+  return { sessionToken, keypair, encryptionKey, error, createSession};
 };
 
-function generateEncryptionKey(): string {
-  const key = CryptoJS.lib.WordArray.random(ENCRYPTION_KEY_LENGTH);
-  return key.toString();
-}
-
-function encrypt(data: string, key: string): string {
-  const iv = CryptoJS.lib.WordArray.random(16);
-  const encrypted = CryptoJS.AES.encrypt(data, key, { iv });
-  return `${encrypted.toString()}:${iv.toString()}`;
-}
-
-function decrypt(data: string, key: string): string {
-  const [encryptedData, iv] = data.split(':');
-  const decrypted = CryptoJS.AES.decrypt(encryptedData, key, { iv: CryptoJS.enc.Hex.parse(iv) });
-  return decrypted.toString(CryptoJS.enc.Utf8);
-}
-
-export { useSession };
+export default useSession;

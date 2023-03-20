@@ -1,1 +1,1 @@
-export { useSession } from "./useSession";
+export { default as useSession } from './useSession';
