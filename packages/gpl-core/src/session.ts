@@ -1,5 +1,6 @@
 import { SDK } from ".";
 import { PublicKey, Keypair } from "@solana/web3.js";
+import { BN } from "@project-serum/anchor";
 
 export class Session {
   private readonly sdk: SDK;
@@ -12,20 +13,29 @@ export class Session {
     return this.sdk.session_program.account.sessionToken.fetch(sessionAccount);
   }
 
-  public async create(targetProgram: PublicKey, owner: PublicKey, topUp = false, validUntil = null) {
-    const sessionSigner = Keypair.generate();
-    const instructionMethodBuilder = this.sdk.session_program.methods.createSession(topUp, validUntil)
+  public async create(targetProgramPublicKey: PublicKey, ownerPublicKey: PublicKey, topUp: boolean = false, validUntilTimestamp: number | null = null) {
+    const sessionSignerKeypair = Keypair.generate();
+    const sessionSignerPublicKey = sessionSignerKeypair.publicKey;
+
+    let validUntilBN: BN | null = null;
+    if (validUntilTimestamp !== null) {
+      validUntilBN = new BN(validUntilTimestamp);
+    }
+
+    const instructionMethodBuilder = this.sdk.session_program.methods.createSession(topUp, validUntilBN)
       .accounts({
-        targetProgram: targetProgram,
-        sessionSigner: sessionSigner.publicKey,
-        authority: owner,
+        targetProgram: targetProgramPublicKey,
+        sessionSigner: sessionSignerPublicKey,
+        authority: ownerPublicKey,
       });
+
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const sessionPDA = pubKeys.sessionToken as PublicKey;
+
     return {
-      instructionMethodBuilder,
-      sessionSigner,
-      sessionPDA,
+      instructionMethodBuilder: instructionMethodBuilder,
+      sessionSignerKeypair: sessionSignerKeypair,
+      sessionPDA: sessionPDA,
     };
   }
 

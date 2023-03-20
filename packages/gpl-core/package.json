@@ -7,6 +7,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "npm run clean && tsc && cp -r src/idl/*json lib/",
+    "dev": "npm run clean && tsc && cp -r src/idl/*json lib/ && tsc -w",
     "test": "ts-mocha -p tsconfig.json tests/**/*.spec.ts"
   },
   "devDependencies": {

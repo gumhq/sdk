@@ -34,7 +34,7 @@ describe("Sparkle Session", async () => {
   it("should create a session", async () => {
     const session = await sdk.session.create(targetProgram, user.publicKey);
     sessionPDA = session.sessionPDA;
-    sessionSigner = session.sessionSigner;
+    sessionSigner = session.sessionSignerKeypair;
     await session.instructionMethodBuilder.signers([sessionSigner]).rpc();
     const sessionAccount = await sdk.session.get(session.sessionPDA);
     expect(sessionAccount.targetProgram.toString()).is.equal(targetProgram.toString());
