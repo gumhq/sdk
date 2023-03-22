@@ -9,9 +9,11 @@ import { deleteItemFromIndexedDB, getItemFromIndexedDB, setItemToIndexedDB } fro
 
 export interface SessionWalletInterface {
   publicKey: PublicKey | null;
+  sessionToken: string | null;
   signTransaction: (<T extends Transaction>(transaction: T) => Promise<T>) | undefined;
   signAllTransactions: (<T extends Transaction >(transactions: T[]) => Promise<T[]>) | undefined;
   signMessage: ((message: Uint8Array) => Promise<Uint8Array>) | undefined;
+  sendTransaction: (<T extends Transaction>(transaction: T) => Promise<string>) | undefined;
   createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number | null) => Promise<{ sessionToken: any; encryptionKey: string; } | undefined>;
   revokeSession: () => Promise<void>;
   getSessionToken: () => Promise<string | null>;
@@ -23,7 +25,7 @@ const SESSION_OBJECT_STORE = 'sessions';
 const ENCRYPTION_KEY_OBJECT_STORE = 'user_preferences';
 
 export function useSessionKeyWallet(wallet: AnchorWallet, connection: Connection, cluster: Cluster | "localnet"): SessionWalletInterface {
-  const keypairRef = useRef<Keypair>(Keypair.generate());
+  const keypairRef = useRef<Keypair | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,16 +54,36 @@ export function useSessionKeyWallet(wallet: AnchorWallet, connection: Connection
   };
 
   const signTransaction = async <T extends Transaction>(transaction: T): Promise<T> => {
+    if (!keypairRef.current || !sessionToken) {
+      throw new Error('Keypair or session token not loaded or is not available. Please re-create the session.');
+    }
+
+    const { blockhash } = await connection.getLatestBlockhash("finalized");
+    const feePayer = new PublicKey(sessionToken);
+
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = feePayer;
     transaction.sign(keypairRef.current);
+
     return transaction;
   };
+
 
   const signAllTransactions = async <T extends Transaction>(transactions: T[]): Promise<T[]> => {
     return Promise.all(transactions.map((transaction) => signTransaction(transaction)));
   };
 
   const signMessage = async (message: Uint8Array): Promise<Uint8Array> => {
+    if (!keypairRef.current) {
+      throw new Error('Keypair not loaded or is not available. Please re-create the session.');
+    }
     return nacl.sign.detached(message, keypairRef.current.secretKey);
+  };
+
+  const sendTransaction = async (transaction: Transaction): Promise<string> => {
+    const signedTransaction = await signTransaction(transaction);
+    const txid = await connection.sendRawTransaction(signedTransaction.serialize());
+    return txid;
   };
 
   const getSessionToken = async (): Promise<string | null> => {
@@ -76,12 +98,12 @@ export function useSessionKeyWallet(wallet: AnchorWallet, connection: Connection
       ]);
 
       if (sessionData && encryptionKeyData) {
-        const { encryptedToken, encryptedKeypair, validUntil } = sessionData;
-        const { userPreferences: storedEncryptionKey, validUntil: encryptionKeyExpiry } = encryptionKeyData;
+        const { encryptedToken, encryptedKeypair, validUntilTimestamp } = sessionData;
+        const { userPreferences: storedEncryptionKey, validUntilTimestamp: encryptionKeyExpiry } = encryptionKeyData;
 
         const currentTimestamp = Math.ceil(Date.now() / 1000);
 
-        if (currentTimestamp > encryptionKeyExpiry || currentTimestamp > validUntil) {
+        if (currentTimestamp > encryptionKeyExpiry || currentTimestamp > validUntilTimestamp) {
           await deleteSessionData();
           return null;
         }
@@ -92,7 +114,6 @@ export function useSessionKeyWallet(wallet: AnchorWallet, connection: Connection
         loadKeypairFromDecryptedSecret(decryptedKeypair);
 
         setSessionToken(decryptedToken);
-        // setEncryptionKey(storedEncryptionKey);
 
         return decryptedToken;
       }
@@ -106,14 +127,19 @@ export function useSessionKeyWallet(wallet: AnchorWallet, connection: Connection
 
   const createSession = async (targetProgramPublicKey: PublicKey, topUp = false, validUntilTimestamp: number | null= null) => {
     try {
+
+      generateKeypair();
+
+      if (!keypairRef.current) {
+        throw new Error("Keypair is not available. Please re-create the session.");
+      }
+
       // if the expiry param is null or undefined, then the session will be valid for 1 hour
       if (!validUntilTimestamp) {
         validUntilTimestamp = Math.ceil((Date.now() + 60 * 60 * 1000) / 1000);
       }
 
       const validUntilBN: BN | null = new BN(validUntilTimestamp);
-      
-      generateKeypair();
 
       const sessionKeypair = keypairRef.current;
       const sessionSignerPublicKey = sessionKeypair.publicKey;
@@ -165,7 +191,7 @@ export function useSessionKeyWallet(wallet: AnchorWallet, connection: Connection
 
       await deleteSessionData();
       setSessionToken(null);
-      keypairRef.current = Keypair.generate(); // overwrite the keypair to remove the old secret key
+      keypairRef.current = null;
     } catch (error: any) {
       console.error("Error revoking session:", error);
       setError(error);
@@ -175,9 +201,11 @@ export function useSessionKeyWallet(wallet: AnchorWallet, connection: Connection
   if (!wallet) {
     return {
       publicKey: null,
+      sessionToken: null,
       signTransaction: undefined,
       signAllTransactions: undefined,
       signMessage: undefined,
+      sendTransaction: undefined,
       getSessionToken: async () => null,
       createSession: async () => undefined,
       revokeSession: async () => undefined,
@@ -186,10 +214,12 @@ export function useSessionKeyWallet(wallet: AnchorWallet, connection: Connection
   }
 
   return {
-    publicKey: wallet.publicKey,
+    publicKey: sessionToken && keypairRef.current ? keypairRef.current.publicKey : null,
+    sessionToken,
     signTransaction,
     signAllTransactions,
     signMessage,
+    sendTransaction,
     getSessionToken,
     createSession,
     revokeSession,
