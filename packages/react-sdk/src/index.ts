@@ -3,7 +3,7 @@ export {
   useUser,
   useProfile,
   usePost,
-  useSession,
+  useSessionKeyWallet,
   useFeed,
   useExploreFeed,
   useReaction,
@@ -11,10 +11,17 @@ export {
   useUnfollow,
   useCreateUser,
   useCreateProfile,
-  useCreatePost,
+  useCreatePost
 } from "./hooks";
+
+export {
+  SessionWalletProvider,
+  useSessionWallet
+} from "./providers";
 
 export {
   SDK,
   GRAPHQL_ENDPOINTS,
 } from "@gumhq/sdk";
+
+export type { SessionWalletInterface } from "./hooks";
