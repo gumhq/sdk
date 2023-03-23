@@ -3,7 +3,7 @@ export {
   useUser,
   useProfile,
   usePost,
-  useSessionKeyWallet,
+  useSessionKeyManager,
   useFeed,
   useExploreFeed,
   useReaction,
@@ -15,8 +15,8 @@ export {
 } from "./hooks";
 
 export {
+  useSessionWallet,
   SessionWalletProvider,
-  useSessionWallet
 } from "./providers";
 
 export {

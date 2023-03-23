@@ -1,2 +1,2 @@
-export { useSessionKeyWallet } from './useSessionKeyWallet';
-export type { SessionWalletInterface } from './useSessionKeyWallet';
+export { useSessionKeyManager } from './useSessionKeyManager';
+export type { SessionWalletInterface } from './useSessionKeyManager';
