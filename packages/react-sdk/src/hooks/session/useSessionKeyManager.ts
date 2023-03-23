@@ -9,6 +9,8 @@ import { deleteItemFromIndexedDB, getItemFromIndexedDB, setItemToIndexedDB } fro
 
 export interface SessionWalletInterface {
   publicKey: PublicKey | null;
+  isLoading: boolean;
+  error: string | null;
   sessionToken: string | null;
   signTransaction: (<T extends Transaction>(transaction: T) => Promise<T>) | undefined;
   signAllTransactions: (<T extends Transaction >(transactions: T[]) => Promise<T[]>) | undefined;
@@ -18,7 +20,6 @@ export interface SessionWalletInterface {
   createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number | null) => Promise<{ sessionToken: any; encryptionKey: string; } | undefined>;
   revokeSession: () => Promise<void>;
   getSessionToken: () => Promise<string | null>;
-  error: string | null;
 }
 
 // Constants
@@ -28,6 +29,7 @@ const ENCRYPTION_KEY_OBJECT_STORE = 'user_preferences';
 export function useSessionKeyManager(wallet: AnchorWallet, connection: Connection, cluster: Cluster | "localnet"): SessionWalletInterface {
   const keypairRef = useRef<Keypair | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const sdk = new SessionWallet(wallet, connection, cluster)
@@ -54,42 +56,63 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
     await deleteItemFromIndexedDB(SESSION_OBJECT_STORE);
   };
 
-  const signTransaction = async <T extends Transaction>(transaction: T): Promise<T> => {
-    if (!keypairRef.current || !sessionToken) {
-      throw new Error('Cannot sign transaction - keypair or session token not loaded. Please create a session first.');
+  const withLoading = async (asyncFunction: () => Promise<any>) => {
+    setIsLoading(true);
+    try {
+      const result = await asyncFunction();
+      return result;
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const { blockhash } = await connection.getLatestBlockhash("finalized");
-    const feePayer = keypairRef.current.publicKey;
+  const signTransaction = async <T extends Transaction>(transaction: T): Promise<T> => {
+    return withLoading(async () => {
+      if (!keypairRef.current || !sessionToken) {
+        throw new Error('Cannot sign transaction - keypair or session token not loaded. Please create a session first.');
+      }
 
-    transaction.recentBlockhash = blockhash;
-    transaction.feePayer = feePayer;
-    transaction.sign(keypairRef.current);
+      const { blockhash } = await connection.getLatestBlockhash("finalized");
+      const feePayer = keypairRef.current.publicKey;
 
-    return transaction;
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = feePayer;
+      transaction.sign(keypairRef.current);
+
+      return transaction;
+    });
   };
 
   const signAllTransactions = async <T extends Transaction>(transactions: T[]): Promise<T[]> => {
-    return Promise.all(transactions.map((transaction) => signTransaction(transaction)));
+    return withLoading(async () => {
+      return Promise.all(transactions.map((transaction) => signTransaction(transaction)));
+    });
   };
 
   const signMessage = async (message: Uint8Array): Promise<Uint8Array> => {
-    if (!keypairRef.current) {
-      throw new Error('Cannot sign message - keypair not loaded. Please create a session first.');
-    }
-    return nacl.sign.detached(message, keypairRef.current.secretKey);
+    return withLoading(async () => {
+      if (!keypairRef.current) {
+        throw new Error('Cannot sign message - keypair not loaded. Please create a session first.');
+      }
+      return nacl.sign.detached(message, keypairRef.current.secretKey);
+    });
+
   };
 
   const sendTransaction = async (signedTransaction: Transaction): Promise<string> => {
-    const txid = await connection.sendRawTransaction(signedTransaction.serialize());
-    return txid;
+    return withLoading(async () => {
+      const txid = await connection.sendRawTransaction(signedTransaction.serialize());
+      return txid;
+    });
   };
 
   const signAndSendTransaction = async (transaction: Transaction | Transaction[]): Promise<string[]> => {
-    const transactionsArray = Array.isArray(transaction) ? transaction : [transaction];
-    const signedTransactions = await signAllTransactions(transactionsArray);
-    const txids = await Promise.all(signedTransactions.map((signedTransaction) => sendTransaction(signedTransaction)));
-    return txids;
+    return withLoading(async () => {
+      const transactionsArray = Array.isArray(transaction) ? transaction : [transaction];
+      const signedTransactions = await signAllTransactions(transactionsArray);
+      const txids = await Promise.all(signedTransactions.map((signedTransaction) => sendTransaction(signedTransaction)));
+      return txids;
+    });
   };
 
   const getSessionToken = async (): Promise<string | null> => {
@@ -132,80 +155,85 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
   };
 
   const createSession = async (targetProgramPublicKey: PublicKey, topUp = false, validUntilTimestamp: number | null= null) => {
-    try {
+    return withLoading(async () => {
+      try {
 
-      generateKeypair();
+        generateKeypair();
 
-      if (!keypairRef.current) {
-        throw new Error("Keypair is not available. Please re-create the session.");
+        if (!keypairRef.current) {
+          throw new Error("Keypair is not available. Please re-create the session.");
+        }
+
+        // if the expiry param is null or undefined, then the session will be valid for 1 hour
+        if (!validUntilTimestamp) {
+          validUntilTimestamp = Math.ceil((Date.now() + 60 * 60 * 1000) / 1000);
+        }
+
+        const validUntilBN: BN | null = new BN(validUntilTimestamp);
+
+        const sessionKeypair = keypairRef.current;
+        const sessionSignerPublicKey = sessionKeypair.publicKey;
+
+        const instructionMethodBuilder = sdk.program.methods.createSession(topUp, validUntilBN)
+          .accounts({
+            targetProgram: targetProgramPublicKey,
+            sessionSigner: sessionSignerPublicKey,
+            authority: wallet.publicKey as PublicKey,
+          });
+
+        const pubKeys = await instructionMethodBuilder.pubkeys();
+        const sessionToken = pubKeys.sessionToken as PublicKey;
+
+        await instructionMethodBuilder.signers([sessionKeypair]).rpc();
+        await deleteSessionData();
+
+        const encryptionKey = generateEncryptionKey();
+
+        const sessionTokenString = sessionToken.toBase58();
+        const keypairSecretBase64String = Buffer.from(sessionKeypair.secretKey).toString('base64');
+
+        const encryptedToken = encrypt(sessionTokenString, encryptionKey);
+        const encryptedKeypair = encrypt(keypairSecretBase64String, encryptionKey);
+
+        await setItemToIndexedDB(SESSION_OBJECT_STORE, { encryptedToken, encryptedKeypair, validUntilTimestamp });
+        await setItemToIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, { 'userPreferences': encryptionKey, validUntilTimestamp });
+
+        setSessionToken(sessionTokenString);
+        return {
+          sessionToken: sessionTokenString,
+          encryptionKey,
+        };
+      } catch (error: any) {
+        console.error("Error creating session:", error);
+        setError(error);
       }
-
-      // if the expiry param is null or undefined, then the session will be valid for 1 hour
-      if (!validUntilTimestamp) {
-        validUntilTimestamp = Math.ceil((Date.now() + 60 * 60 * 1000) / 1000);
-      }
-
-      const validUntilBN: BN | null = new BN(validUntilTimestamp);
-
-      const sessionKeypair = keypairRef.current;
-      const sessionSignerPublicKey = sessionKeypair.publicKey;
-
-      const instructionMethodBuilder = sdk.program.methods.createSession(topUp, validUntilBN)
-        .accounts({
-          targetProgram: targetProgramPublicKey,
-          sessionSigner: sessionSignerPublicKey,
-          authority: wallet.publicKey as PublicKey,
-        });
-
-      const pubKeys = await instructionMethodBuilder.pubkeys();
-      const sessionToken = pubKeys.sessionToken as PublicKey;
-
-      await instructionMethodBuilder.signers([sessionKeypair]).rpc();
-      await deleteSessionData();
-
-      const encryptionKey = generateEncryptionKey();
-
-      const sessionTokenString = sessionToken.toBase58();
-      const keypairSecretBase64String = Buffer.from(sessionKeypair.secretKey).toString('base64');
-
-      const encryptedToken = encrypt(sessionTokenString, encryptionKey);
-      const encryptedKeypair = encrypt(keypairSecretBase64String, encryptionKey);
-
-      await setItemToIndexedDB(SESSION_OBJECT_STORE, { encryptedToken, encryptedKeypair, validUntilTimestamp });
-      await setItemToIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, { 'userPreferences': encryptionKey, validUntilTimestamp });
-
-      setSessionToken(sessionTokenString);
-      return {
-        sessionToken: sessionTokenString,
-        encryptionKey,
-      };
-    } catch (error: any) {
-      console.error("Error creating session:", error);
-      setError(error);
-    }
+    });
   };
 
   const revokeSession = async () => {
-    try {
-      if (!sessionToken) {
-        return;
-      }
-      const sessionTokenPublicKey = new PublicKey(sessionToken);
-      const instructionMethodBuilder = await sdk.revoke(sessionTokenPublicKey, wallet.publicKey as PublicKey);
-      await instructionMethodBuilder.rpc();
+    return withLoading(async () => {
+      try {
+        if (!sessionToken) {
+          return;
+        }
+        const sessionTokenPublicKey = new PublicKey(sessionToken);
+        const instructionMethodBuilder = await sdk.revoke(sessionTokenPublicKey, wallet.publicKey as PublicKey);
+        await instructionMethodBuilder.rpc();
 
-      await deleteSessionData();
-      setSessionToken(null);
-      keypairRef.current = null;
-    } catch (error: any) {
-      console.error("Error revoking session:", error);
-      setError(error);
-    }
+        await deleteSessionData();
+        setSessionToken(null);
+        keypairRef.current = null;
+      } catch (error: any) {
+        console.error("Error revoking session:", error);
+        setError(error);
+      }
+    });
   };
 
   if (!wallet) {
     return {
       publicKey: null,
+      isLoading: false,
       sessionToken: null,
       signTransaction: undefined,
       signAllTransactions: undefined,
@@ -221,6 +249,8 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
 
   return {
     publicKey: sessionToken && keypairRef.current ? keypairRef.current.publicKey : null,
+    isLoading,
+    error,
     sessionToken,
     signTransaction,
     signAllTransactions,
@@ -230,6 +260,5 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
     getSessionToken,
     createSession,
     revokeSession,
-    error,
   };
 };
