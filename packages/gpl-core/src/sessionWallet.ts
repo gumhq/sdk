@@ -27,8 +27,7 @@ export class SessionWallet {
     return this.program.account.sessionToken.fetch(sessionAccount);
   }
 
-  private async create(targetProgramPublicKey: PublicKey, ownerPublicKey: PublicKey, topUp: boolean = false, validUntilTimestamp: number | null = null) {
-    const sessionSignerKeypair = Keypair.generate();
+  private async create(sessionSignerKeypair: Keypair, targetProgramPublicKey: PublicKey, ownerPublicKey: PublicKey, topUp: boolean = false, validUntilTimestamp: number | null = null) {
     const sessionSignerPublicKey = sessionSignerKeypair.publicKey;
 
     let validUntilBN: BN | null = null;
@@ -48,18 +47,16 @@ export class SessionWallet {
 
     return {
       instructionMethodBuilder: instructionMethodBuilder,
-      sessionSignerKeypair: sessionSignerKeypair,
       sessionPDA: sessionPDA,
     };
   }
 
-  public async createSession(targetProgramPublicKey: PublicKey, ownerPublicKey: PublicKey, validUntilTimestamp: number | null = null) {
+  public async createSession(sessionSignerKeypair: Keypair, targetProgramPublicKey: PublicKey, ownerPublicKey: PublicKey, validUntilTimestamp: number | null = null) {
     try {
-      const { instructionMethodBuilder, sessionSignerKeypair, sessionPDA } = await this.create(targetProgramPublicKey, ownerPublicKey, false, validUntilTimestamp);
+      const { instructionMethodBuilder, sessionPDA } = await this.create(sessionSignerKeypair, targetProgramPublicKey, ownerPublicKey, false, validUntilTimestamp);
       
       return {
         instructionMethodBuilder: instructionMethodBuilder,
-        sessionSignerKeypair: sessionSignerKeypair,
         sessionPDA: sessionPDA,
       };
     } catch (error) {
