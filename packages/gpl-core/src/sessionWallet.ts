@@ -80,4 +80,37 @@ export class SessionWallet {
       throw new Error('Failed to revoke session.');
     }
   }
+
+  public async signTransaction(transaction: anchor.web3.Transaction, sessionSignerKeypair: Keypair) {
+    try {
+      const sessionSignerWallet = new anchor.Wallet(sessionSignerKeypair);
+      return await sessionSignerWallet.signTransaction(transaction);
+    } catch (error) {
+      console.error('Error signing transaction:', error);
+      throw new Error('Failed to sign transaction.');
+    }
+  }
+
+  public async signAllTransactions(transactions: anchor.web3.Transaction[], sessionSignerKeypair: Keypair) {
+    try {
+      const sessionSignerWallet = new anchor.Wallet(sessionSignerKeypair);
+      return await sessionSignerWallet.signAllTransactions(transactions);
+    } catch (error) {
+      console.error('Error signing transactions:', error);
+      throw new Error('Failed to sign transactions.');
+    }
+  }
+
+  public async signAndSendTransaction(transaction: anchor.web3.Transaction | anchor.web3.Transaction[], sessionSignerKeypair: Keypair): Promise<string[]> {
+    try {
+      const transactionsArray = Array.isArray(transaction) ? transaction : [transaction];
+      const signedTransactions = await this.signAllTransactions(transactionsArray, sessionSignerKeypair);
+      const serializedTransactions = signedTransactions.map((signedTransaction) => signedTransaction.serialize());
+      const txids = await Promise.all(serializedTransactions.map((serializedTransaction) => this.provider.connection.sendRawTransaction(serializedTransaction)));
+      return txids;
+    } catch (error) {
+      console.error('Error sending transaction:', error);
+      throw new Error('Failed to send transaction.');
+    }
+  }
 }
