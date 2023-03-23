@@ -17,7 +17,7 @@ export interface SessionWalletInterface {
   signMessage: ((message: Uint8Array) => Promise<Uint8Array>) | undefined;
   sendTransaction: (<T extends Transaction>(transaction: T) => Promise<string>) | undefined;
   signAndSendTransaction: (<T extends Transaction>(transactions: T | T[]) => Promise<string[]>) | undefined;
-  createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number | null) => Promise<{ sessionToken: any; encryptionKey: string; } | undefined>;
+  createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number) => Promise<{ sessionToken: any; encryptionKey: string; } | undefined>;
   revokeSession: () => Promise<void>;
   getSessionToken: () => Promise<string | null>;
 }
@@ -154,24 +154,28 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
     return null;
   };
 
-  const createSession = async (targetProgramPublicKey: PublicKey, topUp = false, validUntilTimestamp: number | null= null) => {
+  const createSession = async (targetProgramPublicKey: PublicKey, topUp = false, expiryInMinutes: number = 60) => {
     return withLoading(async () => {
       try {
-
-        generateKeypair();
+        
+        // if expiry is more than 24 hours then throw error
+        if (expiryInMinutes > 24 * 60) {
+          throw new Error("Expiry cannot be more than 24 hours.");
+        }
 
         if (!keypairRef.current) {
-          throw new Error("Keypair is not available. Please re-create the session.");
+          generateKeypair();
         }
 
-        // if the expiry param is null or undefined, then the session will be valid for 1 hour
-        if (!validUntilTimestamp) {
-          validUntilTimestamp = Math.ceil((Date.now() + 60 * 60 * 1000) / 1000);
+        // default expiry is 60 minutes 
+        const expiryTimestamp = Math.ceil((Date.now() + expiryInMinutes * 60 * 1000) / 1000);
+
+        const validUntilBN: BN | null = new BN(expiryTimestamp);
+
+        const sessionKeypair: Keypair | null = keypairRef.current;
+        if (!sessionKeypair) {
+          throw new Error("Session keypair not generated.");
         }
-
-        const validUntilBN: BN | null = new BN(validUntilTimestamp);
-
-        const sessionKeypair = keypairRef.current;
         const sessionSignerPublicKey = sessionKeypair.publicKey;
 
         const instructionMethodBuilder = sdk.program.methods.createSession(topUp, validUntilBN)
@@ -195,8 +199,8 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
         const encryptedToken = encrypt(sessionTokenString, encryptionKey);
         const encryptedKeypair = encrypt(keypairSecretBase64String, encryptionKey);
 
-        await setItemToIndexedDB(SESSION_OBJECT_STORE, { encryptedToken, encryptedKeypair, validUntilTimestamp });
-        await setItemToIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, { 'userPreferences': encryptionKey, validUntilTimestamp });
+        await setItemToIndexedDB(SESSION_OBJECT_STORE, { encryptedToken, encryptedKeypair, validUntilTimestamp: expiryTimestamp });
+        await setItemToIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, { 'userPreferences': encryptionKey, validUntilTimestamp: expiryTimestamp });
 
         setSessionToken(sessionTokenString);
         return {
