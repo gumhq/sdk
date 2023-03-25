@@ -21,7 +21,7 @@ export interface GraphQLFeed {
   profile_metadata: string;
   profile_metadata_uri: string;
 }
-  
+
 export class Post {
   readonly sdk: SDK;
 
@@ -50,11 +50,12 @@ export class Post {
   }
 
   public async create(
-    metadataUri: String,
+    metadataUri: string,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    owner: anchor.web3.PublicKey) {
-    const metadata = await axios.get(metadataUri as string);
+    owner: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey | null = null) {
+    const metadata = await axios.get(metadataUri);
     const postMetadata = new PostMetadata(metadata.data);
     if (!postMetadata.validate()) {
       throw new Error("Invalid post metadata");
@@ -66,6 +67,7 @@ export class Post {
       .accounts({
         profile: profileAccount,
         user: userAccount,
+        sessionToken: sessionTokenAccount,
         authority: owner,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
@@ -77,13 +79,14 @@ export class Post {
   }
 
   public async update(
-    newMetadataUri: String,
+    newMetadataUri: string,
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    owner: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey | null = null) {
 
-    const metadata = await axios.get(newMetadataUri as string);
+    const metadata = await axios.get(newMetadataUri);
     const postMetadata = new PostMetadata(metadata.data);
     if (!postMetadata.validate()) {
       throw new Error("Invalid post metadata");
@@ -95,31 +98,37 @@ export class Post {
         post: postAccount,
         profile: profileAccount,
         user: userAccount,
+        sessionToken: sessionTokenAccount,
         authority: owner,
       });
   }
-
 
   public delete(
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    owner: anchor.web3.PublicKey) {
+    owner: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey | null = null,
+    refundReceiver: anchor.web3.PublicKey = owner) {
     return this.sdk.program.methods
       .deletePost()
       .accounts({
         post: postAccount,
         profile: profileAccount,
         user: userAccount,
+        sessionToken: sessionTokenAccount,
         authority: owner,
+        refundReceiver,
       });
   }
+  
   public async reply(
     replyToPostAccount: anchor.web3.PublicKey,
     metadataUri: String,
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
-    owner: anchor.web3.PublicKey
+    owner: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey | null = null
   ) {
     const metadata = await axios.get(metadataUri as string);
     const postMetadata = new PostMetadata(metadata.data);
@@ -134,6 +143,7 @@ export class Post {
         user: userAccount,
         authority: owner,
         replyTo: replyToPostAccount,
+        sessionToken: sessionTokenAccount,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const postPDA = pubKeys.post as anchor.web3.PublicKey;
@@ -155,7 +165,7 @@ export class Post {
           profile
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[]}>(query);
+    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
     return data.gum_0_1_0_decoded_post;
   }
 
@@ -171,7 +181,7 @@ export class Post {
           profile
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[]}>(query);
+    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
     return data.gum_0_1_0_decoded_post;
   }
 
@@ -185,7 +195,7 @@ export class Post {
           profile
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[]}>(query);
+    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
     return data.gum_0_1_0_decoded_post;
   }
 
@@ -201,7 +211,7 @@ export class Post {
           profile
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[]}>(query);
+    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
     return data.gum_0_1_0_decoded_post;
   }
 
@@ -216,7 +226,7 @@ export class Post {
           profile
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[]}>(query);
+    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
     return data.gum_0_1_0_decoded_post;
   }
 
@@ -232,7 +242,7 @@ export class Post {
         }
       }
     `;
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[]}>(query);
+    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
     const feed = await Promise.all(data.gum_0_1_0_decoded_post.map(async (post: GraphQLPost) => {
       const profileData = await this.sdk.profileMetadata.getProfileMetadataByProfile(new anchor.web3.PublicKey(post.profile));
       return {

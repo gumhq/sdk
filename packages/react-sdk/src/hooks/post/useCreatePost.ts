@@ -8,12 +8,12 @@ const useCreatePost = (sdk: SDK) => {
   const [createPostError, setCreatePostError] = useState<Error | null>(null);
 
   const create = useCallback(
-    async (metadataUri: String, profileAccount: PublicKey, userAccount: PublicKey, owner: PublicKey) => {
+    async (metadataUri: string, profileAccount: PublicKey, userAccount: PublicKey, owner: PublicKey, sessionAccount: PublicKey | null = null) => {
       setIsCreatingPost(true);
       setCreatePostError(null);
 
       try {
-        const instructionMethodBuilder = await createPostIxMethodBuilder(metadataUri, profileAccount, userAccount, owner);
+        const instructionMethodBuilder = await createPostIxMethodBuilder(metadataUri, profileAccount, userAccount, owner, sessionAccount);
         await instructionMethodBuilder?.rpc();
       } catch (err: any) {
         setCreatePostError(err);
@@ -23,11 +23,11 @@ const useCreatePost = (sdk: SDK) => {
     }, [sdk]);
 
   const createPostIxMethodBuilder = useCallback(
-    async (metadataUri: String, profileAccount: PublicKey, userAccount: PublicKey, owner: PublicKey) => {
+    async (metadataUri: string, profileAccount: PublicKey, userAccount: PublicKey, owner: PublicKey, sessionAccount: PublicKey | null = null) => {
       setCreatePostError(null);
 
       try {
-        const data = await sdk.post.create(metadataUri, profileAccount, userAccount, owner);
+        const data = await sdk.post.create(metadataUri, profileAccount, userAccount, owner, sessionAccount);
         setPostPDA(data.postPDA);
         return data.instructionMethodBuilder;
       } catch (err: any) {
