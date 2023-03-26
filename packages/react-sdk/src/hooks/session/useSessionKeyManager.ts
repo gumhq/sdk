@@ -17,7 +17,7 @@ export interface SessionWalletInterface {
   signMessage: ((message: Uint8Array) => Promise<Uint8Array>) | undefined;
   sendTransaction: (<T extends Transaction>(transaction: T) => Promise<string>) | undefined;
   signAndSendTransaction: (<T extends Transaction>(transactions: T | T[]) => Promise<string[]>) | undefined;
-  createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number) => Promise<{ sessionToken: any; encryptionKey: string; } | undefined>;
+  createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number) => Promise<{ sessionToken: string; publicKey: string; } | undefined>;
   revokeSession: () => Promise<void>;
   getSessionToken: () => Promise<string | null>;
 }
@@ -28,7 +28,8 @@ const ENCRYPTION_KEY_OBJECT_STORE = 'user_preferences';
 
 export function useSessionKeyManager(wallet: AnchorWallet, connection: Connection, cluster: Cluster | "localnet"): SessionWalletInterface {
   const keypairRef = useRef<Keypair | null>(null);
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const sessionTokenRef = useRef<string | null>(null);
+  const [, forceUpdate] = useState({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +42,10 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
 
   const loadKeypairFromDecryptedSecret = (decryptedKeypair: string) => {
     keypairRef.current = Keypair.fromSecretKey(new Uint8Array(Buffer.from(decryptedKeypair, 'base64')));
+  };
+
+  const triggerRerender = () => {
+    forceUpdate({});
   };
 
   useEffect(() => {
@@ -68,7 +73,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
 
   const signTransaction = async <T extends Transaction>(transaction: T): Promise<T> => {
     return withLoading(async () => {
-      if (!keypairRef.current || !sessionToken) {
+      if (!keypairRef.current || !sessionTokenRef.current) {
         throw new Error('Cannot sign transaction - keypair or session token not loaded. Please create a session first.');
       }
 
@@ -116,8 +121,8 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
   };
 
   const getSessionToken = async (): Promise<string | null> => {
-    if (sessionToken) {
-      return sessionToken;
+    if (sessionTokenRef.current) {
+      return sessionTokenRef.current;
     }
 
     try {
@@ -142,7 +147,8 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
 
         loadKeypairFromDecryptedSecret(decryptedKeypair);
 
-        setSessionToken(decryptedToken);
+        sessionTokenRef.current = decryptedToken;
+        triggerRerender();
 
         return decryptedToken;
       }
@@ -202,10 +208,11 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
         await setItemToIndexedDB(SESSION_OBJECT_STORE, { encryptedToken, encryptedKeypair, validUntilTimestamp: expiryTimestamp });
         await setItemToIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, { 'userPreferences': encryptionKey, validUntilTimestamp: expiryTimestamp });
 
-        setSessionToken(sessionTokenString);
+        sessionTokenRef.current = sessionTokenString;
+        triggerRerender();
         return {
-          sessionToken: sessionTokenString,
-          encryptionKey,
+          sessionToken: sessionTokenRef.current,
+          publicKey: sessionSignerPublicKey.toBase58(),
         };
       } catch (error: any) {
         console.error("Error creating session:", error);
@@ -217,15 +224,16 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
   const revokeSession = async () => {
     return withLoading(async () => {
       try {
-        if (!sessionToken) {
+        if (!sessionTokenRef.current) {
           return;
         }
-        const sessionTokenPublicKey = new PublicKey(sessionToken);
+        const sessionTokenPublicKey = new PublicKey(sessionTokenRef.current);
         const instructionMethodBuilder = await sdk.revoke(sessionTokenPublicKey, wallet.publicKey as PublicKey);
         await instructionMethodBuilder.rpc();
 
         await deleteSessionData();
-        setSessionToken(null);
+        sessionTokenRef.current = null;
+        triggerRerender();
         keypairRef.current = null;
       } catch (error: any) {
         console.error("Error revoking session:", error);
@@ -252,10 +260,10 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
   }
 
   return {
-    publicKey: sessionToken && keypairRef.current ? keypairRef.current.publicKey : null,
+    publicKey: sessionTokenRef.current && keypairRef.current ? keypairRef.current.publicKey : null,
     isLoading,
     error,
-    sessionToken,
+    sessionToken: sessionTokenRef.current,
     signTransaction,
     signAllTransactions,
     signMessage,
