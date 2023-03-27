@@ -5,7 +5,7 @@ import { BN } from "@project-serum/anchor";
 import gpl_session_idl from "./idl/gpl_session.json";
 import { GPLSESSION_PROGRAMS } from "./constants";
 
-export class SessionWallet {
+export class SessionTokenManager {
   readonly program: anchor.Program;
   readonly provider: anchor.AnchorProvider;
 

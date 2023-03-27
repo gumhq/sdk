@@ -46,4 +46,4 @@ export class SDK {
     public reaction = new Reaction(this);
 }
 
-export { SessionWallet } from "./sessionWallet";
+export { SessionTokenManager } from "./sessionTokenManager";
