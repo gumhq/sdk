@@ -157,8 +157,5 @@
       "name": "ValidityTooLong",
       "msg": "Requested validity is too long"
     }
-  ],
-  "metadata": {
-    "address": "2AfeS4zYgZoBK33xED7opF1gPxZMWjj8cAJiGqjtFnLH"
-  }
+  ]
 }
