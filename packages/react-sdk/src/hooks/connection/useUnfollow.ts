@@ -15,7 +15,7 @@ const useUnfollow = (sdk: SDK) => {
       toProfile: PublicKey,
       userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount: PublicKey | null = null,
+      sessionAccount?: PublicKey,
       refundReceiver: PublicKey = owner,
       signAndSendTransaction?: SignAndSendTransactionFn
     ) => {
@@ -62,7 +62,7 @@ const useUnfollow = (sdk: SDK) => {
       toProfile: PublicKey,
       userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount: PublicKey | null = null,
+      sessionAccount?: PublicKey,
       refundReceiver: PublicKey = owner
     ) => {
       try {

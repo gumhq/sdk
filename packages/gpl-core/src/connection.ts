@@ -24,7 +24,7 @@ export class Connection {
     toProfile: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount: anchor.web3.PublicKey | null = null,) {
+    sessionTokenAccount?: anchor.web3.PublicKey) {
     const instructionMethodBuilder = this.sdk.program.methods
       .createConnection()
       .accounts({
@@ -48,7 +48,7 @@ export class Connection {
     toProfile: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount: anchor.web3.PublicKey | null = null,
+    sessionTokenAccount?: anchor.web3.PublicKey,
     refundReceiver: anchor.web3.PublicKey = owner) {
     return this.sdk.program.methods
       .deleteConnection()

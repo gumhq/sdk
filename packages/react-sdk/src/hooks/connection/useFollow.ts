@@ -15,7 +15,7 @@ const useFollow = (sdk: SDK) => {
       toProfile: PublicKey,
       userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount: PublicKey | null = null,
+      sessionAccount?: PublicKey,
       signAndSendTransaction?: SignAndSendTransactionFn
     ) => {
       setConnectionLoading(true);
@@ -59,7 +59,7 @@ const useFollow = (sdk: SDK) => {
       toProfile: PublicKey,
       userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount: PublicKey | null = null
+      sessionAccount?: PublicKey
     ) => {
       try {
         const connection = await sdk.connection.create(

@@ -15,7 +15,7 @@ const useCreatePost = (sdk: SDK) => {
       profileAccount: PublicKey,
       userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount: PublicKey | null = null,
+      sessionAccount?: PublicKey,
       signAndSendTransaction?: SignAndSendTransactionFn
     ) => {
       setIsCreatingPost(true);
@@ -47,7 +47,7 @@ const useCreatePost = (sdk: SDK) => {
       profileAccount: PublicKey,
       userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount: PublicKey | null = null
+      sessionAccount?: PublicKey
     ) => {
       setCreatePostError(null);
 

@@ -17,7 +17,7 @@ const useReaction = (sdk: SDK, ) => {
       toPostAccount: PublicKey,
       userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount: PublicKey | null = null,
+      sessionAccount?: PublicKey,
       signAndSendTransaction?: SignAndSendTransactionFn
     ) => {
       setIsReacting(true);
@@ -54,7 +54,7 @@ const useReaction = (sdk: SDK, ) => {
       toPostAccount: PublicKey,
       userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount: PublicKey | null = null
+      sessionAccount?: PublicKey
     ) => {
       try {
         const data = await sdk.reaction.create(fromProfile, toPostAccount, reactionType, userAccount, owner, sessionAccount);
@@ -75,7 +75,7 @@ const useReaction = (sdk: SDK, ) => {
       toPostAccount: PublicKey,
       userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount: PublicKey | null = null,
+      sessionAccount?: PublicKey,
       refundReceiver: PublicKey = owner,
       signAndSendTransaction?: SignAndSendTransactionFn
     ) => {
@@ -112,7 +112,7 @@ const useReaction = (sdk: SDK, ) => {
     toPostAccount: PublicKey,
     userAccount: PublicKey,
     owner: PublicKey,
-    sessionAccount: PublicKey | null = null,
+    sessionAccount?: PublicKey,
     refundReceiver: PublicKey = owner,
   ) => {
     setCreateReactionError(null);
