@@ -1,6 +1,8 @@
 import { SDK } from "@gumhq/sdk";
 import { useState, useCallback } from "react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
+
+type SignAndSendTransactionFn = <T extends Transaction>(transactions: T | T[]) => Promise<string[]>;
 
 const useUnfollow = (sdk: SDK) => {
   const [connectionLoading, setConnectionLoading] = useState(false);
@@ -12,20 +14,39 @@ const useUnfollow = (sdk: SDK) => {
       fromProfile: PublicKey,
       toProfile: PublicKey,
       userAccount: PublicKey,
-      owner: PublicKey
+      owner: PublicKey,
+      sessionAccount?: PublicKey,
+      refundReceiver: PublicKey = owner,
+      signAndSendTransaction?: SignAndSendTransactionFn
     ) => {
       setConnectionLoading(true);
       setConnectionError(null);
 
       try {
-        const instructionMethodBuilder = await deleteConnectionIxMethodBuilder(
+        const ixMethodBuilder = await deleteConnectionIxMethodBuilder(
           connectionAccount,
           fromProfile,
           toProfile,
           userAccount,
-          owner
+          owner,
+          sessionAccount,
+          refundReceiver
         );
-        await instructionMethodBuilder?.rpc();
+        
+        if (ixMethodBuilder) {
+          if (signAndSendTransaction) {
+            const tx = await ixMethodBuilder.transaction();
+            if (tx) {
+              return await signAndSendTransaction(tx);
+            }
+          } else {
+            return await ixMethodBuilder.rpc();
+          }
+        } else {
+          const error = new Error('ixMethodBuilder is undefined');
+          setConnectionError(error);
+          return Promise.reject(error);
+        }
       } catch (err: any) {
         setConnectionError(err);
       } finally {
@@ -40,19 +61,21 @@ const useUnfollow = (sdk: SDK) => {
       fromProfile: PublicKey,
       toProfile: PublicKey,
       userAccount: PublicKey,
-      owner: PublicKey
+      owner: PublicKey,
+      sessionAccount?: PublicKey,
+      refundReceiver: PublicKey = owner
     ) => {
-      setConnectionError(null);
-
       try {
-        const data = sdk.connection.delete(
+        const connection = sdk.connection.delete(
           connectionAccount,
           fromProfile,
           toProfile,
           userAccount,
-          owner
+          owner,
+          sessionAccount,
+          refundReceiver
         );
-        return data;
+        return connection;
       } catch (err: any) {
         setConnectionError(err);
         return null;

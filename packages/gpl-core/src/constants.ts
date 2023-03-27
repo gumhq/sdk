@@ -9,9 +9,18 @@ export const GPLCORE_PROGRAMS = {
   ),
   localnet: new anchor.web3.PublicKey(
     "CDDMdCAWB5AXgvEy7XJRggAu37QPG1b9aJXndZoPUkkm"
+  )
+};
+
+export const GPLSESSION_PROGRAMS = {
+  "mainnet-beta": new anchor.web3.PublicKey(
+    "3ao63wcSRNa76bncC2M3KupNtXBFiDyNbgK52VG7dLaE"
   ),
-  testnet: new anchor.web3.PublicKey(
-    "9XZ9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z"
+  devnet: new anchor.web3.PublicKey(
+    "3ao63wcSRNa76bncC2M3KupNtXBFiDyNbgK52VG7dLaE"
+  ),
+  localnet: new anchor.web3.PublicKey(
+    "3ao63wcSRNa76bncC2M3KupNtXBFiDyNbgK52VG7dLaE"
   ),
 };
 

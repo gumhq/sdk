@@ -7,8 +7,8 @@ import { Post } from "./post";
 import { Profile } from "./profile";
 import { Reaction } from "./reaction";
 import { User } from "./user";
-import gpl_core_idl from "./idl/gpl_core.json";
 import { ProfileMetadata } from "./profileMetadata";
+import gpl_core_idl from "./idl/gpl_core.json";
 import { GraphQLClient } from "graphql-request";
 
 export { GPLCORE_PROGRAMS } from "./constants";
@@ -45,3 +45,5 @@ export class SDK {
     public post = new Post(this);
     public reaction = new Reaction(this);
 }
+
+export { SessionTokenManager } from "./sessionTokenManager";

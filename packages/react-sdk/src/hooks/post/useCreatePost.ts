@@ -1,6 +1,8 @@
 import { SDK } from "@gumhq/sdk";
 import { useState, useCallback } from "react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
+
+type SignAndSendTransactionFn = <T extends Transaction>(transactions: T | T[]) => Promise<string[]>;
 
 const useCreatePost = (sdk: SDK) => {
   const [postPDA, setPostPDA] = useState<PublicKey | null>(null);
@@ -8,33 +10,57 @@ const useCreatePost = (sdk: SDK) => {
   const [createPostError, setCreatePostError] = useState<Error | null>(null);
 
   const create = useCallback(
-    async (metadataUri: String, profileAccount: PublicKey, userAccount: PublicKey, owner: PublicKey) => {
+    async (
+      metadataUri: string,
+      profileAccount: PublicKey,
+      userAccount: PublicKey,
+      owner: PublicKey,
+      sessionAccount?: PublicKey,
+      signAndSendTransaction?: SignAndSendTransactionFn
+    ) => {
       setIsCreatingPost(true);
       setCreatePostError(null);
 
       try {
-        const instructionMethodBuilder = await createPostIxMethodBuilder(metadataUri, profileAccount, userAccount, owner);
-        await instructionMethodBuilder?.rpc();
+        const ixMethodBuilder = await createPostIxMethodBuilder(metadataUri, profileAccount, userAccount, owner, sessionAccount);
+        const tx = await ixMethodBuilder?.transaction();
+
+        if (signAndSendTransaction) {
+          if (tx) {
+            return await signAndSendTransaction(tx);
+          }
+        } else {
+          return await ixMethodBuilder?.rpc();
+        }
       } catch (err: any) {
         setCreatePostError(err);
       } finally {
         setIsCreatingPost(false);
       }
-    }, [sdk]);
+    },
+    [sdk]
+  );
 
   const createPostIxMethodBuilder = useCallback(
-    async (metadataUri: String, profileAccount: PublicKey, userAccount: PublicKey, owner: PublicKey) => {
+    async (
+      metadataUri: string,
+      profileAccount: PublicKey,
+      userAccount: PublicKey,
+      owner: PublicKey,
+      sessionAccount?: PublicKey
+    ) => {
       setCreatePostError(null);
 
       try {
-        const data = await sdk.post.create(metadataUri, profileAccount, userAccount, owner);
+        const data = await sdk.post.create(metadataUri, profileAccount, userAccount, owner, sessionAccount);
         setPostPDA(data.postPDA);
         return data.instructionMethodBuilder;
       } catch (err: any) {
         setCreatePostError(err);
         return null;
       }
-    }, [sdk]
+    },
+    [sdk]
   );
 
   return {

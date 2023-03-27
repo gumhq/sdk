@@ -8,7 +8,6 @@
     "url": "https://github.com/gumhq/sdk.git",
     "directory": "packages/react-sdk"
   },
-  "type": "module",
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
@@ -20,13 +19,20 @@
   "files": [
     "lib"
   ],
+  "browser": {
+    "fs": false,
+    "net": false,
+    "tls": false
+  },
   "dependencies": {
     "@gumhq/sdk": "^1.0.14",
     "@solana/wallet-adapter-react": "^0.15.26",
-    "@types/node": "^16.18.12",
+    "crypto-js": "^4.1.1",
     "typescript": "^4.9.5"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.1.1",
+    "@types/node": "^16.18.12",
     "@types/react": "^18.0.27",
     "tsup": "^6.6.3"
   },
@@ -36,8 +42,8 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "npm run clean && tsup",
-    "start": "tsup --watch",
-    "dev": "DEV=true tsup",
+    "dev": "tsup --watch",
+    "start": "tsup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
