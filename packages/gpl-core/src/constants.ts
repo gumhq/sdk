@@ -13,6 +13,9 @@ export const GPLCORE_PROGRAMS = {
 };
 
 export const GPLSESSION_PROGRAMS = {
+  "mainnet-beta": new anchor.web3.PublicKey(
+    "3ao63wcSRNa76bncC2M3KupNtXBFiDyNbgK52VG7dLaE"
+  ),
   devnet: new anchor.web3.PublicKey(
     "3ao63wcSRNa76bncC2M3KupNtXBFiDyNbgK52VG7dLaE"
   ),
