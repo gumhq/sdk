@@ -9,21 +9,15 @@ export const GPLCORE_PROGRAMS = {
   ),
   localnet: new anchor.web3.PublicKey(
     "CDDMdCAWB5AXgvEy7XJRggAu37QPG1b9aJXndZoPUkkm"
-  ),
-  testnet: new anchor.web3.PublicKey(
-    "9XZ9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z9Y9Z"
-  ),
+  )
 };
 
 export const GPLSESSION_PROGRAMS = {
-  "mainnet-beta": new anchor.web3.PublicKey(
-    "2AfeS4zYgZoBK33xED7opF1gPxZMWjj8cAJiGqjtFnLH"
-  ),
   devnet: new anchor.web3.PublicKey(
-    "2AfeS4zYgZoBK33xED7opF1gPxZMWjj8cAJiGqjtFnLH"
+    "3ao63wcSRNa76bncC2M3KupNtXBFiDyNbgK52VG7dLaE"
   ),
   localnet: new anchor.web3.PublicKey(
-    "2AfeS4zYgZoBK33xED7opF1gPxZMWjj8cAJiGqjtFnLH"
+    "3ao63wcSRNa76bncC2M3KupNtXBFiDyNbgK52VG7dLaE"
   ),
 };
 
