@@ -2,7 +2,7 @@ import { AnchorWallet } from '@solana/wallet-adapter-react';
 import { Keypair, PublicKey, Transaction, Cluster, Connection } from '@solana/web3.js';
 import { useEffect, useRef, useState } from 'react';
 import { generateEncryptionKey, encrypt, decrypt } from '../../utils/crypto';
-import { SessionWallet } from '@gumhq/sdk';
+import { SessionTokenManager } from '@gumhq/sdk';
 import * as nacl from 'tweetnacl';
 import { BN } from "@project-serum/anchor";
 import { deleteItemFromIndexedDB, getItemFromIndexedDB, setItemToIndexedDB } from 'src/utils/indexedDB';
@@ -33,7 +33,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sdk = new SessionWallet(wallet, connection, cluster)
+  const sdk = new SessionTokenManager(wallet, connection, cluster)
 
   // functions for keypair management
   const generateKeypair = () => {
