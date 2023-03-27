@@ -15,7 +15,9 @@ export {
 } from "./hooks";
 
 export {
+  useGumContext,
   useSessionWallet,
+  GumProvider,
   SessionWalletProvider,
 } from "./providers";
 
