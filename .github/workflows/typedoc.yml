@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [16.x, 18.4.0]
 
     steps:
       - name: Checkout repository
@@ -29,16 +29,16 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Bootstrap Lerna
-        run: npx lerna bootstrap
+        run: yarn lerna bootstrap
 
       - name: Build packages
-        run: npx lerna run build
+        run: yarn lerna run build
 
       - name: Generate TypeDoc for @gumhq/sdk
-        run: cd packages/gpl-core && npm run build:docs
+        run: yarn workspace @gumhq/sdk run build:docs
 
       - name: Generate TypeDoc for @gumhq/react-sdk
-        run: cd packages/react-sdk && npm run build:docs
+        run: yarn workspace @gumhq/react-sdk run build:docs
 
       - name: Deploy documentation to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
