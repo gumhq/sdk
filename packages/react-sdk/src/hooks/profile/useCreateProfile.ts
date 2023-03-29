@@ -4,7 +4,6 @@ import { PublicKey } from "@solana/web3.js";
 import { Namespace } from "@gumhq/sdk/lib/profile";
 
 const useCreateProfile = (sdk: SDK) => {
-  const [profilePDA, setProfilePDA] = useState<PublicKey | null>(null);
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const [createProfileError, setCreateProfileError] = useState<Error | null>(null);
 
@@ -13,9 +12,9 @@ const useCreateProfile = (sdk: SDK) => {
       setIsCreatingProfile(true);
       setCreateProfileError(null);
       try {
-
         const ixMethodBuilder = await createProfileIxMethodBuilder(metadataUri, namespace, userAccount, owner);
-        await ixMethodBuilder?.rpc();
+        await ixMethodBuilder?.instructionMethodBuilder.rpc();
+        return ixMethodBuilder?.profilePDA;
       } catch (err: any) {
         setCreateProfileError(err);
       } finally {
@@ -29,7 +28,7 @@ const useCreateProfile = (sdk: SDK) => {
       setCreateProfileError(null);
       try {
         const profilePDA = await sdk.profile.getOrCreate(metadataUri, userAccount, namespace, owner);
-        setProfilePDA(profilePDA);
+        return profilePDA;
       }
       catch (err: any) {
         setCreateProfileError(err);
@@ -52,8 +51,7 @@ const useCreateProfile = (sdk: SDK) => {
             [profileMetadataIx]),
           profilePDA: createProfile.profilePDA,
         }
-        setProfilePDA(data.profilePDA);
-        return data.instructionMethodBuilder;
+        return data;
       } catch (err: any) {
         setCreateProfileError(err);
         return null;
@@ -64,7 +62,6 @@ const useCreateProfile = (sdk: SDK) => {
     create,
     getOrCreate,
     createProfileIxMethodBuilder,
-    profilePDA,
     isCreatingProfile,
     createProfileError
   };
