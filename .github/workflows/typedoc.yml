@@ -1,0 +1,47 @@
+name: TypeDoc
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bootstrap Lerna
+        run: npx lerna bootstrap
+
+      - name: Build packages
+        run: npx lerna run build
+
+      - name: Generate TypeDoc for @gumhq/sdk
+        run: cd packages/gpl-core && npm run build:docs
+
+      - name: Generate TypeDoc for @gumhq/react-sdk
+        run: cd packages/react-sdk && npm run build:docs
+
+      - name: Deploy documentation to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs

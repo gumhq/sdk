@@ -7,6 +7,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "npm run clean && tsc && cp -r src/idl/*json lib/",
+    "build:docs": "typedoc",
     "dev": "npm run clean && tsc && cp -r src/idl/*json lib/ && tsc -w",
     "test": "ts-mocha -p tsconfig.json tests/**/*.spec.ts"
   },
@@ -18,6 +19,7 @@
     "mocha": "^10.1.0",
     "ts-mocha": "^10.0.0",
     "ts-node": "^8.6.2",
+    "typedoc": "^0.23.28",
     "typescript": "^4.9.4"
   },
   "dependencies": {
