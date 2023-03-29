@@ -1,7 +1,7 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
-import { PostMetadata } from "./postmetadata";
+import { PostMetadata } from "./postMetadata";
 import axios from "axios";
 import { gql } from "graphql-request";
 import { Namespace } from "./profile";
@@ -54,7 +54,7 @@ export class Post {
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount?: anchor.web3.PublicKey) {
+    sessionTokenAccount: anchor.web3.PublicKey | null = null) {
     const metadata = await axios.get(metadataUri);
     const postMetadata = new PostMetadata(metadata.data);
     if (!postMetadata.validate()) {
@@ -84,7 +84,7 @@ export class Post {
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount?: anchor.web3.PublicKey) {
+    sessionTokenAccount: anchor.web3.PublicKey | null = null) {
 
     const metadata = await axios.get(newMetadataUri);
     const postMetadata = new PostMetadata(metadata.data);
@@ -108,7 +108,7 @@ export class Post {
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount?: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey | null = null,
     refundReceiver: anchor.web3.PublicKey = owner) {
     return this.sdk.program.methods
       .deletePost()
@@ -128,7 +128,7 @@ export class Post {
     profileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount?: anchor.web3.PublicKey
+    sessionTokenAccount: anchor.web3.PublicKey | null = null
   ) {
     const metadata = await axios.get(metadataUri as string);
     const postMetadata = new PostMetadata(metadata.data);

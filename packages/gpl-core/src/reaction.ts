@@ -28,7 +28,7 @@ export class Reaction {
     reactionType: ReactionType,
     userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount?: anchor.web3.PublicKey) {
+    sessionTokenAccount: anchor.web3.PublicKey | null = null) {
     const instructionMethodBuilder = this.sdk.program.methods
       .createReaction(reactionType)
       .accounts({
@@ -52,7 +52,7 @@ export class Reaction {
     fromProfileAccount: anchor.web3.PublicKey,
     userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount?: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey | null = null,
     refundReceiver: anchor.web3.PublicKey = owner) {
     return this.sdk.program.methods
       .deleteReaction()
