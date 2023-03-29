@@ -3,7 +3,6 @@ import { useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
 
 const useCreateUser = (sdk: SDK) => {
-  const [userPDA, setUserPDA] = useState<PublicKey | null>(null);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [createUserError, setCreateUserError] = useState<Error | null>(null);
 
@@ -14,7 +13,8 @@ const useCreateUser = (sdk: SDK) => {
 
       try {
         const data = await createUserIxMethodBuilder(owner);
-        await data?.rpc();
+        await data?.instructionMethodBuilder.rpc();
+        return data?.userPDA;
       } catch (err: any) {
         setCreateUserError(err);
       } finally {
@@ -31,7 +31,7 @@ const useCreateUser = (sdk: SDK) => {
 
       try {
         const userPDA = await sdk.user.getOrCreate(owner);
-        setUserPDA(userPDA);
+        return userPDA;
       } catch (err: any) {
         setCreateUserError(err);
       } finally {
@@ -46,8 +46,12 @@ const useCreateUser = (sdk: SDK) => {
 
       try {
         const user = await sdk.user.create(owner);
-        setUserPDA(user?.userPDA);
-        return user.instructionMethodBuilder;
+        
+        const data = {
+          instructionMethodBuilder: user.instructionMethodBuilder,
+          userPDA: user.userPDA,
+        }
+        return data;
       } catch (err: any) {
         setCreateUserError(err);
         return null;
@@ -60,7 +64,6 @@ const useCreateUser = (sdk: SDK) => {
     create,
     getOrCreate,
     createUserIxMethodBuilder,
-    userPDA,
     isCreatingUser,
     createUserError
   };
