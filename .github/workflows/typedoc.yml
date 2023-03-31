@@ -40,8 +40,16 @@ jobs:
       - name: Generate TypeDoc for @gumhq/react-sdk
         run: yarn workspace @gumhq/react-sdk run build:docs
 
+      - name: Copy documentation to root docs folder
+        run: |
+          mkdir -p docs
+          mkdir -p docs/react
+          cp -r packages/gpl-core/docs/* docs
+          cp -r packages/react-sdk/docs/* docs/react
+
       - name: Deploy documentation to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GH_PAGES_TOKEN }}
           publish_dir: ./docs
+          publish_branch: gh-pages
