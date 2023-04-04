@@ -1756,24 +1756,12 @@ export type GplCore = {
   ],
   "types": [
     {
-      "name": "GumError",
+      "name": "PostError",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "PostError"
-          },
-          {
-            "name": "ProfileError"
-          },
-          {
-            "name": "UserError"
-          },
-          {
-            "name": "ReactionError"
-          },
-          {
-            "name": "ConnectionError"
+            "name": "URITooLong"
           }
         ]
       }
@@ -2343,7 +2331,7 @@ export type GplCore = {
   "errors": [
     {
       "code": 6000,
-      "name": "URITooLong"
+      "name": "UnauthorizedSigner"
     }
   ]
 };
@@ -4106,24 +4094,12 @@ export const IDL: GplCore = {
   ],
   "types": [
     {
-      "name": "GumError",
+      "name": "PostError",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "PostError"
-          },
-          {
-            "name": "ProfileError"
-          },
-          {
-            "name": "UserError"
-          },
-          {
-            "name": "ReactionError"
-          },
-          {
-            "name": "ConnectionError"
+            "name": "URITooLong"
           }
         ]
       }
@@ -4693,7 +4669,7 @@ export const IDL: GplCore = {
   "errors": [
     {
       "code": 6000,
-      "name": "URITooLong"
+      "name": "UnauthorizedSigner"
     }
   ]
 };

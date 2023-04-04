@@ -1756,24 +1756,12 @@
   ],
   "types": [
     {
-      "name": "GumError",
+      "name": "PostError",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "PostError"
-          },
-          {
-            "name": "ProfileError"
-          },
-          {
-            "name": "UserError"
-          },
-          {
-            "name": "ReactionError"
-          },
-          {
-            "name": "ConnectionError"
+            "name": "URITooLong"
           }
         ]
       }
@@ -2343,7 +2331,7 @@
   "errors": [
     {
       "code": 6000,
-      "name": "URITooLong"
+      "name": "UnauthorizedSigner"
     }
   ]
 }

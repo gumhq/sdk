@@ -156,6 +156,16 @@
       "code": 6000,
       "name": "ValidityTooLong",
       "msg": "Requested validity is too long"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidToken",
+      "msg": "Invalid session token"
+    },
+    {
+      "code": 6002,
+      "name": "NoToken",
+      "msg": "No session token provided"
     }
   ]
 }
