@@ -21,12 +21,12 @@ export const openIndexedDB = async () => {
   });
 };
 
-export const getItemFromIndexedDB = async (storeName: string, key?: IDBValidKey) => {
+export const getItemFromIndexedDB = async (storeName: string, key: IDBValidKey) => {
   const db = await openIndexedDB();
   return new Promise<any>((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readonly');
     const store = transaction.objectStore(storeName);
-    const request = key ? store.get(key) : store.get(1);
+    const request = store.get(key);
     request.onsuccess = (event) => {
       resolve(request.result);
     };
@@ -36,14 +36,12 @@ export const getItemFromIndexedDB = async (storeName: string, key?: IDBValidKey)
   });
 };
 
-
-
-export const setItemToIndexedDB = async <T>(storeName: string, data: T, key?: IDBValidKey) => {
+export const setItemToIndexedDB = async <T>(storeName: string, data: T, key: IDBValidKey) => {
   const db = await openIndexedDB();
   return new Promise<void>((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readwrite');
     const store = transaction.objectStore(storeName);
-    const request = key ? store.put(data, key) : store.put(data, 1);
+    const request = store.put(data, key);
     request.onsuccess = (event) => {
       resolve();
     };
@@ -54,10 +52,6 @@ export const setItemToIndexedDB = async <T>(storeName: string, data: T, key?: ID
 };
 
 export const deleteItemFromIndexedDB = async (storeName: string, key: IDBValidKey) => {
-  if (!key) {
-    throw new Error("Key must be provided for deleting item from IndexedDB.");
-  }
-
   const db = await openIndexedDB();
   return new Promise<void>((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readwrite');
