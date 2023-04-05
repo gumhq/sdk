@@ -8,11 +8,35 @@ export type GplSession = {
         {
           "name": "sessionToken",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "session_token"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "target_program"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "session_signer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          }
         },
         {
           "name": "sessionSigner",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
@@ -55,7 +79,37 @@ export type GplSession = {
         {
           "name": "sessionToken",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "session_token"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "SessionToken",
+                "path": "session_token.target_program"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "SessionToken",
+                "path": "session_token.session_signer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "SessionToken",
+                "path": "session_token.authority"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -102,6 +156,16 @@ export type GplSession = {
       "code": 6000,
       "name": "ValidityTooLong",
       "msg": "Requested validity is too long"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidToken",
+      "msg": "Invalid session token"
+    },
+    {
+      "code": 6002,
+      "name": "NoToken",
+      "msg": "No session token provided"
     }
   ]
 };
@@ -116,11 +180,35 @@ export const IDL: GplSession = {
         {
           "name": "sessionToken",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "session_token"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "target_program"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "session_signer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          }
         },
         {
           "name": "sessionSigner",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
@@ -163,7 +251,37 @@ export const IDL: GplSession = {
         {
           "name": "sessionToken",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "session_token"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "SessionToken",
+                "path": "session_token.target_program"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "SessionToken",
+                "path": "session_token.session_signer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "SessionToken",
+                "path": "session_token.authority"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -210,6 +328,16 @@ export const IDL: GplSession = {
       "code": 6000,
       "name": "ValidityTooLong",
       "msg": "Requested validity is too long"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidToken",
+      "msg": "Invalid session token"
+    },
+    {
+      "code": 6002,
+      "name": "NoToken",
+      "msg": "No session token provided"
     }
   ]
 };

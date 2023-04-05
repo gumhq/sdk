@@ -18,12 +18,13 @@ export interface SessionWalletInterface {
   sendTransaction: (<T extends Transaction>(transaction: T) => Promise<string>) | undefined;
   signAndSendTransaction: (<T extends Transaction>(transactions: T | T[]) => Promise<string[]>) | undefined;
   createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number) => Promise<{ sessionToken: string; publicKey: string; } | undefined>;
-  revokeSession: () => Promise<void>;
+  revokeSession: () => Promise<string | null>;
   getSessionToken: () => Promise<string | null>;
 }
 
 // Constants
 const SESSION_OBJECT_STORE = 'sessions';
+const WALLET_PUBKEY_TO_SESSION_STORE = 'walletPublicKeyToSessionData';
 const ENCRYPTION_KEY_OBJECT_STORE = 'user_preferences';
 
 export function useSessionKeyManager(wallet: AnchorWallet, connection: Connection, cluster: Cluster | "localnet"): SessionWalletInterface {
@@ -53,15 +54,38 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
       return;
     }
 
-    getSessionToken();
-  }, [wallet]);
+    getSessionToken()
+      .then((token) => {
+        if (!token) {
+          resetSessionData();
+        }
+      })
+      .catch(() => {
+        resetSessionData();
+      });
+  }, [wallet, wallet?.publicKey, cluster]);
 
   const deleteSessionData = async () => {
-    await deleteItemFromIndexedDB(ENCRYPTION_KEY_OBJECT_STORE);
-    await deleteItemFromIndexedDB(SESSION_OBJECT_STORE);
+    try {
+      const walletPublicKey = wallet.publicKey.toBase58();
+      const sessionKey = await getItemFromIndexedDB(WALLET_PUBKEY_TO_SESSION_STORE, walletPublicKey);
+
+      if (sessionKey) {
+        console.log("Deleting session data from IndexedDB");
+        console.log("Session key:", sessionKey);
+        await deleteItemFromIndexedDB(SESSION_OBJECT_STORE, sessionKey);
+        await deleteItemFromIndexedDB(WALLET_PUBKEY_TO_SESSION_STORE, walletPublicKey);
+      }
+
+      await deleteItemFromIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, walletPublicKey);
+    } catch (error: any) {
+      console.error("Error deleting session data:", error);
+      setError(error);
+    }
   };
 
   const withLoading = async (asyncFunction: () => Promise<any>) => {
+    setError(null);
     setIsLoading(true);
     try {
       const result = await asyncFunction();
@@ -121,19 +145,25 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
   };
 
   const getSessionToken = async (): Promise<string | null> => {
-    if (sessionTokenRef.current) {
-      return sessionTokenRef.current;
-    }
-
     try {
-      const [sessionData, encryptionKeyData] = await Promise.all([
-        getItemFromIndexedDB(SESSION_OBJECT_STORE),
-        getItemFromIndexedDB(ENCRYPTION_KEY_OBJECT_STORE),
-      ]);
+      const sessionKey = await getItemFromIndexedDB(WALLET_PUBKEY_TO_SESSION_STORE, wallet.publicKey.toString());
+      
+      if (!sessionKey) {
+        resetSessionData();
+        return null;
+      }
 
-      if (sessionData && encryptionKeyData) {
-        const { encryptedToken, encryptedKeypair, validUntilTimestamp } = sessionData;
-        const { userPreferences: storedEncryptionKey, validUntilTimestamp: encryptionKeyExpiry } = encryptionKeyData;
+      const encryptedSessionData = await getItemFromIndexedDB(SESSION_OBJECT_STORE, sessionKey);
+      const encryptionKey = await getItemFromIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, wallet.publicKey.toString());
+
+      if (!encryptedSessionData || !encryptionKey) {
+        resetSessionData();
+        return null;
+      }
+
+      if (encryptedSessionData && encryptionKey) {
+        const { encryptedToken, encryptedKeypair, validUntilTimestamp } = encryptedSessionData;
+        const { userPreferences: storedEncryptionKey, validUntilTimestamp: encryptionKeyExpiry } = encryptionKey;
 
         const currentTimestamp = Math.ceil(Date.now() / 1000);
 
@@ -160,7 +190,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
     return null;
   };
 
-  const createSession = async (targetProgramPublicKey: PublicKey, topUp = false, expiryInMinutes: number = 60) => {
+  const createSession = async (targetProgramPublicKey: PublicKey, topUp = false, expiryInMinutes = 60) => {
     return withLoading(async () => {
       try {
         
@@ -173,7 +203,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
           generateKeypair();
         }
 
-        // default expiry is 60 minutes 
+        // default expiry is 60 minutes (1 hour)
         const expiryTimestamp = Math.ceil((Date.now() + expiryInMinutes * 60 * 1000) / 1000);
 
         const validUntilBN: BN | null = new BN(expiryTimestamp);
@@ -205,8 +235,20 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
         const encryptedToken = encrypt(sessionTokenString, encryptionKey);
         const encryptedKeypair = encrypt(keypairSecretBase64String, encryptionKey);
 
-        await setItemToIndexedDB(SESSION_OBJECT_STORE, { encryptedToken, encryptedKeypair, validUntilTimestamp: expiryTimestamp });
-        await setItemToIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, { 'userPreferences': encryptionKey, validUntilTimestamp: expiryTimestamp });
+        const encryptedSessionData = {
+          encryptedToken,
+          encryptedKeypair,
+          validUntilTimestamp: expiryTimestamp,
+        };
+
+        // Save the encrypted session data in the SESSION_OBJECT_STORE with sessionToken as key
+        await setItemToIndexedDB(SESSION_OBJECT_STORE, encryptedSessionData, sessionTokenString);
+
+        // Save the wallet public key to sessionToken mapping in WALLET_PUBKEY_TO_SESSION_STORE
+        await setItemToIndexedDB(WALLET_PUBKEY_TO_SESSION_STORE, sessionTokenString, wallet.publicKey.toBase58());
+
+        // Save the encryption key in the ENCRYPTION_KEY_OBJECT_STORE with wallet public key as key
+        await setItemToIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, { 'userPreferences': encryptionKey, validUntilTimestamp: expiryTimestamp }, wallet.publicKey.toBase58());
 
         sessionTokenRef.current = sessionTokenString;
         triggerRerender();
@@ -221,6 +263,12 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
     });
   };
 
+  const resetSessionData = () => {
+    keypairRef.current = null;
+    sessionTokenRef.current = null;
+    triggerRerender();
+  };
+
   const revokeSession = async () => {
     return withLoading(async () => {
       try {
@@ -229,15 +277,20 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
         }
         const sessionTokenPublicKey = new PublicKey(sessionTokenRef.current);
         const instructionMethodBuilder = await sdk.revoke(sessionTokenPublicKey, wallet.publicKey as PublicKey);
-        await instructionMethodBuilder.rpc();
+        const txId = await instructionMethodBuilder.rpc();
 
-        await deleteSessionData();
-        sessionTokenRef.current = null;
-        triggerRerender();
-        keypairRef.current = null;
+        // Delete session data for the wallet
+        const walletPublicKey = wallet.publicKey.toBase58();
+        await deleteItemFromIndexedDB(SESSION_OBJECT_STORE, sessionTokenRef.current);
+        await deleteItemFromIndexedDB(ENCRYPTION_KEY_OBJECT_STORE, walletPublicKey);
+        await deleteItemFromIndexedDB(WALLET_PUBKEY_TO_SESSION_STORE, walletPublicKey);
+
+        resetSessionData();
+        return txId;
       } catch (error: any) {
         console.error("Error revoking session:", error);
         setError(error);
+        return null;
       }
     });
   };
@@ -254,7 +307,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
       signAndSendTransaction: undefined,
       getSessionToken: async () => null,
       createSession: async () => undefined,
-      revokeSession: async () => undefined,
+      revokeSession: async () => null,
       error,
     };
   }
