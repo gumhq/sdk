@@ -1,5 +1,6 @@
 const DB_NAME = 'session_data';
 const SESSION_OBJECT_STORE = 'sessions';
+const WALLET_PUBKEY_TO_SESSION_STORE = 'walletPublicKeyToSessionData';
 const ENCRYPTION_KEY_OBJECT_STORE = 'user_preferences';
 
 export const openIndexedDB = async () => {
@@ -9,6 +10,7 @@ export const openIndexedDB = async () => {
       const db = request.result;
       db.createObjectStore(SESSION_OBJECT_STORE);
       db.createObjectStore(ENCRYPTION_KEY_OBJECT_STORE);
+      db.createObjectStore(WALLET_PUBKEY_TO_SESSION_STORE);
     };
     request.onsuccess = (event) => {
       resolve(request.result);
@@ -19,12 +21,12 @@ export const openIndexedDB = async () => {
   });
 };
 
-export const getItemFromIndexedDB = async (storeName: string) => {
+export const getItemFromIndexedDB = async (storeName: string, key?: IDBValidKey) => {
   const db = await openIndexedDB();
   return new Promise<any>((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readonly');
     const store = transaction.objectStore(storeName);
-    const request = store.get(1);
+    const request = key ? store.get(key) : store.get(1);
     request.onsuccess = (event) => {
       resolve(request.result);
     };
@@ -36,12 +38,12 @@ export const getItemFromIndexedDB = async (storeName: string) => {
 
 
 
-export const setItemToIndexedDB = async (storeName: string, data: any) => {
+export const setItemToIndexedDB = async <T>(storeName: string, data: T, key?: IDBValidKey) => {
   const db = await openIndexedDB();
   return new Promise<void>((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readwrite');
     const store = transaction.objectStore(storeName);
-    const request = store.put(data, 1);
+    const request = key ? store.put(data, key) : store.put(data, 1);
     request.onsuccess = (event) => {
       resolve();
     };
@@ -51,12 +53,17 @@ export const setItemToIndexedDB = async (storeName: string, data: any) => {
   });
 };
 
-export const deleteItemFromIndexedDB = async (storeName: string) => {
+export const deleteItemFromIndexedDB = async (storeName: string, key: IDBValidKey) => {
+  if (!key) {
+    throw new Error("Key must be provided for deleting item from IndexedDB.");
+  }
+
   const db = await openIndexedDB();
   return new Promise<void>((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readwrite');
     const store = transaction.objectStore(storeName);
-    const request = store.delete(1);
+    const request = store.delete(key);
+
     request.onsuccess = (event) => {
       resolve();
     };
