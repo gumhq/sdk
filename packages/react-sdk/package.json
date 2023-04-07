@@ -25,6 +25,7 @@
     "tls": false
   },
   "dependencies": {
+    "@bundlr-network/client": "^0.10.5",
     "@gumhq/sdk": "^2.0.2",
     "@solana/wallet-adapter-react": "^0.15.26",
     "crypto-js": "^4.1.1",
