@@ -25,5 +25,5 @@ export const GPLSESSION_PROGRAMS = {
 };
 
 export const GRAPHQL_ENDPOINTS = {
-  devnet: "https://light-pelican-32.hasura.app/v1/graphql",
+  devnet: "https://cloud.hasura.io/public/graphiql?endpoint=https://aware-earwig-49.hasura.app/v1/graphql",
 };
