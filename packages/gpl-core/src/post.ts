@@ -5,6 +5,7 @@ import { PostMetadata } from "./postMetadata";
 import axios from "axios";
 import { gql } from "graphql-request";
 import { Namespace } from "./profile";
+import { QUERY_SUFFIX } from "./constants";
 
 export interface GraphQLPost {
   cl_pubkey: string;
@@ -158,7 +159,7 @@ export class Post {
   public async getAllPosts(): Promise<GraphQLPost[]> {
     const query = gql`
       query GetAllPosts {
-        gum_0_1_0_decoded_post {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_post {
           cl_pubkey
           metadata
           metadatauri
@@ -174,7 +175,7 @@ export class Post {
     const profilePDAs = profiles.map((p) => p.cl_pubkey) as string[];
     const query = gql`
       query GetPostsByUser {
-        gum_0_1_0_decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
           cl_pubkey
           metadata
           metadatauri
@@ -188,7 +189,7 @@ export class Post {
   public async getPostsByProfile(profilePubKey: anchor.web3.PublicKey): Promise<GraphQLPost[]> {
     const query = gql`
       query GetPostsByProfile {
-        gum_0_1_0_decoded_post(where: {profile: {_eq: "${profilePubKey}"}}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_post(where: {profile: {_eq: "${profilePubKey}"}}) {
           cl_pubkey
           metadata
           metadatauri
@@ -204,7 +205,7 @@ export class Post {
     const profilePDAs = profiles.map((p) => p.cl_pubkey) as string[];
     const query = gql`
       query GetPostsByNamespace {
-        gum_0_1_0_decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
           cl_pubkey
           metadata
           metadatauri
@@ -219,7 +220,7 @@ export class Post {
     const followedUsersProfileAccounts = await this.sdk.connection.getFollowingsByProfile(profileAccount);
     const query = gql`
       query GetPostsByFollowedUsers {
-        gum_0_1_0_decoded_post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
           cl_pubkey
           metadata
           metadatauri
@@ -234,7 +235,7 @@ export class Post {
     const followedUsersProfileAccounts = await this.sdk.connection.getFollowingsByProfile(profileAccount);
     const query = gql`
       query GetFeedsByFollowedUsers {
-        gum_0_1_0_decoded_post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
           cl_pubkey
           metadata
           metadatauri

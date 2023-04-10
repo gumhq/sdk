@@ -1,6 +1,7 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import { gql } from "graphql-request";
+import { QUERY_SUFFIX } from "./constants";
 
 export type ReactionType = "Like" | "Dislike" | "Love" | "Haha" | "Wow" | "Sad" | "Angry";
 
@@ -72,7 +73,7 @@ export class Reaction {
   public async getAllReactions(): Promise<GraphQLReaction[]> {
     const query = gql`
       query GetAllReactions {
-        gum_0_1_0_decoded_reaction {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_reaction {
           topost
           reactiontype
           fromprofile
@@ -86,7 +87,7 @@ export class Reaction {
   public async getReactionsByPost(postAccount: anchor.web3.PublicKey): Promise<GraphQLReaction[]> {
     const query = gql`
       query GetReactionsByPost($postAccount: String!) {
-        gum_0_1_0_decoded_reaction(where: {topost: {_eq: $postAccount}}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_reaction(where: {topost: {_eq: $postAccount}}) {
           topost
           reactiontype
           fromprofile

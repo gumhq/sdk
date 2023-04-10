@@ -1,6 +1,7 @@
 import { SDK } from ".";
 import { gql } from "graphql-request";
 import * as anchor from "@project-serum/anchor";
+import { QUERY_SUFFIX } from "./constants";
 
 export type Namespace = "Professional" | "Personal" | "Gaming" | "Degen";
 
@@ -116,7 +117,7 @@ export class Profile {
     const namespaceString = JSON.stringify({ [namespace.toLowerCase()]: {} });
     const query = gql`
       query GetProfile ($namespace: String) {
-        gum_0_1_0_decoded_profile(
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_profile(
           where: {
             username: { _eq: "${userAccount}" },
             namespace: { _eq: $namespace }
@@ -135,7 +136,7 @@ export class Profile {
   public async getAllProfiles(): Promise<GumDecodedProfile[]> {
     const query = gql`
       query AllProfiles {
-        gum_0_1_0_decoded_profile {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_profile {
           username
           namespace
           cl_pubkey
@@ -150,7 +151,7 @@ export class Profile {
     const userPDAs = users.map(user => user.cl_pubkey) as string[];
     const query = gql`
       query UserProfiles {
-        gum_0_1_0_decoded_profile(
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_profile(
           where: {username: {_in: [${userPDAs.map(pda => `"${pda}"`).join(',')}] }}
         ) {
           username
@@ -167,7 +168,7 @@ export class Profile {
     const namespaceString = JSON.stringify({ [namespace.toLowerCase()]: {} });
     const query = gql`
       query ProfilesByNamespace ($namespace: String) {
-        gum_0_1_0_decoded_profile(where: { namespace: { _eq: $namespace } }) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_profile(where: { namespace: { _eq: $namespace } }) {
           username
           namespace
           cl_pubkey
@@ -184,7 +185,7 @@ export class Profile {
     const namespaceString = JSON.stringify({ [namespace.toLowerCase()]: {} });
     const query = gql`
       query ProfileByUserAndNamespace ($namespace: String) {
-        gum_0_1_0_decoded_profile(
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_profile(
           where: {
             username: {_in: [${userPDAs.map(pda => `"${pda}"`).join(',')}] },
             namespace: { _eq: $namespace }

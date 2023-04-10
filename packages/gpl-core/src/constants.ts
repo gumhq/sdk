@@ -9,7 +9,7 @@ export const GPLCORE_PROGRAMS = {
   ),
   localnet: new anchor.web3.PublicKey(
     "CDDMdCAWB5AXgvEy7XJRggAu37QPG1b9aJXndZoPUkkm"
-  )
+  ),
 };
 
 export const GPLSESSION_PROGRAMS = {
@@ -26,4 +26,10 @@ export const GPLSESSION_PROGRAMS = {
 
 export const GRAPHQL_ENDPOINTS = {
   devnet: "https://light-pelican-32.hasura.app/v1/graphql",
+  "mainnet-beta": "https://gum-core-main.hasura.app/v1/graphql",
+};
+
+export const QUERY_SUFFIX = {
+  devnet: "gum_0_1_0_",
+  "mainnet-beta": "gpl_core_0_1_0_",
 };

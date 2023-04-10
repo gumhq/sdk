@@ -1,6 +1,7 @@
 import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import { gql } from "graphql-request";
+import { QUERY_SUFFIX } from "./constants";
 
 export interface GraphQLConnection {
   fromprofile: string;
@@ -68,7 +69,7 @@ export class Connection {
   public async getAllConnections(): Promise<GraphQLConnection[]> {
     const query = gql`
       query GetAllConnections {
-      gum_0_1_0_decoded_connection {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_connection {
         toprofile
         fromprofile
         cl_pubkey
@@ -83,7 +84,7 @@ export class Connection {
     const profilePDAs = profiles.map((p) => p.cl_pubkey) as string[];
     const query = gql`
       query GetConnectionsByUser {
-        gum_0_1_0_decoded_connection(where: {fromprofile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_connection(where: {fromprofile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
           fromprofile
           toprofile
           cl_pubkey
@@ -97,7 +98,7 @@ export class Connection {
   public async getFollowersByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
     const query = gql`
       query GetFollowersByProfile ($profileAccount: String!) {
-        gum_0_1_0_decoded_connection(where: {toprofile: {_eq: $profileAccount}}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_connection(where: {toprofile: {_eq: $profileAccount}}) {
           fromprofile
         }
       }`;
@@ -112,7 +113,7 @@ export class Connection {
   public async getFollowingsByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
     const query = gql`
       query GetFollowingsByProfile ($profileAccount: String!) {
-        gum_0_1_0_decoded_connection(where: {fromprofile: {_eq: $profileAccount}}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_connection(where: {fromprofile: {_eq: $profileAccount}}) {
           toprofile
         }
       }

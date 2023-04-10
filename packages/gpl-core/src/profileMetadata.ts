@@ -3,6 +3,7 @@ import * as anchor from "@project-serum/anchor";
 import { gql } from "graphql-request";
 import { Namespace } from "./profile";
 import axios from "axios";
+import { QUERY_SUFFIX } from "./constants";
 
 export type ProfileMetadataType = {
   name: string;
@@ -161,7 +162,7 @@ export class ProfileMetadata {
   public async getAllProfileMetadata(): Promise<GraphQLProfileMetadata[]> {
     const query = gql`
       query GetAllProfileMetadata {
-        gum_0_1_0_decoded_profilemetadata {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_profilemetadata {
           cl_pubkey
           metadatauri
           metadata
@@ -177,7 +178,7 @@ export class ProfileMetadata {
     const profilePDAs = profiles.map((p) => p.cl_pubkey) as string[];
     const query = gql`
       query GetProfileMetadataByUser {
-        gum_0_1_0_decoded_profilemetadata(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_profilemetadata(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
           cl_pubkey
           metadatauri
           metadata
@@ -193,7 +194,7 @@ export class ProfileMetadata {
     const profilePDA = profiles.cl_pubkey;
     const query = gql`
       query GetProfileMetadataByUserAndNamespace($profilePDA: String) {
-        gum_0_1_0_decoded_profilemetadata(where: { profile: { _eq: $profilePDA } }) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_profilemetadata(where: { profile: { _eq: $profilePDA } }) {
           cl_pubkey
           metadatauri
           metadata
@@ -209,7 +210,7 @@ export class ProfileMetadata {
   public async getProfileMetadataByProfile(profileAccount: anchor.web3.PublicKey): Promise<GraphQLProfileMetadata> {
     const query = gql`
       query GetProfileMetadataByProfile($profileAccount: String) {
-        gum_0_1_0_decoded_profilemetadata(where: { profile: { _eq: $profileAccount } }) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_profilemetadata(where: { profile: { _eq: $profileAccount } }) {
           cl_pubkey
           metadatauri
           metadata

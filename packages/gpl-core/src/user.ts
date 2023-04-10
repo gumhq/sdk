@@ -2,6 +2,7 @@ import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
 import { gql } from "graphql-request";
+import { QUERY_SUFFIX } from "./constants";
 
 export interface GumDecodedUser {
   authority: string;
@@ -109,7 +110,7 @@ export class User {
   public async getUser(owner: anchor.web3.PublicKey): Promise<GumDecodedUser> {
     const query = gql`
       query GetUser ($owner: String!) {
-        gum_0_1_0_decoded_user(where: { authority: { _eq: $owner } }) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_user(where: { authority: { _eq: $owner } }) {
           authority
           cl_pubkey
           randomhash
@@ -126,7 +127,7 @@ export class User {
   public async getAllUsersAccounts(): Promise<GumDecodedUser[]> {
     const query = gql`
       query AllUsersAccounts {
-        gum_0_1_0_decoded_user {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_user {
           authority
           cl_pubkey
           randomhash
@@ -140,7 +141,7 @@ export class User {
   public async getUserAccountsByAuthority(userPubkey: anchor.web3.PublicKey): Promise<GumDecodedUser[]> {
     const query = gql`
       query UserAccounts {
-        gum_0_1_0_decoded_user(where: { authority: { _eq: "${userPubkey}" } }) {
+        ${QUERY_SUFFIX[this.sdk.cluster]}decoded_user(where: { authority: { _eq: "${userPubkey}" } }) {
           authority
           cl_pubkey
           randomhash
