@@ -7,7 +7,7 @@ import { WalletContextState } from '@solana/wallet-adapter-react';
 import { Connection } from '@solana/web3.js';
 import { SessionWalletInterface } from '../../session';
 
-interface ArweaveStorageHook {
+export interface ArweaveStorageHook {
   uploadData: (data: any) => Promise<{ url: string | null, error: string | null }>;
   getAccountBalance: () => Promise<number>;
   estimateMinimumFunds: (data: any) => Promise<number>;
