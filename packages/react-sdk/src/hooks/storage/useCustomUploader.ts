@@ -1,13 +1,13 @@
-// useCustomUploader.ts
 import { useState, useCallback } from 'react';
-import { useArweaveStorage } from './useArweave';
+import { useArweaveStorage } from './arweave/useArweave';
 import { WalletContextState } from '@solana/wallet-adapter-react';
 import { Connection } from '@solana/web3.js';
+import { SessionWalletInterface } from '../session';
 
 export type UploaderType = 'arweave' | 'genesysgo' | 'custom';
 
 export interface UploaderFunction {
-  (data: File | string | object): Promise<string>;
+  (data: string): Promise<string>;
 }
 
 export const useCustomUploader = (
@@ -15,38 +15,40 @@ export const useCustomUploader = (
   wallet: WalletContextState,
   connection: Connection,
   cluster: "devnet" | "mainnet-beta",
+  useSession: boolean,
+  session?: SessionWalletInterface,
   customUploader?: UploaderFunction,
 ) => {
   if (uploaderType === 'custom' && !customUploader) {
     throw new Error('Custom uploader function is required for custom uploader type');
   }
 
-  const arweaveStorage = useArweaveStorage(wallet, connection, cluster);
+  const arweaveStorage = useArweaveStorage(wallet, connection, cluster, useSession, session);
 
   const getFileUploader = (): UploaderFunction => {
     if (uploaderType === 'custom' && customUploader) {
       return customUploader;
     }
+    
+    if (!session) {
+      throw new Error('Session is required for arweave uploader');
+    }
 
     if (uploaderType === 'arweave') {
-      return async (data: File | string | object): Promise<string> => {
-        const dataArrayBuffer = await (async () => {
-          if (typeof data === 'string') {
-            return new TextEncoder().encode(data).buffer;
-          } else if (data instanceof File) {
-            return data.arrayBuffer();
-          } else {
-            return new TextEncoder().encode(JSON.stringify(data)).buffer;
+      return async (data: string): Promise<string> => {
+        try {
+          const { url, error } = await arweaveStorage.uploadData(data);
+
+          if (error) {
+            console.error(error);
+            throw new Error(error);
           }
-        })();
 
-        const { url, error } = await arweaveStorage.uploadData(dataArrayBuffer);
-
-        if (error) {
-          throw new Error(error);
+          return url as string;
+        } catch (err) {
+          console.error('Error in Arweave uploader:', err);
+          throw err;
         }
-
-        return url as string;
       };
     } else if (uploaderType === 'genesysgo') {
       return async (_: File | string | object): Promise<string> => {
@@ -58,13 +60,11 @@ export const useCustomUploader = (
   };
 
   const uploader = getFileUploader();
-
-  const [data, setData] = useState<File | string | object | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleUpload = useCallback(async () => {
+  const handleUpload = useCallback(async (data: string | null) => {
     if (data) {
       setUploading(true);
       setError(null);
@@ -77,7 +77,7 @@ export const useCustomUploader = (
         setUploading(false);
       }
     }
-  }, [data, uploader]);
+  }, [uploader]);
 
-  return { setData, handleUpload, uploading, uploadedUrl, error };
+  return { handleUpload, uploading, uploadedUrl, error };
 };

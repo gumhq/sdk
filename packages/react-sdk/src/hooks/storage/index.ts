@@ -1,2 +1,2 @@
 export { useCustomUploader } from "./useCustomUploader";
-export { useArweaveStorage } from "./useArweave";
+export { useArweaveStorage } from "./arweave/useArweave";
