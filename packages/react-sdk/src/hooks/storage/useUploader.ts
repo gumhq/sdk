@@ -6,35 +6,35 @@ import { Uploader } from './UploaderInterface';
 import { useArweaveStorage } from './arweave/useArweave';
 import { ArweaveUpload } from './ArweaveUpload';
 import { GenesysGoUpload } from './GenesysGoUpload';
+import { useShadowStorage } from './shdw/useShadow';
 
-export const useCustomUploader = (
+export const useUploader = (
   uploaderType: 'arweave' | 'genesysgo' | 'custom',
-  wallet: WalletContextState,
+  wallet: WalletContextState | SessionWalletInterface,
   connection: Connection,
   cluster: "devnet" | "mainnet-beta",
-  useSession: boolean,
-  session?: SessionWalletInterface,
   customUploaderInstance?: Uploader,
 ) => {
   if (uploaderType === 'custom' && !customUploaderInstance) {
     throw new Error('Custom uploader instance is required for custom uploader type');
   }
 
-  const arweaveStorage = useArweaveStorage(wallet, connection, cluster, useSession, session);
+  const arweaveStorage = uploaderType === 'arweave' ? useArweaveStorage(wallet, connection, cluster) : null;
+  const genesysgoStorage = uploaderType === 'genesysgo' ? useShadowStorage(wallet, connection) : null;
+
+  if (uploaderType === 'genesysgo' && cluster === 'devnet') {
+    throw new Error("GenesysGo doesn't support devnet and it only works on mainnet-beta");
+  }
 
   const getFileUploader = (): Uploader => {
     if (uploaderType === 'custom' && customUploaderInstance) {
       return customUploaderInstance;
     }
 
-    if (!session) {
-      throw new Error('Session is required for arweave uploader');
-    }
-
-    if (uploaderType === 'arweave') {
+    if (uploaderType === 'arweave' && arweaveStorage) {
       return new ArweaveUpload(arweaveStorage);
-    } else if (uploaderType === 'genesysgo') {
-      return new GenesysGoUpload();
+    } else if (uploaderType === 'genesysgo' && genesysgoStorage) {
+      return new GenesysGoUpload(genesysgoStorage);
     } else {
       throw new Error('Invalid uploader type or custom uploader instance not provided');
     }
@@ -44,7 +44,7 @@ export const useCustomUploader = (
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleUpload = useCallback(async (data: string | null) => {
+  const handleUpload = useCallback(async (data: string| File | null) => {
     if (data) {
       setUploading(true);
       setError(null);

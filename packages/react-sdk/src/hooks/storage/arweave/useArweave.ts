@@ -16,13 +16,11 @@ export interface ArweaveStorageHook {
 }
 
 export const useArweaveStorage = (
-  wallet: WalletContextState,
+  wallet: WalletContextState | SessionWalletInterface,
   connection: Connection,
-  cluster: "devnet" | "mainnet-beta",
-  useSession: boolean,
-  session?: SessionWalletInterface
+  cluster: "devnet" | "mainnet-beta"
 ): ArweaveStorageHook => {
-  const bundlr = useBundlr(wallet, connection, cluster, useSession, session);
+  const bundlr = useBundlr(wallet, connection, cluster);
 
   const withErrorHandling = useCallback(
     (fn: (...args: any[]) => Promise<any>) => async (...args: any[]) => {
@@ -42,7 +40,7 @@ export const useArweaveStorage = (
         throw new Error('Bundlr not initialized');
       }
 
-      const publicKey = session?.publicKey || wallet.publicKey;
+      const publicKey = wallet?.publicKey;
 
       if (!publicKey) {
         throw new Error('Public key not found');

@@ -4,14 +4,17 @@ import { WalletContextState } from '@solana/wallet-adapter-react';
 import { Connection } from '@solana/web3.js';
 import { SessionWalletInterface } from '../../session';
 
+function isSessionWallet(wallet: WalletContextState | SessionWalletInterface): wallet is SessionWalletInterface {
+  return 'sessionToken' in wallet;
+}
+
 export const useBundlr = (
-  wallet: WalletContextState,
+  wallet: WalletContextState | SessionWalletInterface,
   connection: Connection,
-  cluster: "devnet" | "mainnet-beta",
-  useSession: boolean,
-  session?: SessionWalletInterface
+  cluster: "devnet" | "mainnet-beta"
 ) => {
-  const { connected } = wallet;
+  const isConnected = isSessionWallet(wallet) ? !!wallet.sessionToken : wallet.connected;
+  const useSession = isSessionWallet(wallet);
   const [bundlr, setBundlr] = useState<WebBundlr | null>(null);
   const BUNDLR_URL = cluster === 'devnet' ? 'https://devnet.bundlr.network' : 'http://node1.bundlr.network';
 
@@ -25,22 +28,24 @@ export const useBundlr = (
     };
 
     const initializeBundlrWithSession = async () => {
-      if (!session || !session.sessionToken) {
+      if (!isSessionWallet(wallet) || !wallet.sessionToken) {
         throw new Error('Session is required for arweave uploader');
       }
-      const newBundlr = new WebBundlr(BUNDLR_URL, 'solana', session, {
+      const newBundlr = new WebBundlr(BUNDLR_URL, 'solana', wallet, {
         providerUrl: connection.rpcEndpoint,
       });
       await newBundlr.ready();
       setBundlr(newBundlr);
     };
 
-    if (connected && !useSession) {
-      initializeBundlr();
-    } else if (connected && useSession && session && session.sessionToken) {
-      initializeBundlrWithSession();
+    if (isConnected) {
+      if (useSession) {
+        initializeBundlrWithSession();
+      } else {
+        initializeBundlr();
+      }
     }
-  }, [connected, connection.rpcEndpoint, session?.publicKey]);
+  }, [isConnected, connection.rpcEndpoint, wallet]);
 
   return bundlr;
 };

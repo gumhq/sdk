@@ -12,8 +12,9 @@ export {
   useCreateUser,
   useCreateProfile,
   useCreatePost,
-  useCustomUploader,
+  useUploader,
   useArweaveStorage,
+  useShadowStorage,
 } from "./hooks";
 
 export {
