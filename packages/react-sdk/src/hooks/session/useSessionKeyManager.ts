@@ -1,4 +1,5 @@
 import { AnchorWallet } from '@solana/wallet-adapter-react';
+import { SendTransactionOptions } from '@solana/wallet-adapter-base';
 import { Keypair, PublicKey, Transaction, Cluster, Connection } from '@solana/web3.js';
 import { useEffect, useRef, useState } from 'react';
 import { generateEncryptionKey, encrypt, decrypt } from '../../utils/crypto';
@@ -15,8 +16,8 @@ export interface SessionWalletInterface {
   signTransaction: (<T extends Transaction>(transaction: T) => Promise<T>) | undefined;
   signAllTransactions: (<T extends Transaction >(transactions: T[]) => Promise<T[]>) | undefined;
   signMessage: ((message: Uint8Array) => Promise<Uint8Array>) | undefined;
-  sendTransaction: (<T extends Transaction>(transaction: T) => Promise<string>) | undefined;
-  signAndSendTransaction: (<T extends Transaction>(transactions: T | T[]) => Promise<string[]>) | undefined;
+  sendTransaction: (<T extends Transaction>(transaction: T, connection: Connection, options: SendTransactionOptions) => Promise<string>) | undefined;
+  signAndSendTransaction: (<T extends Transaction>(transactions: T | T[], connection: Connection, options: SendTransactionOptions) => Promise<string[]>) | undefined;
   createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number) => Promise<{ sessionToken: string; publicKey: string; } | undefined>;
   revokeSession: () => Promise<string | null>;
   getSessionToken: () => Promise<string | null>;
@@ -104,8 +105,8 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
       const { blockhash } = await connection.getLatestBlockhash("finalized");
       const feePayer = keypairRef.current.publicKey;
 
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = feePayer;
+      transaction.recentBlockhash = transaction.recentBlockhash || blockhash;
+      transaction.feePayer = transaction.feePayer || feePayer;
       transaction.sign(keypairRef.current);
 
       return transaction;
@@ -128,18 +129,57 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
 
   };
 
-  const sendTransaction = async (signedTransaction: Transaction): Promise<string> => {
+  const sendTransaction = async (
+    transaction: Transaction,
+    connection: Connection,
+    options: SendTransactionOptions = {}
+  ): Promise<string> => {
     return withLoading(async () => {
-      const txid = await connection.sendRawTransaction(signedTransaction.serialize());
+      const keypair = keypairRef.current;
+      const sessionToken = sessionTokenRef.current;
+
+      if (!keypair || !sessionToken) {
+        throw new Error(
+          'Cannot sign transaction - keypair or session token not loaded. Please create a session first.'
+        );
+      }
+
+      const { signers, ...sendOptions } = options;
+      const publicKey = keypair.publicKey;
+
+      if (!publicKey) {
+        throw new Error(
+          'Cannot send transaction - keypair not loaded. Please create a session first.'
+        );
+      }
+
+      transaction.feePayer = transaction.feePayer || publicKey;
+      transaction.recentBlockhash =
+        transaction.recentBlockhash ||
+        (await connection.getLatestBlockhash({
+          commitment: sendOptions.preflightCommitment,
+          minContextSlot: sendOptions.minContextSlot,
+        })).blockhash;
+
+      if (signers?.length) {
+        transaction.partialSign(...signers);
+      }
+
+      transaction.partialSign(keypair);
+
+      const txid = await connection.sendRawTransaction(
+        transaction.serialize(),
+        sendOptions
+      );
       return txid;
     });
   };
 
-  const signAndSendTransaction = async (transaction: Transaction | Transaction[]): Promise<string[]> => {
+  const signAndSendTransaction = async (transaction: Transaction | Transaction[], connection: Connection, options: SendTransactionOptions = {}): Promise<string[]> => {
     return withLoading(async () => {
       const transactionsArray = Array.isArray(transaction) ? transaction : [transaction];
       const signedTransactions = await signAllTransactions(transactionsArray);
-      const txids = await Promise.all(signedTransactions.map((signedTransaction) => sendTransaction(signedTransaction)));
+      const txids = await Promise.all(signedTransactions.map((signedTransaction) => sendTransaction(signedTransaction, connection, options)));
       return txids;
     });
   };
