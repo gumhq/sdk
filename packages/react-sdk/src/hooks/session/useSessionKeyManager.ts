@@ -10,6 +10,7 @@ import { deleteItemFromIndexedDB, getItemFromIndexedDB, setItemToIndexedDB } fro
 
 export interface SessionWalletInterface {
   publicKey: PublicKey | null;
+  ownerPublicKey: PublicKey | null;
   isLoading: boolean;
   error: string | null;
   sessionToken: string | null;
@@ -338,6 +339,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
   if (!wallet) {
     return {
       publicKey: null,
+      ownerPublicKey: null,
       isLoading: false,
       sessionToken: null,
       signTransaction: undefined,
@@ -354,6 +356,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
 
   return {
     publicKey: sessionTokenRef.current && keypairRef.current ? keypairRef.current.publicKey : null,
+    ownerPublicKey: wallet.publicKey,
     isLoading,
     error,
     sessionToken: sessionTokenRef.current,
