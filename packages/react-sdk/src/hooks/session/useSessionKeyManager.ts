@@ -1,6 +1,6 @@
 import { AnchorWallet } from '@solana/wallet-adapter-react';
 import { SendTransactionOptions } from '@solana/wallet-adapter-base';
-import { Keypair, PublicKey, Transaction, Cluster, Connection } from '@solana/web3.js';
+import { Keypair, PublicKey, Transaction, Cluster, Connection, SystemProgram } from '@solana/web3.js';
 import { useEffect, useRef, useState } from 'react';
 import { generateEncryptionKey, encrypt, decrypt } from '../../utils/crypto';
 import { SessionTokenManager } from '@gumhq/sdk';
@@ -74,8 +74,6 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
       const sessionKey = await getItemFromIndexedDB(WALLET_PUBKEY_TO_SESSION_STORE, walletPublicKey);
 
       if (sessionKey) {
-        console.log("Deleting session data from IndexedDB");
-        console.log("Session key:", sessionKey);
         await deleteItemFromIndexedDB(SESSION_OBJECT_STORE, sessionKey);
         await deleteItemFromIndexedDB(WALLET_PUBKEY_TO_SESSION_STORE, walletPublicKey);
       }
@@ -352,12 +350,43 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
   const revokeSession = async () => {
     return withLoading(async () => {
       try {
-        if (!sessionTokenRef.current) {
+        if (!sessionTokenRef.current || !keypairRef.current) {
           return;
         }
-        const sessionTokenPublicKey = new PublicKey(sessionTokenRef.current);
-        const instructionMethodBuilder = await sdk.revoke(sessionTokenPublicKey, wallet.publicKey as PublicKey);
+        const sessionTokenPublicKey = keypairRef.current.publicKey;
+
+        const instructionMethodBuilder = sdk.program.methods.revokeSession()
+          .accounts({
+            sessionToken: sessionTokenRef.current,
+            authority: wallet.publicKey,
+          });
         const txId = await instructionMethodBuilder.rpc();
+
+        // Transfer all the lamports from the session keypair wallet to the owner wallet
+        const sessionSignerSolanaBalance = await connection.getBalance(sessionTokenPublicKey);
+        if (sessionSignerSolanaBalance > 0) {
+          const tx = new Transaction().add(
+            SystemProgram.transfer({
+              fromPubkey: sessionTokenPublicKey,
+              toPubkey: wallet.publicKey,
+              lamports: sessionSignerSolanaBalance,
+            }),
+          );
+          tx.feePayer = sessionTokenPublicKey;
+          tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+          const estimatedFee = await tx.getEstimatedFee(connection);
+          
+          if (estimatedFee && sessionSignerSolanaBalance > estimatedFee) {
+            const transaction = new Transaction().add(
+              SystemProgram.transfer({
+                fromPubkey: sessionTokenPublicKey,
+                toPubkey: wallet.publicKey,
+                lamports: sessionSignerSolanaBalance - estimatedFee,
+              }),
+            );
+            await sendTransaction(transaction);
+          }
+        }
 
         // Delete session data for the wallet
         const walletPublicKey = wallet.publicKey.toBase58();
