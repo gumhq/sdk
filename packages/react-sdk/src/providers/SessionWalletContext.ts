@@ -1,6 +1,11 @@
 import * as React from 'react';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { SessionWalletInterface } from '..';
+
+interface SessionWalletContextInterface extends SessionWalletInterface {
+  sessionCreated: boolean;
+  setSessionCreated: (sessionCreated: boolean) => void;
+}
 
 const SessionWalletContext = createContext<SessionWalletInterface | null>(null);
 
@@ -18,10 +23,21 @@ interface SessionWalletProviderProps {
 }
 
 export const SessionWalletProvider: React.FC<SessionWalletProviderProps> = ({ sessionWallet, children }) => {
-  return React.createElement(
-    SessionWalletContext.Provider,
-    { value: sessionWallet },
-    children
+  const [sessionCreated, setSessionCreated] = useState(false);
+
+  React.useEffect(() => {
+    if (sessionWallet.sessionToken) {
+      setSessionCreated(true);
+    }
+  }, [sessionWallet.sessionToken]);
+
+  const value: SessionWalletContextInterface = {
+    ...sessionWallet,
+    sessionCreated,
+    setSessionCreated,
+  };
+
+  return (
+    React.createElement(SessionWalletContext.Provider, { value }, children)
   );
 };
-
