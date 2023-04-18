@@ -19,8 +19,10 @@ export {
 
 export {
   useGumContext,
+  useUploaderContext,
   useSessionWallet,
   GumProvider,
+  UploaderProvider,
   SessionWalletProvider,
 } from "./providers";
 
