@@ -21,10 +21,9 @@ import {
 import { SessionWalletInterface } from 'src/hooks/session';
 
 export interface ShadowStorageInterface {
-  uploadData: (data: File | ShadowFile, storageAccount?: PublicKey) => Promise<ShadowUploadResponse | null | undefined>;
-  getOwnedStorageAccounts: () => Promise<StorageAccountResponse[]>;
-  createStorageAccount: (name: string, sizeInMB: number, owner2?: PublicKey) => Promise<CreateStorageResponse | null>;
-  shadowStorage: ShdwDrive | null;
+  uploadData: (data: File | ShadowFile, wallet: WalletContextState | SessionWalletInterface, storageAccount?: PublicKey) => Promise<ShadowUploadResponse | null | undefined>;
+  getOwnedStorageAccounts: (wallet: WalletContextState | SessionWalletInterface) => Promise<StorageAccountResponse[]>;
+  createStorageAccount: (name: string, sizeInMB: number, wallet: WalletContextState | SessionWalletInterface, owner2?: PublicKey) => Promise<CreateStorageResponse | null>;
 }
 
 /**
@@ -35,34 +34,24 @@ export interface ShadowStorageInterface {
  * @returns An object containing methods to upload data, manage storage accounts, and interact with the Shadow token (SHDW).
  */
 export const useShadowStorage = (
-  wallet: WalletContextState | SessionWalletInterface,
   connection: Connection,
 ): ShadowStorageInterface => {
-  const [shadowStorage, setShadowStorage] = useState<ShdwDrive | null>(null);
   const SHDW = new PublicKey('SHDWyBxihqiCj6YekG2GUr7wqKLeLAMK1gHZck9pL6y');
 
-  /**
-   * Initialize the Shadow Drive instance when the wallet is connected.
-   */
-  useEffect(() => {
-    const initializeShadow = async () => {
-      const newShadow = await new ShdwDrive(connection, wallet).init();
-      setShadowStorage(newShadow);
+    const initializeShadow = async (wallet: WalletContextState | SessionWalletInterface) => {
+      const shdwInstance = await new ShdwDrive(connection, wallet).init();
+      return shdwInstance;
     };
-
-    if ((isSessionWallet(wallet) && wallet.sessionToken) || (!isSessionWallet(wallet) && wallet.connected)) {
-      initializeShadow();
-    }
-  }, [connection.rpcEndpoint, wallet]);
 
   /**
    * Fetch the list of owned storage accounts.
    *
    * @returns A promise that resolves to an array of StorageAccountResponse objects.
    */
-  const getOwnedStorageAccounts = useCallback(async () => {
+  const getOwnedStorageAccounts = useCallback(async (wallet: WalletContextState | SessionWalletInterface) => {
+    const shadowStorage = await initializeShadow(wallet);
     return shadowStorage ? await shadowStorage.getStorageAccounts("v2") : [];
-  }, [shadowStorage]);
+  }, []);
 
   /**
    * Create a new storage account.
@@ -72,16 +61,18 @@ export const useShadowStorage = (
    * @param owner2 - An optional PublicKey for the second owner of the storage account.
    * @returns A promise that resolves to a CreateStorageResponse object or null.
    */
-  const createStorageAccount = useCallback(async (name: string, sizeInMB: number, owner2?: PublicKey) => {
+  const createStorageAccount = useCallback(async (name: string, sizeInMB: number, wallet: WalletContextState | SessionWalletInterface, owner2?: PublicKey) => {
+    const shadowStorage = await initializeShadow(wallet);
     return shadowStorage ? await shadowStorage.createStorageAccount(name, `${sizeInMB.toString()}MB`, "v2", owner2) : null;
-  }, [shadowStorage]);
+  }, []);
 
-  const getAvailableStorage = useCallback(async (storageAccount?: PublicKey): Promise<number | null> => {
+  const getAvailableStorage = useCallback(async (wallet: WalletContextState | SessionWalletInterface, storageAccount?: PublicKey): Promise<number | null> => {
+    const shadowStorage = await initializeShadow(wallet);
     if (shadowStorage) {
       let storageAvailable: number | null = null;
 
       if (!storageAccount) {
-        const accounts = await getOwnedStorageAccounts();
+        const accounts = await getOwnedStorageAccounts(wallet);
         const gumAccount = accounts.find((account) => account.account.identifier === "Gum");
 
         if (gumAccount) {
@@ -99,15 +90,15 @@ export const useShadowStorage = (
     }
 
     return null;
-  }, [shadowStorage, getOwnedStorageAccounts]);
+  }, [getOwnedStorageAccounts]);
 
-  const hasSufficientStorageSpace = useCallback(async (requiredSizeInBytes: number, storageAccount?: PublicKey) => {
-    const storageAvailable = await getAvailableStorage(storageAccount);
+  const hasSufficientStorageSpace = useCallback(async (wallet: WalletContextState | SessionWalletInterface, requiredSizeInBytes: number, storageAccount?: PublicKey) => {
+    const storageAvailable = await getAvailableStorage(wallet, storageAccount);
 
     return storageAvailable !== null && storageAvailable > requiredSizeInBytes;
   }, [getAvailableStorage]);
 
-  const checkSHDWBalance = useCallback(async () => {
+  const checkSHDWBalance = useCallback(async (wallet: WalletContextState | SessionWalletInterface) => {
     if (!wallet?.publicKey) return;
 
     const response = await connection.getParsedTokenAccountsByOwner(
@@ -126,9 +117,9 @@ export const useShadowStorage = (
     const shdwTokenBalance =
       shdwToken?.account.data.parsed.info.tokenAmount.uiAmountString || 0;
     return shdwTokenBalance;
-  }, [wallet]);
+  }, []);
 
-  const buySHDW = useCallback(async (amount: number) => {
+  const buySHDW = useCallback(async (wallet: WalletContextState | SessionWalletInterface, amount: number) => {
     if (!wallet.publicKey) return;
 
     const orca = getOrca(connection);
@@ -144,7 +135,7 @@ export const useShadowStorage = (
     const tx = await buyShdwWithSol(orcaSolPool, wallet, connection, solAmount, shdwAmount);
 
     return tx;
-  }, [wallet, connection]);
+  }, [connection]);
 
   /**
    * Upload a file to a storage account, and handle storage and token requirements.
@@ -153,32 +144,33 @@ export const useShadowStorage = (
    * @param storageAccount - An optional PublicKey for the target storage account.
    * @returns A promise that resolves to a ShadowUploadResponse object, null, or undefined.
    */
-  const uploadData = useCallback(async (data: File | ShadowFile, storageAccount?: PublicKey, makeStorageAccountImmutable: boolean = true) => {
+  const uploadData = useCallback(async (data: File | ShadowFile, wallet: WalletContextState | SessionWalletInterface, storageAccount?: PublicKey, makeStorageAccountImmutable: boolean = true) => {
+    const shadowStorage = await initializeShadow(wallet);
     const requiredSizeInBytes = calculateRequiredSizeInBytes(data);
     if (shadowStorage) {
       if (!storageAccount) {
-        const accounts = await getOwnedStorageAccounts();
+        const accounts = await getOwnedStorageAccounts(wallet);
         const gumAccount = accounts.find((account) => account.account.identifier === "Gum");
 
         if (gumAccount) {
-          const hasSpace = await hasSufficientStorageSpace(requiredSizeInBytes, gumAccount.publicKey);
+          const hasSpace = await hasSufficientStorageSpace(wallet, requiredSizeInBytes, gumAccount.publicKey);
           if (!hasSpace) {
             const shdwNeeded = calculateShdwRequired(1024*5);
-            const shdwBalance = await checkSHDWBalance();
+            const shdwBalance = await checkSHDWBalance(wallet);
             if (shdwBalance < shdwNeeded) {
-              await buySHDW(shdwNeeded);
+              await buySHDW(wallet, shdwNeeded);
             }
             await shadowStorage.addStorage(gumAccount.publicKey, "5MB", "v2");
           }
           storageAccount = gumAccount.publicKey;
         } else {
           const shdwNeeded = calculateShdwRequired(1024*5);
-          const shdwBalance = await checkSHDWBalance();
+          const shdwBalance = await checkSHDWBalance(wallet);
           if (shdwBalance < shdwNeeded) {
-            await buySHDW(shdwNeeded);
+            await buySHDW(wallet, shdwNeeded);
           }
           const ownerPublicKey = isSessionWallet(wallet) ? wallet.ownerPublicKey ?? undefined : wallet.publicKey ?? undefined;
-          const account = await createStorageAccount("Gum", 5, ownerPublicKey);
+          const account = await createStorageAccount("Gum", 5, wallet, ownerPublicKey);
           if (account) {
             storageAccount = new PublicKey(account.shdw_bucket);
           } else {
@@ -195,12 +187,11 @@ export const useShadowStorage = (
       return await shadowStorage.uploadFile(storageAccount, data);
     }
     return null;
-  }, [shadowStorage, getOwnedStorageAccounts, createStorageAccount]);
+  }, [getOwnedStorageAccounts, createStorageAccount]);
 
   return {
     uploadData,
     getOwnedStorageAccounts,
     createStorageAccount,
-    shadowStorage
   };
 };
