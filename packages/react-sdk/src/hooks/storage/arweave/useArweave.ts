@@ -1,14 +1,18 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { WebBundlr } from '@bundlr-network/client';
 import BigNumber from "bignumber.js";
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { FundResponse } from '@bundlr-network/client/build/common/types';
-import { useBundlr } from './useBundlr';
 import { WalletContextState } from '@solana/wallet-adapter-react';
 import { Connection } from '@solana/web3.js';
 import { SessionWalletInterface } from '../../session';
 
+function isSessionWallet(wallet: WalletContextState | SessionWalletInterface): wallet is SessionWalletInterface {
+  return 'sessionToken' in wallet;
+}
+
 export interface ArweaveStorageHook {
-  uploadData: (data: any) => Promise<{ url: string | null, error: string | null }>;
+  uploadData: (data: any, wallet: WalletContextState | SessionWalletInterface) => Promise<{ url: string | null, signature: string | null, error: string | null }>;
   getAccountBalance: () => Promise<number>;
   estimateMinimumFunds: (data: any) => Promise<number>;
   estimateUploadPriceInSol: (data: any) => Promise<number>;
@@ -16,11 +20,23 @@ export interface ArweaveStorageHook {
 }
 
 export const useArweaveStorage = (
-  wallet: WalletContextState | SessionWalletInterface,
   connection: Connection,
   cluster: "devnet" | "mainnet-beta"
 ): ArweaveStorageHook => {
-  const bundlr = useBundlr(wallet, connection, cluster);
+
+  const BUNDLR_URL = cluster === 'devnet' ? 'https://devnet.bundlr.network' : 'http://node1.bundlr.network';
+
+  const initializeBundlr = async (wallet: WalletContextState | SessionWalletInterface) => {
+    if (isSessionWallet(wallet) && !wallet.sessionToken) {
+      throw new Error('Session is required for arweave uploader');
+    }
+
+    const newBundlr = new WebBundlr(BUNDLR_URL, 'solana', wallet, {
+      providerUrl: connection.rpcEndpoint,
+    });
+    await newBundlr.ready();
+    return newBundlr;
+  };
 
   const withErrorHandling = useCallback(
     (fn: (...args: any[]) => Promise<any>) => async (...args: any[]) => {
@@ -35,7 +51,9 @@ export const useArweaveStorage = (
   );
 
   const uploadData = useCallback(
-    withErrorHandling(async (data: any) => {
+    withErrorHandling(async (data: any, wallet: WalletContextState | SessionWalletInterface) => {
+      const bundlr = await initializeBundlr(wallet);
+
       if (!bundlr) {
         throw new Error('Bundlr not initialized');
       }
@@ -46,8 +64,11 @@ export const useArweaveStorage = (
         throw new Error('Public key not found');
       }
 
+      if (typeof data === 'object') {
+        data = JSON.stringify(data);
+      }
       const price = await bundlr.getPrice(data.length);
-      const minimumFunds = price.multipliedBy(50);
+      const minimumFunds = price.multipliedBy(1);
       const balance = await bundlr.getBalance(publicKey.toBase58());
 
       if (balance.isLessThan(minimumFunds)) {
@@ -64,24 +85,29 @@ export const useArweaveStorage = (
       }
 
     const url = `https://arweave.net/${id}`;
-    return { url, error: null };
+    const signature = transaction.signature;
+    return { url, signature, error: null };
     }),
-    [bundlr, wallet, withErrorHandling]
+    [withErrorHandling]
   );
 
   const getAccountBalance = useCallback(
-    withErrorHandling(async () => {
+    withErrorHandling(async ( wallet: WalletContextState | SessionWalletInterface) => {
+      const bundlr = await initializeBundlr(wallet);
+
       if (!bundlr || !wallet.publicKey) {
         throw new Error('Bundlr not initialized');
       }
       const balance = await bundlr.getBalance(wallet.publicKey.toBase58());
       return balance.toNumber();
     }),
-  [bundlr, wallet.publicKey, withErrorHandling]
+  [withErrorHandling]
   );
 
   const estimateMinimumFunds = useCallback(
-    withErrorHandling(async (data: any) => {
+    withErrorHandling(async (data: any, wallet: WalletContextState | SessionWalletInterface) => {
+      const bundlr = await initializeBundlr(wallet);
+
       if (!bundlr || !wallet.publicKey) {
         throw new Error('Bundlr not initialized');
       }
@@ -89,11 +115,13 @@ export const useArweaveStorage = (
       const minimumFunds = price.multipliedBy(10);
       return minimumFunds.toNumber();
     }),
-  [bundlr, wallet.publicKey, withErrorHandling]
+  [withErrorHandling]
   );
 
   const estimateUploadPriceInSol = useCallback(
-    withErrorHandling(async (data: any) => {
+    withErrorHandling(async (data: any, wallet: WalletContextState | SessionWalletInterface) => {
+      const bundlr = await initializeBundlr(wallet);
+
       if (!bundlr || !wallet.publicKey) {
         throw new Error('Bundlr not initialized');
       }
@@ -101,18 +129,20 @@ export const useArweaveStorage = (
       const priceInSol = price.dividedBy(LAMPORTS_PER_SOL);
       return priceInSol.toNumber();
     }),
-  [bundlr, wallet.publicKey, withErrorHandling]
+  [withErrorHandling]
   );
 
   const fundStorageNode = useCallback(
-    withErrorHandling(async (amount: number) => {
+    withErrorHandling(async (amount: number, wallet: WalletContextState | SessionWalletInterface) => {
+      const bundlr = await initializeBundlr(wallet);
+
       if (!bundlr || !wallet.publicKey) {
         throw new Error('Bundlr not initialized');
       }
       const transaction = await bundlr.fund(amount);
       return transaction;
     }),
-  [bundlr, wallet.publicKey, withErrorHandling]
+  [withErrorHandling]
   );
 
   return {  
