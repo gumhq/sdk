@@ -1,6 +1,6 @@
 # Security Policy
 
-Please contact hello@gun.fun for any questions, issues, or concerns. We appreciate any and all feedback.
+Please contact hello@gum.fun for any questions, issues, or concerns. We appreciate any and all feedback.
 
 # 3rd party Security Audits
 At the time of writing, we haven't undergone any 3rd party security audits.
