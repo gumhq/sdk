@@ -1,9 +1,10 @@
 import { SDK } from "@gumhq/sdk";
 import { useState, useCallback } from "react";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction, Connection } from "@solana/web3.js";
+import { SendTransactionOptions } from '@solana/wallet-adapter-base';
 import { ReactionType } from "@gumhq/sdk/lib/reaction";
 
-type SignAndSendTransactionFn = <T extends Transaction>(transactions: T | T[]) => Promise<string[]>;
+type sendTransactionFn = <T extends Transaction>(transaction: T, connection?: Connection, options?: SendTransactionOptions) => Promise<string>;
 
 const useReaction = (sdk: SDK, ) => {
   const [reactionPDA, setReactionPDA] = useState<PublicKey | null>(null);
@@ -18,7 +19,9 @@ const useReaction = (sdk: SDK, ) => {
       userAccount: PublicKey,
       owner: PublicKey,
       sessionAccount?: PublicKey,
-      signAndSendTransaction?: SignAndSendTransactionFn
+      sendTransactionFn?: sendTransactionFn,
+      connection?: Connection,
+      options?: SendTransactionOptions
     ) => {
       setIsReacting(true);
       setCreateReactionError(null);
@@ -27,10 +30,10 @@ const useReaction = (sdk: SDK, ) => {
         const ixMethodBuilder = await createReactionIxMethodBuilder(reactionType, fromProfile, toPostAccount, userAccount, owner, sessionAccount);
 
         if (ixMethodBuilder) {
-          if (signAndSendTransaction) {
+          if (sendTransactionFn) {
             const tx = await ixMethodBuilder.transaction();
             if (tx) {
-              return await signAndSendTransaction(tx);
+              return await sendTransactionFn(tx, connection, options);
             }
           } else {
             return await ixMethodBuilder.rpc();
@@ -77,18 +80,20 @@ const useReaction = (sdk: SDK, ) => {
       owner: PublicKey,
       sessionAccount?: PublicKey,
       refundReceiver: PublicKey = owner,
-      signAndSendTransaction?: SignAndSendTransactionFn
+      sendTransaction?: sendTransactionFn,
+      connection?: Connection,
+      options?: SendTransactionOptions
     ) => {
       setIsReacting(true);
 
       try {
-        const ixMethodBuilder = await deleteReactionIxMethodBuilder(reactionAccount, fromProfile, toPostAccount, userAccount, owner, sessionAccount, refundReceiver);
+        const ixMethodBuilder = deleteReactionIxMethodBuilder(reactionAccount, fromProfile, toPostAccount, userAccount, owner, sessionAccount, refundReceiver);
         
         if (ixMethodBuilder) {
-          if (signAndSendTransaction) {
+          if (sendTransaction) {
             const tx = await ixMethodBuilder.transaction();
             if (tx) {
-              return await signAndSendTransaction(tx);
+              return await sendTransaction(tx, connection, options);
             }
           } else {
             return await ixMethodBuilder.rpc();

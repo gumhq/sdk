@@ -1,8 +1,9 @@
 import { SDK } from "@gumhq/sdk";
 import { useState, useCallback } from "react";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction, Connection } from "@solana/web3.js";
+import { SendTransactionOptions } from '@solana/wallet-adapter-base';
 
-type SignAndSendTransactionFn = <T extends Transaction>(transactions: T | T[]) => Promise<string[]>;
+type sendTransactionFn = <T extends Transaction>(transaction: T, connection?: Connection, options?: SendTransactionOptions) => Promise<string>;
 
 const useCreatePost = (sdk: SDK) => {
   const [postPDA, setPostPDA] = useState<PublicKey | null>(null);
@@ -16,7 +17,9 @@ const useCreatePost = (sdk: SDK) => {
       userAccount: PublicKey,
       owner: PublicKey,
       sessionAccount?: PublicKey,
-      signAndSendTransaction?: SignAndSendTransactionFn
+      sendTransaction?: sendTransactionFn,
+      connection?: Connection,
+      options?: SendTransactionOptions
     ) => {
       setIsCreatingPost(true);
       setCreatePostError(null);
@@ -25,9 +28,9 @@ const useCreatePost = (sdk: SDK) => {
         const ixMethodBuilder = await createPostIxMethodBuilder(metadataUri, profileAccount, userAccount, owner, sessionAccount);
         const tx = await ixMethodBuilder?.transaction();
 
-        if (signAndSendTransaction) {
+        if (sendTransaction) {
           if (tx) {
-            return await signAndSendTransaction(tx);
+            return await sendTransaction(tx, connection, options);
           }
         } else {
           return await ixMethodBuilder?.rpc();

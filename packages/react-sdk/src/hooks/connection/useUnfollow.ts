@@ -1,8 +1,9 @@
 import { SDK } from "@gumhq/sdk";
 import { useState, useCallback } from "react";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction, Connection } from "@solana/web3.js";
+import { SendTransactionOptions } from '@solana/wallet-adapter-base';
 
-type SignAndSendTransactionFn = <T extends Transaction>(transactions: T | T[]) => Promise<string[]>;
+type sendTransactionFn = <T extends Transaction>(transaction: T, connection?: Connection, options?: SendTransactionOptions) => Promise<string>;
 
 const useUnfollow = (sdk: SDK) => {
   const [connectionLoading, setConnectionLoading] = useState(false);
@@ -17,7 +18,9 @@ const useUnfollow = (sdk: SDK) => {
       owner: PublicKey,
       sessionAccount?: PublicKey,
       refundReceiver: PublicKey = owner,
-      signAndSendTransaction?: SignAndSendTransactionFn
+      sendTransaction?: sendTransactionFn,
+      connection?: Connection,
+      options?: SendTransactionOptions
     ) => {
       setConnectionLoading(true);
       setConnectionError(null);
@@ -34,10 +37,10 @@ const useUnfollow = (sdk: SDK) => {
         );
         
         if (ixMethodBuilder) {
-          if (signAndSendTransaction) {
+          if (sendTransaction) {
             const tx = await ixMethodBuilder.transaction();
             if (tx) {
-              return await signAndSendTransaction(tx);
+              return await sendTransaction(tx, connection, options);
             }
           } else {
             return await ixMethodBuilder.rpc();

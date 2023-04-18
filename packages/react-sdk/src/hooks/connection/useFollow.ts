@@ -1,8 +1,9 @@
 import { SDK } from "@gumhq/sdk";
 import { useState, useCallback } from "react";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction, Connection } from "@solana/web3.js";
+import { SendTransactionOptions } from '@solana/wallet-adapter-base';
 
-type SignAndSendTransactionFn = <T extends Transaction>(transactions: T | T[]) => Promise<string[]>;
+type sendTransactionFn = <T extends Transaction>(transaction: T, connection?: Connection, options?: SendTransactionOptions) => Promise<string>;
 
 const useFollow = (sdk: SDK) => {
   const [connectionPDA, setConnectionPDA] = useState<PublicKey | null>(null);
@@ -16,7 +17,9 @@ const useFollow = (sdk: SDK) => {
       userAccount: PublicKey,
       owner: PublicKey,
       sessionAccount?: PublicKey,
-      signAndSendTransaction?: SignAndSendTransactionFn
+      sendTransaction?: sendTransactionFn,
+      connection?: Connection,
+      options?: SendTransactionOptions
     ) => {
       setConnectionLoading(true);
       setConnectionError(null);
@@ -31,10 +34,10 @@ const useFollow = (sdk: SDK) => {
         );
         
         if (ixMethodBuilder) {
-          if (signAndSendTransaction) {
+          if (sendTransaction) {
             const tx = await ixMethodBuilder.transaction();
             if (tx) {
-              return await signAndSendTransaction(tx);
+              return await sendTransaction(tx, connection, options);
             }
           } else {
             return await ixMethodBuilder.rpc();
