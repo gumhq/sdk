@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
-import { PublicKey, Keypair, Cluster } from "@solana/web3.js";
+import { PublicKey, Keypair, Cluster, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
 import { BN } from "@project-serum/anchor";
 import gpl_session_idl from "./idl/gpl_session.json";
 import { GPLSESSION_PROGRAMS } from "./constants";
@@ -51,10 +51,10 @@ export class SessionTokenManager {
     };
   }
 
-  public async createSession(sessionSignerKeypair: Keypair, targetProgramPublicKey: PublicKey, ownerPublicKey: PublicKey, validUntilTimestamp: number | null = null) {
+  public async createSession(sessionSignerKeypair: Keypair, targetProgramPublicKey: PublicKey, ownerPublicKey: PublicKey, topUp = false, validUntilTimestamp: number | null = null) {
     try {
-      const { instructionMethodBuilder, sessionPDA } = await this.create(sessionSignerKeypair, targetProgramPublicKey, ownerPublicKey, false, validUntilTimestamp);
-      
+      const { instructionMethodBuilder, sessionPDA } = await this.create(sessionSignerKeypair, targetProgramPublicKey, ownerPublicKey, topUp, validUntilTimestamp);
+
       return {
         instructionMethodBuilder: instructionMethodBuilder,
         sessionPDA: sessionPDA,
@@ -65,8 +65,36 @@ export class SessionTokenManager {
     }
   }
 
-  public async revoke(sessionAccount: PublicKey, owner: PublicKey) {
+  public async revoke(sessionSignerKeypair: Keypair, sessionAccount: PublicKey, owner: PublicKey) {
     try {
+      // Transfer all SOL from sessionSigner to owner
+      const sessionWallet = new anchor.Wallet(sessionSignerKeypair);
+      const sessionSignerPublicKey = sessionSignerKeypair.publicKey;
+      const sessionSignerSolanaBalance = await this.provider.connection.getBalance(sessionSignerPublicKey);
+      if (sessionSignerSolanaBalance > 0) {
+        const transferTx = new Transaction().add(anchor.web3.SystemProgram.transfer({
+          fromPubkey: sessionSignerPublicKey,
+          toPubkey: owner,
+          lamports: sessionSignerSolanaBalance,
+        }));
+        transferTx.feePayer = sessionSignerPublicKey;
+        transferTx.recentBlockhash = (await this.provider.connection.getLatestBlockhash()).blockhash;
+        const estimatedFee = await transferTx.getEstimatedFee(this.provider.connection);
+
+        if (sessionSignerSolanaBalance > estimatedFee) {
+          const transaction = new Transaction().add(anchor.web3.SystemProgram.transfer({
+            fromPubkey: sessionSignerPublicKey,
+            toPubkey: owner,
+            lamports: sessionSignerSolanaBalance - estimatedFee,
+          }));
+          transaction.feePayer = sessionSignerPublicKey;
+          transaction.recentBlockhash = (await this.provider.connection.getLatestBlockhash()).blockhash;
+          await sessionWallet.signTransaction(transaction);
+          await sendAndConfirmTransaction(this.provider.connection, transaction, [sessionSignerKeypair]);
+        }
+      }
+
+      // Revoke session
       return this.program.methods.revokeSession()
         .accounts({
           sessionToken: sessionAccount,
