@@ -17,9 +17,9 @@ export interface SessionWalletInterface {
   signTransaction: (<T extends Transaction>(transaction: T) => Promise<T>) | undefined;
   signAllTransactions: (<T extends Transaction >(transactions: T[]) => Promise<T[]>) | undefined;
   signMessage: ((message: Uint8Array) => Promise<Uint8Array>) | undefined;
-  sendTransaction: (<T extends Transaction>(transaction: T, connection: Connection, options: SendTransactionOptions) => Promise<string>) | undefined;
-  signAndSendTransaction: (<T extends Transaction>(transactions: T | T[], connection: Connection, options: SendTransactionOptions) => Promise<string[]>) | undefined;
-  createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number) => Promise<{ sessionToken: string; publicKey: string; } | undefined>;
+  sendTransaction: (<T extends Transaction>(transaction: T, connection?: Connection, options?: SendTransactionOptions) => Promise<string>) | undefined;
+  signAndSendTransaction: (<T extends Transaction>(transactions: T | T[], connection?: Connection, options?: SendTransactionOptions) => Promise<string[]>) | undefined;
+  createSession: (targetProgram: PublicKey, topUp: boolean, validUntil?: number, sessionCreatedCallback?: (sessionInfo: { sessionToken: string; publicKey: string; }) => void) => Promise<SessionWalletInterface | undefined>;
   revokeSession: () => Promise<string | null>;
   getSessionToken: () => Promise<string | null>;
 }
@@ -35,6 +35,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
   const [, forceUpdate] = useState({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const sessionConnection = connection;
 
   const sdk = new SessionTokenManager(wallet, connection, cluster)
 
@@ -132,12 +133,16 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
 
   const sendTransaction = async (
     transaction: Transaction,
-    connection: Connection,
+    connection?: Connection,
     options: SendTransactionOptions = {}
   ): Promise<string> => {
     return withLoading(async () => {
       const keypair = keypairRef.current;
       const sessionToken = sessionTokenRef.current;
+
+      if (!connection) {
+        connection = sessionConnection;
+      }
 
       if (!keypair || !sessionToken) {
         throw new Error(
@@ -166,7 +171,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
         transaction.partialSign(...signers);
       }
 
-      transaction.partialSign(keypair);
+      transaction = await signTransaction(transaction);
 
       const txid = await connection.sendRawTransaction(
         transaction.serialize(),
@@ -176,11 +181,13 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
     });
   };
 
-  const signAndSendTransaction = async (transaction: Transaction | Transaction[], connection: Connection, options: SendTransactionOptions = {}): Promise<string[]> => {
+  const signAndSendTransaction = async (transaction: Transaction | Transaction[], connection?: Connection, options: SendTransactionOptions = {}): Promise<string[]> => {
     return withLoading(async () => {
+      if (!connection) {
+        connection = sessionConnection;
+      }
       const transactionsArray = Array.isArray(transaction) ? transaction : [transaction];
-      const signedTransactions = await signAllTransactions(transactionsArray);
-      const txids = await Promise.all(signedTransactions.map((signedTransaction) => sendTransaction(signedTransaction, connection, options)));
+      const txids = await Promise.all(transactionsArray.map((signedTransaction) => sendTransaction(signedTransaction, connection, options)));
       return txids;
     });
   };
@@ -231,7 +238,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
     return null;
   };
 
-  const createSession = async (targetProgramPublicKey: PublicKey, topUp = false, expiryInMinutes = 60) => {
+  const createSession = async (targetProgramPublicKey: PublicKey, topUp = false, expiryInMinutes = 60, sessionCreatedCallback?: (sessionInfo: { sessionToken: string; publicKey: string; }) => void): Promise<SessionWalletInterface> => {
     return withLoading(async () => {
       try {
         
@@ -293,13 +300,45 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
 
         sessionTokenRef.current = sessionTokenString;
         triggerRerender();
+
+        if (!sessionTokenRef.current) {
+          console.error("Session token not generated.");
+        }
+
+        if (sessionCreatedCallback) {
+          sessionCreatedCallback({ sessionToken: sessionTokenRef.current, publicKey: sessionSignerPublicKey.toBase58() });
+        }
+
         return {
+          ownerPublicKey: wallet.publicKey,
+          isLoading: false,
+          error: null,
           sessionToken: sessionTokenRef.current,
-          publicKey: sessionSignerPublicKey.toBase58(),
+          publicKey: sessionSignerPublicKey,
+          signMessage,
+          signTransaction,
+          signAllTransactions,
+          signAndSendTransaction,
+          sendTransaction,
         };
       } catch (error: any) {
         console.error("Error creating session:", error);
         setError(error);
+        return {
+          publicKey: wallet.publicKey,
+          ownerPublicKey: null,
+          isLoading: false,
+          error: error.message,
+          sessionToken: null,
+          signTransaction: null,
+          signAllTransactions: null,
+          signMessage: null,
+          sendTransaction: null,
+          signAndSendTransaction: null,
+          getSessionToken: null,
+          createSession: null,
+          revokeSession: null,
+        };
       }
     });
   };
