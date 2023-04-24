@@ -1,3 +1,14 @@
+## [2.0.3](https://github.com/gumhq/sdk/compare/v1.0.10...v2.0.3) (2023-04-20)
+
+### Features
+
+- **session:** transfer remaining session keypair topUp balance when revoking session for node sdk ([b53fb74](https://github.com/gumhq/sdk/commit/b53fb74ea1f95b9810815d4a464e5967fe15d6e5))
+
+## [2.0.1]()
+
+- setup typedoc for all packages in monorepo ([3265149](https://github.com/gumhq/sdk/commit/3265149e0b1eaf6232bcab92b3ff672c2a58d5e0))
+- update branch name to master in GA workflow for typedoc ([ea3f6ff](https://github.com/gumhq/sdk/commit/ea3f6ff29899359f05ef74813e85c7e32cb1e88a))
+
 ## [1.0.13](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.13) (2023-03-09)
 
 ### Bug Fixes

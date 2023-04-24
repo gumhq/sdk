@@ -1,3 +1,16 @@
+## [2.0.3](https://github.com/gumhq/sdk/compare/v1.0.10...v2.0.3) (2023-04-20)
+
+### Features
+
+- **session:** add support for callback function in createSession and updated return type ([39340fd](https://github.com/gumhq/sdk/commit/39340fdab8340b5de762213476e0b9ec4e77ae95))
+- **session:** added state in session context ([a77b16d](https://github.com/gumhq/sdk/commit/a77b16d7acc7520df7a3569f74052a79edc354ea))
+- **session:** enhance sendTransaction and signAndSendTransaction functions in useSessionKeyManager hook ([#21](https://github.com/gumhq/sdk/issues/21)) ([1294ea1](https://github.com/gumhq/sdk/commit/1294ea19de6f2dba759a6b7c8ef95d7afecf4747))
+- **session:** include ownerPublicKey in useSessionKeyManager hook ([4408715](https://github.com/gumhq/sdk/commit/4408715f6aea90f2ecd6f9d10bb4bc1ff3dbefbc))
+- **session:** transfer remaining session keypair topUp balance when revoking session ([401c40b](https://github.com/gumhq/sdk/commit/401c40bff27f2fb7a172dcd64770a66b3b3ec532))
+- **storage:** add support for second storage account owner and make storage immutable for shadow storage ([811c87d](https://github.com/gumhq/sdk/commit/811c87d8a1c44adeaed4b51a0e595570584507eb))
+- **uploader:** add UploaderProvider and UploaderContext ([28ec0f1](https://github.com/gumhq/sdk/commit/28ec0f116fca5646d036a02428c66e86546fe90d))
+- **uploader:** pass wallet param while handling upload ([0b1192c](https://github.com/gumhq/sdk/commit/0b1192c018d179b4ac0cd8581250513215b1c972))
+
 ## [1.0.9](https://github.com/gumhq/sdk/compare/v1.0.10...v1.0.9) (2023-03-09)
 
 ### Features
