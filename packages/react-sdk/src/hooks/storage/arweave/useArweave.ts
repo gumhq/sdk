@@ -24,7 +24,7 @@ export const useArweaveStorage = (
   cluster: "devnet" | "mainnet-beta"
 ): ArweaveStorageHook => {
 
-  const BUNDLR_URL = cluster === 'devnet' ? 'https://devnet.bundlr.network' : 'http://node2.bundlr.network';
+  const BUNDLR_URL = cluster === 'devnet' ? 'https://devnet.bundlr.network' : 'https://node2.bundlr.network';
 
   const initializeBundlr = async (wallet: WalletContextState | SessionWalletInterface) => {
     if (isSessionWallet(wallet) && !wallet.sessionToken) {
