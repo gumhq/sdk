@@ -24,7 +24,7 @@ export const useArweaveStorage = (
   cluster: "devnet" | "mainnet-beta"
 ): ArweaveStorageHook => {
 
-  const BUNDLR_URL = cluster === 'devnet' ? 'https://devnet.bundlr.network' : 'http://node1.bundlr.network';
+  const BUNDLR_URL = cluster === 'devnet' ? 'https://devnet.bundlr.network' : 'http://node2.bundlr.network';
 
   const initializeBundlr = async (wallet: WalletContextState | SessionWalletInterface) => {
     if (isSessionWallet(wallet) && !wallet.sessionToken) {
@@ -67,26 +67,38 @@ export const useArweaveStorage = (
       if (typeof data === 'object') {
         data = JSON.stringify(data);
       }
-      const price = await bundlr.getPrice(data.length);
-      const minimumFunds = price.multipliedBy(1);
-      const balance = await bundlr.getBalance(publicKey.toBase58());
+      
+      const transaction = bundlr.createTransaction(data);
+      try {
+        await transaction.sign();
+        await transaction.upload();
+      } catch (e: any) {
+        if (e.message.includes("Not enough funds to send data")) {
+          const price = await bundlr.getPrice(data.length);
+          const minimumFunds = price.multipliedBy(1);
+          const balance = await bundlr.getBalance(publicKey.toBase58());
 
-      if (balance.isLessThan(minimumFunds)) {
-        await bundlr.fund(minimumFunds);
+          if (balance.isLessThan(minimumFunds)) {
+            await bundlr.fund(minimumFunds);
+          }
+
+          // Retry signing and uploading after funding
+          await transaction.sign();
+          await transaction.upload();
+        } else {
+          throw e;
+        }
       }
 
-      const transaction = bundlr.createTransaction(data);
-      await transaction.sign();
-      await transaction.upload();
       const id = transaction.id;
 
       if (!id) {
         throw new Error('Transaction ID not found');
       }
 
-    const url = `https://arweave.net/${id}`;
-    const signature = transaction.signature;
-    return { url, signature, error: null };
+      const url = `https://arweave.net/${id}`;
+      const signature = transaction.signature;
+      return { url, signature, error: null };
     }),
     [withErrorHandling]
   );
