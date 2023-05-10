@@ -3,9 +3,9 @@ import * as anchor from "@project-serum/anchor";
 import { gql } from "graphql-request";
 
 export interface GraphQLConnection {
-  fromprofile: string;
-  toprofile: string;
-  cl_pubkey: string;
+  from_profile: string;
+  to_profile: string;
+  address: string;
 }
 
 export class Connection {
@@ -68,60 +68,65 @@ export class Connection {
   public async getAllConnections(): Promise<GraphQLConnection[]> {
     const query = gql`
       query GetAllConnections {
-      gum_0_1_0_decoded_connection {
-        toprofile
-        fromprofile
-        cl_pubkey
+        connection {
+          from_profile
+          to_profile
+          address
+          slot_created_at
+          slot_updated_at
+        }
       }
     `;
-    const result = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_connection: GraphQLConnection[] }>(query);
-    return result.gum_0_1_0_decoded_connection;
+    const result = await this.sdk.gqlClient.request<{ connection: GraphQLConnection[] }>(query);
+    return result.connection;
   }
 
   public async getConnectionsByUser(userPubKey: anchor.web3.PublicKey): Promise<GraphQLConnection[]> {
     const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
-    const profilePDAs = profiles.map((p) => p.cl_pubkey) as string[];
+    const profilePDAs = profiles.map((p) => p.address) as string[];
     const query = gql`
       query GetConnectionsByUser {
-        gum_0_1_0_decoded_connection(where: {fromprofile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
-          fromprofile
-          toprofile
-          cl_pubkey
+        connection(where: {from_profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+          from_profile
+          to_profile
+          address
+          slot_created_at
+          slot_updated_at
         }
       }
     `;
-    const result = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_connection: GraphQLConnection[] }>(query);
-    return result.gum_0_1_0_decoded_connection;
+    const result = await this.sdk.gqlClient.request<{ connection: GraphQLConnection[] }>(query);
+    return result.connection;
   }
 
   public async getFollowersByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
     const query = gql`
       query GetFollowersByProfile ($profileAccount: String!) {
-        gum_0_1_0_decoded_connection(where: {toprofile: {_eq: $profileAccount}}) {
-          fromprofile
+        connection(where: {to_profile: {_eq: $profileAccount}}) {
+          from_profile
         }
       }`;
     const variables = {
       profileAccount: profileAccount.toBase58(),
     };
-    const result = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_connection: { fromprofile: string }[] }>(query, variables);
-    const followers = result.gum_0_1_0_decoded_connection.map((follower) => follower.fromprofile);
+    const result = await this.sdk.gqlClient.request<{ connection: { from_profile: string }[] }>(query, variables);
+    const followers = result.connection.map((follower) => follower.from_profile);
     return followers;
   }
 
   public async getFollowingsByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
     const query = gql`
       query GetFollowingsByProfile ($profileAccount: String!) {
-        gum_0_1_0_decoded_connection(where: {fromprofile: {_eq: $profileAccount}}) {
-          toprofile
+        connection(where: {from_profile: {_eq: $profileAccount}}) {
+          to_profile
         }
       }
     `;
     const variables = {
       profileAccount: profileAccount.toBase58(),
     };
-    const result = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_connection: { toprofile: string }[] }>(query, variables);
-    const followings = result.gum_0_1_0_decoded_connection.map((following) => following.toprofile);
+    const result = await this.sdk.gqlClient.request<{ connection: { to_profile: string }[] }>(query, variables);
+    const followings = result.connection.map((following) => following.to_profile);
     return followings;
   }
 

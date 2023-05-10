@@ -5,8 +5,8 @@ import { gql } from "graphql-request";
 
 export interface GumDecodedUser {
   authority: string;
-  cl_pubkey: string;
-  randomhash: number[];
+  address: string;
+  random_hash: number[];
 }
 
 export class User {
@@ -47,8 +47,8 @@ export class User {
   public async getOrCreate(owner: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> {
     try {
       const user = await this.getUser(owner);
-      if (user?.authority && user?.cl_pubkey && user?.randomhash) {
-        const { cl_pubkey: userPDAstr } = user;
+      if (user?.authority && user?.address && user?.random_hash) {
+        const { address: userPDAstr } = user;
         return new anchor.web3.PublicKey(userPDAstr);
       }
 
@@ -109,45 +109,51 @@ export class User {
   public async getUser(owner: anchor.web3.PublicKey): Promise<GumDecodedUser> {
     const query = gql`
       query GetUser ($owner: String!) {
-        gum_0_1_0_decoded_user(where: { authority: { _eq: $owner } }) {
+        user(where: { authority: { _eq: $owner } }) {
           authority
-          cl_pubkey
-          randomhash
+          address
+          random_hash
+          slot_created_at
+          slot_updated_at
         }
       }
     `;
     const variables = {
       owner: owner.toBase58(),
     };
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_user: GumDecodedUser[] }>(query, variables);
-    return data.gum_0_1_0_decoded_user[0];
+    const data = await this.sdk.gqlClient.request<{ user: GumDecodedUser[] }>(query, variables);
+    return data.user[0];
   }
 
   public async getAllUsersAccounts(): Promise<GumDecodedUser[]> {
     const query = gql`
       query AllUsersAccounts {
-        gum_0_1_0_decoded_user {
+        user {
           authority
-          cl_pubkey
-          randomhash
+          address
+          random_hash
+          slot_created_at
+          slot_updated_at
         }
       }
     `;
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_user: GumDecodedUser[] }>(query);
-    return data.gum_0_1_0_decoded_user;
+    const data = await this.sdk.gqlClient.request<{ user: GumDecodedUser[] }>(query);
+    return data.user;
   }
 
   public async getUserAccountsByAuthority(userPubkey: anchor.web3.PublicKey): Promise<GumDecodedUser[]> {
     const query = gql`
       query UserAccounts {
-        gum_0_1_0_decoded_user(where: { authority: { _eq: "${userPubkey}" } }) {
+        user(where: { authority: { _eq: "${userPubkey}" } }) {
           authority
-          cl_pubkey
-          randomhash
+          address
+          random_hash
+          slot_created_at
+          slot_updated_at
         }
       }
     `;
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_user: GumDecodedUser[] }>(query);
-    return data.gum_0_1_0_decoded_user;
+    const data = await this.sdk.gqlClient.request<{ user: GumDecodedUser[] }>(query);
+    return data.user;
   }
 }

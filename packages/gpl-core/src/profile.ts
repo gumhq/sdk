@@ -2,12 +2,16 @@ import { SDK } from ".";
 import { gql } from "graphql-request";
 import * as anchor from "@project-serum/anchor";
 
+interface NamespaceData {
+  [key: string]: {};
+}
+
 export type Namespace = "Professional" | "Personal" | "Gaming" | "Degen";
 
 export interface GumDecodedProfile {
-  username: string;
-  namespace: string;
-  cl_pubkey: string;
+  user: string;
+  namespace: NamespaceData;
+  address: string;
 }
 
 export class Profile {
@@ -50,8 +54,8 @@ export class Profile {
     owner: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> {
     try {
       const profile = await this.getProfile(userAccount, namespace);
-      if (profile?.username && profile?.namespace && profile?.cl_pubkey) {
-        const { cl_pubkey: profilePDAstr } = profile;
+      if (profile?.user && profile?.namespace && profile?.address) {
+        const { address: profilePDAstr } = profile;
         return new anchor.web3.PublicKey(profilePDAstr);
       }
 
@@ -113,90 +117,104 @@ export class Profile {
   // GraphQL API methods
 
   public async getProfile(userAccount: anchor.web3.PublicKey, namespace: Namespace): Promise<GumDecodedProfile> {
-    const namespaceString = JSON.stringify({ [namespace.toLowerCase()]: {} });
     const query = gql`
-      query GetProfile ($namespace: String) {
-        gum_0_1_0_decoded_profile(
+      query GetProfile ($userAccount: String, $namespace: jsonb) {
+        profile(
           where: {
-            username: { _eq: "${userAccount}" },
+            user: { _eq: $userAccount },
             namespace: { _eq: $namespace }
           }
         ) {
-          username
+          address
           namespace
-          cl_pubkey
+          user
+          slot_created_at
+          slot_updated_at
         }
       }`;
-    const variables = { namespace: namespaceString };
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_profile: GumDecodedProfile[] }>(query, variables);
-    return data.gum_0_1_0_decoded_profile[0];
+
+    const variables = {
+      userAccount: userAccount.toBase58(),
+      namespace: { [namespace.toLowerCase()]: {} },
+    };
+
+    const data = await this.sdk.gqlClient.request<{ profile: GumDecodedProfile[] }>(query, variables);
+    return data.profile[0];
   }
 
   public async getAllProfiles(): Promise<GumDecodedProfile[]> {
     const query = gql`
       query AllProfiles {
-        gum_0_1_0_decoded_profile {
-          username
+        profile {
+          user
           namespace
-          cl_pubkey
+          address
+          slot_created_at
+          slot_updated_at
         }
       }`;
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_profile: GumDecodedProfile[] }>(query);
-    return data.gum_0_1_0_decoded_profile;
+    const data = await this.sdk.gqlClient.request<{ profile: GumDecodedProfile[] }>(query);
+    return data.profile;
   }
 
   public async getProfilesByUser(userPubkey: anchor.web3.PublicKey): Promise<GumDecodedProfile[]> {
     const users = await this.sdk.user.getUserAccountsByAuthority(userPubkey);
-    const userPDAs = users.map(user => user.cl_pubkey) as string[];
+    const userPDAs = users.map(user => user.address) as string[];
     const query = gql`
       query UserProfiles {
-        gum_0_1_0_decoded_profile(
-          where: {username: {_in: [${userPDAs.map(pda => `"${pda}"`).join(',')}] }}
+        profile(
+          where: {user: {_in: [${userPDAs.map(pda => `"${pda}"`).join(',')}] }}
         ) {
-          username
+          user
           namespace
-          cl_pubkey
+          address
+          slot_created_at
+          slot_updated_at
         }
       }
       `;
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_profile: GumDecodedProfile[] }>(query);
-    return data.gum_0_1_0_decoded_profile;
+    const data = await this.sdk.gqlClient.request<{ profile: GumDecodedProfile[] }>(query);
+    return data.profile;
   }
 
   public async getProfilesByNamespace(namespace: Namespace): Promise<GumDecodedProfile[]> {
-    const namespaceString = JSON.stringify({ [namespace.toLowerCase()]: {} });
+    const namespaceString = { [namespace.toLowerCase()]: {} };
     const query = gql`
-      query ProfilesByNamespace ($namespace: String) {
-        gum_0_1_0_decoded_profile(where: { namespace: { _eq: $namespace } }) {
-          username
+      query ProfilesByNamespace ($namespace: jsonb) {
+        profile(where: { namespace: { _eq: $namespace } }) {
+          user
           namespace
-          cl_pubkey
+          address
+          slot_created_at
+          slot_updated_at
         }
       }
     `;
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_profile: GumDecodedProfile[] }>(query, { namespace: namespaceString });
-    return data.gum_0_1_0_decoded_profile;
+    const data = await this.sdk.gqlClient.request<{ profile: GumDecodedProfile[] }>(query, { namespace: namespaceString });
+    return data.profile;
   }
 
   public async getProfilesByUserAndNamespace(userPubkey: anchor.web3.PublicKey, namespace: Namespace): Promise<GumDecodedProfile> {
     const users = await this.sdk.user.getUserAccountsByAuthority(userPubkey);
-    const userPDAs = users.map(user => user.cl_pubkey) as string[];
-    const namespaceString = JSON.stringify({ [namespace.toLowerCase()]: {} });
+    const userPDAs = users.map(user => user.address) as string[];
+    const namespaceString = { [namespace.toLowerCase()]: {} };
     const query = gql`
-      query ProfileByUserAndNamespace ($namespace: String) {
-        gum_0_1_0_decoded_profile(
+      query ProfileByUserAndNamespace ($namespace: jsonb) {
+        profile(
           where: {
-            username: {_in: [${userPDAs.map(pda => `"${pda}"`).join(',')}] },
+            user: {_in: [${userPDAs.map(pda => `"${pda}"`).join(',')}] },
             namespace: { _eq: $namespace }
           }
         ) {
-          username
+          user
           namespace
-          cl_pubkey
+          address
+          slot_created_at
+          slot_updated_at
         }
       }
     `;
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_profile: GumDecodedProfile[] }>(query, { namespace: namespaceString });
-    return data.gum_0_1_0_decoded_profile[0];
+    const data = await this.sdk.gqlClient.request<{ profile: GumDecodedProfile[] }>(query, { namespace: namespaceString });
+    return data.profile[0];
   }
 }

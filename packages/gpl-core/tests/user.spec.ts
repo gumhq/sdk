@@ -78,8 +78,8 @@ describe("User", async () => {
       expect(users.length).to.be.greaterThan(0);
       users.forEach(user => {
         expect(user).to.have.property("authority");
-        expect(user).to.have.property("cl_pubkey");
-        expect(user).to.have.property("randomhash");
+        expect(user).to.have.property("address");
+        expect(user).to.have.property("random_hash");
       });
     });
 
@@ -92,8 +92,8 @@ describe("User", async () => {
       expect(userAccount.length).to.be.greaterThan(0);
       userAccount.forEach(user => {
         expect(user).to.have.property("authority");
-        expect(user).to.have.property("cl_pubkey");
-        expect(user).to.have.property("randomhash");
+        expect(user).to.have.property("address");
+        expect(user).to.have.property("random_hash");
         expect(user.authority).to.equal(userPubKey.toBase58());
       });
     });

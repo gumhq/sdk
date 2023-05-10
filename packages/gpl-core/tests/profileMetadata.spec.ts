@@ -112,7 +112,7 @@ describe("ProfileMetadata", async () => {
       });
 
       it("should return a post with a metadataUri", async () => {
-        expect(profileMetadatas[0].metadatauri).to.be.a("string");
+        expect(profileMetadatas[0].metadata_uri).to.be.a("string");
       });
     });
 
@@ -132,7 +132,7 @@ describe("ProfileMetadata", async () => {
       });
 
       it("should return a post with a metadataUri", async () => {
-        expect(profileMetadatas[0].metadatauri).to.be.a("string");
+        expect(profileMetadatas[0].metadata_uri).to.be.a("string");
       });
     });
 
@@ -148,7 +148,7 @@ describe("ProfileMetadata", async () => {
       });
 
       it("should return a post with a metadataUri", async () => {
-        expect(profileMetadatas.metadatauri).to.be.a("string");
+        expect(profileMetadatas.metadata_uri).to.be.a("string");
       });
     });
   });

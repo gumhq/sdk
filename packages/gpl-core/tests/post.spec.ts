@@ -124,7 +124,7 @@ describe("Post", async () => {
       });
 
       it("should return a post with a metadataUri", async () => {
-        expect(posts[0].metadatauri).to.be.a("string");
+        expect(posts[0].metadata_uri).to.be.a("string");
       });
     });
 
@@ -144,7 +144,7 @@ describe("Post", async () => {
       });
 
       it("should return a post with a metadataUri", async () => {
-        expect(posts[0].metadatauri).to.be.a("string");
+        expect(posts[0].metadata_uri).to.be.a("string");
       });
     });
   });

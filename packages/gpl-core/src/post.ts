@@ -7,16 +7,16 @@ import { gql } from "graphql-request";
 import { Namespace } from "./profile";
 
 export interface GraphQLPost {
-  cl_pubkey: string;
+  address: string;
   metadata: string;
-  metadatauri: string;
+  metadata_uri: string;
   profile: string;
 }
 
 export interface GraphQLFeed {
-  cl_pubkey: string;
+  address: string;
   metadata: string;
-  metadatauri: string;
+  metadata_uri: string;
   profile: string;
   profile_metadata: string;
   profile_metadata_uri: string;
@@ -158,100 +158,112 @@ export class Post {
   public async getAllPosts(): Promise<GraphQLPost[]> {
     const query = gql`
       query GetAllPosts {
-        gum_0_1_0_decoded_post {
-          cl_pubkey
+        post {
+          address
           metadata
-          metadatauri
+          metadata_uri
           profile
+          slot_created_at
+          slot_updated_at
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
-    return data.gum_0_1_0_decoded_post;
+    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
+    return data.post;
   }
 
   public async getPostsByUser(userPubKey: anchor.web3.PublicKey): Promise<GraphQLPost[]> {
     const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
-    const profilePDAs = profiles.map((p) => p.cl_pubkey) as string[];
+    const profilePDAs = profiles.map((p) => p.address) as string[];
     const query = gql`
       query GetPostsByUser {
-        gum_0_1_0_decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
-          cl_pubkey
+        post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+          address
           metadata
-          metadatauri
+          metadata_uri
           profile
+          slot_created_at
+          slot_updated_at
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
-    return data.gum_0_1_0_decoded_post;
+    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
+    return data.post;
   }
 
   public async getPostsByProfile(profilePubKey: anchor.web3.PublicKey): Promise<GraphQLPost[]> {
     const query = gql`
       query GetPostsByProfile {
-        gum_0_1_0_decoded_post(where: {profile: {_eq: "${profilePubKey}"}}) {
-          cl_pubkey
+        post(where: {profile: {_eq: "${profilePubKey}"}}) {
+          address
           metadata
-          metadatauri
+          metadata_uri
           profile
+          slot_created_at
+          slot_updated_at
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
-    return data.gum_0_1_0_decoded_post;
+    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
+    return data.post;
   }
 
   public async getPostsByNamespace(namespace: Namespace): Promise<GraphQLPost[]> {
     const profiles = await this.sdk.profile.getProfilesByNamespace(namespace);
-    const profilePDAs = profiles.map((p) => p.cl_pubkey) as string[];
+    const profilePDAs = profiles.map((p) => p.address) as string[];
     const query = gql`
       query GetPostsByNamespace {
-        gum_0_1_0_decoded_post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
-          cl_pubkey
+        post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+          address
           metadata
-          metadatauri
+          metadata_uri
           profile
+          slot_created_at
+          slot_updated_at
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
-    return data.gum_0_1_0_decoded_post;
+    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
+    return data.post;
   }
 
   public async getPostsByFollowedUsers(profileAccount: anchor.web3.PublicKey): Promise<GraphQLPost[]> {
     const followedUsersProfileAccounts = await this.sdk.connection.getFollowingsByProfile(profileAccount);
     const query = gql`
       query GetPostsByFollowedUsers {
-        gum_0_1_0_decoded_post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
-          cl_pubkey
+        post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
+          address
           metadata
-          metadatauri
+          metadata_uri
           profile
+          slot_created_at
+          slot_updated_at
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
-    return data.gum_0_1_0_decoded_post;
+    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
+    return data.post;
   }
 
   public async getFeedsByFollowedUsers(profileAccount: anchor.web3.PublicKey): Promise<GraphQLFeed[]> {
     const followedUsersProfileAccounts = await this.sdk.connection.getFollowingsByProfile(profileAccount);
     const query = gql`
       query GetFeedsByFollowedUsers {
-        gum_0_1_0_decoded_post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
-          cl_pubkey
+        post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
+          address
           metadata
-          metadatauri
+          metadata_uri
           profile
+          slot_created_at
+          slot_updated_at
         }
       }
     `;
-    const data = await this.sdk.gqlClient.request<{ gum_0_1_0_decoded_post: GraphQLPost[] }>(query);
-    const feed = await Promise.all(data.gum_0_1_0_decoded_post.map(async (post: GraphQLPost) => {
+    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
+    const feed = await Promise.all(data.post.map(async (post: GraphQLPost) => {
       const profileData = await this.sdk.profileMetadata.getProfileMetadataByProfile(new anchor.web3.PublicKey(post.profile));
       return {
-        cl_pubkey: post.cl_pubkey,
+        address: post.address,
         metadata: post.metadata,
-        metadatauri: post.metadatauri,
+        metadata_uri: post.metadata_uri,
         profile: profileData.profile,
         profile_metadata: profileData.metadata,
-        profile_metadata_uri: profileData.metadatauri,
+        profile_metadata_uri: profileData.metadata_uri,
       };
     }));
     return feed;
