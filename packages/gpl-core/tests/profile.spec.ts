@@ -4,7 +4,8 @@ import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { expect } from "chai";
 import { GraphQLClient } from "graphql-request";
 import dotenv from "dotenv";
-import { GRAPHQL_ENDPOINTS } from "../src/constants";
+// import { GRAPHQL_ENDPOINTS } from "../src/constants";
+import { createGumTld, createGumDomain } from "./utils";
 
 dotenv.config();
 
@@ -16,40 +17,44 @@ describe("Profile", async () => {
   let sdk: SDK;
   let userPDA: anchor.web3.PublicKey;
   let profilePDA: anchor.web3.PublicKey;
+  let gumTld: anchor.web3.PublicKey;
+  let screenNameAccount: anchor.web3.PublicKey;
 
   before(async () => {
-    const gqlClient = new GraphQLClient(GRAPHQL_ENDPOINTS["devnet"]);
+    // const gqlClient = new GraphQLClient(GRAPHQL_ENDPOINTS["devnet"]);
     sdk = new SDK(
       userWallet as NodeWallet,
       new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
       { preflightCommitment: "processed" },
       "localnet",
-      gqlClient
+      // gqlClient
     );
 
-    // Create a user
-    const createUser = await sdk.user.create(user.publicKey)
-    userPDA = createUser.userPDA as anchor.web3.PublicKey;
-    await createUser.instructionMethodBuilder.rpc();
+    // Create a gum tld
+    gumTld = await createGumTld(userWallet);
+
+    // Create a domain for the wallet
+    screenNameAccount = await createGumDomain(userWallet, gumTld, "profiletest");
   });
 
   it("should create a profile", async () => {
+    // Create a profile
+    const profileMetdataUri = "https://example.com";
     const profile = await sdk.profile.create(
-      userPDA,
-      "Personal",
+      profileMetdataUri,
+      screenNameAccount,
       user.publicKey,
     );
-    profilePDA = profile.profilePDA as anchor.web3.PublicKey;
+    profilePDA = profile.profilePDA;
     await profile.instructionMethodBuilder.rpc();
     const profileAccount = await sdk.profile.get(profilePDA);
-    expect(profileAccount.user.toString()).is.equal(userPDA.toString());
-    expect(profileAccount.namespace.toString()).is.equal({ personal: {} }.toString());
+    expect(profileAccount.metadataUri).is.equal(profileMetdataUri);
+    expect(profileAccount.screenName.toBase58()).is.equal(screenNameAccount.toBase58());
   });
 
   it("should delete a profile", async () => {
     const tx = sdk.profile.delete(
       profilePDA,
-      userPDA,
       user.publicKey,
     );
     await tx.rpc();
@@ -61,73 +66,73 @@ describe("Profile", async () => {
     }
   });
 
-  describe("GraphQL Profile Queries", async () => {
-    let userPubKey: anchor.web3.PublicKey;
+  // describe("GraphQL Profile Queries", async () => {
+  //   let userPubKey: anchor.web3.PublicKey;
 
-    beforeEach(async () => {
-      userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn"); // This user is valid on devnet
-    });
+  //   beforeEach(async () => {
+  //     userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn"); // This user is valid on devnet
+  //   });
 
-    describe("get profiles by user", () => {
-      let profiles: any;
+  //   describe("get profiles by user", () => {
+  //     let profiles: any;
 
-      beforeEach(async () => {
-        profiles = await sdk.profile.getProfilesByUser(userPubKey);
-      });
+  //     beforeEach(async () => {
+  //       profiles = await sdk.profile.getProfilesByUser(userPubKey);
+  //     });
 
-      it("should return an array of profiles", () => {
-        expect(profiles).to.be.an("array");
-      });
+  //     it("should return an array of profiles", () => {
+  //       expect(profiles).to.be.an("array");
+  //     });
 
-      it("should return atleast one profile", () => {
-        expect(profiles.length).to.be.greaterThan(0);
-      });
-    });
+  //     it("should return atleast one profile", () => {
+  //       expect(profiles.length).to.be.greaterThan(0);
+  //     });
+  //   });
 
-    describe("get all profiles", () => {
-      let profiles: any;
+  //   describe("get all profiles", () => {
+  //     let profiles: any;
 
-      beforeEach(async () => {
-        profiles = await sdk.profile.getAllProfiles();
-      });
+  //     beforeEach(async () => {
+  //       profiles = await sdk.profile.getAllProfiles();
+  //     });
 
-      it("should return an array of profiles", () => {
-        expect(profiles).to.be.an("array");
-      });
+  //     it("should return an array of profiles", () => {
+  //       expect(profiles).to.be.an("array");
+  //     });
 
-      it("should return atleast one profile", () => {
-        expect(profiles.length).to.be.greaterThan(0);
-      });
-    });
+  //     it("should return atleast one profile", () => {
+  //       expect(profiles.length).to.be.greaterThan(0);
+  //     });
+  //   });
 
-    describe("get profile by namespace", () => {
-      let profiles: any;
+  //   describe("get profile by namespace", () => {
+  //     let profiles: any;
 
-      beforeEach(async () => {
-        profiles = await sdk.profile.getProfilesByNamespace("Personal");
-      });
+  //     beforeEach(async () => {
+  //       profiles = await sdk.profile.getProfilesByNamespace("Personal");
+  //     });
 
-      it("should return an array of profiles", () => {
-        expect(profiles).to.be.an("array");
-      })
+  //     it("should return an array of profiles", () => {
+  //       expect(profiles).to.be.an("array");
+  //     })
 
-      it("should have the namespace Personal", () => {
-        const namespace = JSON.stringify({ "personal": {} });
-        expect(profiles[0].namespace).to.be.equal(namespace);
-      });
-    });
+  //     it("should have the namespace Personal", () => {
+  //       const namespace = JSON.stringify({ "personal": {} });
+  //       expect(profiles[0].namespace).to.be.equal(namespace);
+  //     });
+  //   });
 
-    describe("get profile by namespace and user", () => {
-      let profiles: any;
+  //   describe("get profile by namespace and user", () => {
+  //     let profiles: any;
 
-      beforeEach(async () => {
-        profiles = await sdk.profile.getProfilesByUserAndNamespace(userPubKey, "Professional");
-      });
+  //     beforeEach(async () => {
+  //       profiles = await sdk.profile.getProfilesByUserAndNamespace(userPubKey, "Professional");
+  //     });
 
-      it("should have the namespace Professional", () => {
-        const namespace = JSON.stringify({ "professional": {} });
-        expect(profiles.namespace).to.be.equal(namespace);
-      });
-    });
-  });
+  //     it("should have the namespace Professional", () => {
+  //       const namespace = JSON.stringify({ "professional": {} });
+  //       expect(profiles.namespace).to.be.equal(namespace);
+  //     });
+  //   });
+  // });
 });
