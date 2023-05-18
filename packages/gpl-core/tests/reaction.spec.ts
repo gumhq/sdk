@@ -2,6 +2,7 @@ import { SDK } from "../src";
 import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { expect } from "chai";
+import { createGumTld, createGumDomain } from "./utils";
 
 anchor.setProvider(anchor.AnchorProvider.env());
 const userWallet = (anchor.getProvider() as any).wallet;
@@ -9,7 +10,6 @@ const user = userWallet.payer;
 
 describe("Reaction", async () => {
   let sdk: SDK;
-  let userPDA: anchor.web3.PublicKey;
   let profilePDA: anchor.web3.PublicKey;
   let postPDA: anchor.web3.PublicKey;
   let reactionPDA: anchor.web3.PublicKey;
@@ -22,14 +22,20 @@ describe("Reaction", async () => {
       "localnet"
     );
 
-    // Create a user
-    const createUser = await sdk.user.create(user.publicKey)
-    userPDA = createUser.userPDA as anchor.web3.PublicKey;
-    await createUser.instructionMethodBuilder.rpc();
+    // Create a gum tld
+    const gumTld = await createGumTld(userWallet);
+
+    // Create a domain for the wallet
+    const screenNameAccount = await createGumDomain(userWallet, gumTld, "reactiontest");
 
     // Create a profile
-    const profile = await sdk.profile.create(userPDA, "Personal", user.publicKey);
-    profilePDA = profile.profilePDA as anchor.web3.PublicKey;
+    const profileMetdataUri = "https://example.com";
+    const profile = await sdk.profile.create(
+      profileMetdataUri,
+      screenNameAccount,
+      user.publicKey,
+    );
+    profilePDA = profile.profilePDA;
     await profile.instructionMethodBuilder.rpc();
 
     // Create a post
@@ -37,7 +43,6 @@ describe("Reaction", async () => {
     const post = await sdk.post.create(
       metadataUri,
       profilePDA,
-      userPDA,
       user.publicKey,
     );
     postPDA = post.postPDA as anchor.web3.PublicKey;
@@ -48,8 +53,7 @@ describe("Reaction", async () => {
     const reaction = await sdk.reaction.create(
       profilePDA,
       postPDA,
-      "Haha",
-      userPDA,
+      "🧈",
       user.publicKey,
     );
     reactionPDA = reaction.reactionPDA as anchor.web3.PublicKey;
@@ -58,7 +62,7 @@ describe("Reaction", async () => {
     const reactionAccount = await sdk.reaction.get(reactionPDA);
     expect(reactionAccount.toPost.toBase58()).to.equal(postPDA.toBase58());
     expect(reactionAccount.fromProfile.toBase58()).to.equal(profilePDA.toBase58());
-    expect(reactionAccount.reactionType.toString()).to.equal({ haha: {} }.toString());
+    expect(reactionAccount.reactionType.emoji?.emoji).to.equal("🧈");
   });
 
   it("should delete a reaction", async () => {
@@ -66,7 +70,6 @@ describe("Reaction", async () => {
       reactionPDA,
       postPDA,
       profilePDA,
-      userPDA,
       user.publicKey,
     );
     await reaction.rpc();

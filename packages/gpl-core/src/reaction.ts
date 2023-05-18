@@ -2,8 +2,6 @@ import { SDK } from ".";
 import * as anchor from "@project-serum/anchor";
 import { gql } from "graphql-request";
 
-export type ReactionType = "Like" | "Dislike" | "Love" | "Haha" | "Wow" | "Sad" | "Angry";
-
 export interface GraphQLReaction {
   from_profile: string;
   to_post: string;
@@ -25,8 +23,7 @@ export class Reaction {
   public async create(
     fromProfileAccount: anchor.web3.PublicKey,
     toPostAccount: anchor.web3.PublicKey,
-    reactionType: ReactionType,
-    userAccount: anchor.web3.PublicKey,
+    reactionType: string,
     owner: anchor.web3.PublicKey,
     sessionTokenAccount: anchor.web3.PublicKey | null = null) {
     const instructionMethodBuilder = this.sdk.program.methods
@@ -34,7 +31,6 @@ export class Reaction {
       .accounts({
         toPost: toPostAccount,
         fromProfile: fromProfileAccount,
-        user: userAccount,
         sessionToken: sessionTokenAccount,
         authority: owner,
       });
@@ -50,7 +46,6 @@ export class Reaction {
     reactionAccount: anchor.web3.PublicKey,
     toPostAccount: anchor.web3.PublicKey,
     fromProfileAccount: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
     sessionTokenAccount: anchor.web3.PublicKey | null = null,
     refundReceiver: anchor.web3.PublicKey = owner) {
@@ -60,44 +55,43 @@ export class Reaction {
         reaction: reactionAccount,
         toPost: toPostAccount,
         fromProfile: fromProfileAccount,
-        user: userAccount,
         authority: owner,
         sessionToken: sessionTokenAccount,
         refundReceiver,
       });
   }
 
-  // GraphQL Query methods
+  // // GraphQL Query methods
 
-  public async getAllReactions(): Promise<GraphQLReaction[]> {
-    const query = gql`
-      query GetAllReactions {
-        reaction {
-          to_post
-          reaction_type
-          from_profile
-          address
-          slot_created_at
-          slot_updated_at
-        }
-    }`;
-    const result = await this.sdk.gqlClient.request<{ reaction: GraphQLReaction[] }>(query);
-    return result.reaction;
-  }
+  // public async getAllReactions(): Promise<GraphQLReaction[]> {
+  //   const query = gql`
+  //     query GetAllReactions {
+  //       reaction {
+  //         to_post
+  //         reaction_type
+  //         from_profile
+  //         address
+  //         slot_created_at
+  //         slot_updated_at
+  //       }
+  //   }`;
+  //   const result = await this.sdk.gqlClient.request<{ reaction: GraphQLReaction[] }>(query);
+  //   return result.reaction;
+  // }
 
-  public async getReactionsByPost(postAccount: anchor.web3.PublicKey): Promise<GraphQLReaction[]> {
-    const query = gql`
-      query GetReactionsByPost($postAccount: String!) {
-        reaction(where: {to_post: {_eq: $postAccount}}) {
-          to_post
-          reaction_type
-          from_profile
-          address
-          slot_created_at
-          slot_updated_at
-        }
-    }`;
-    const result = await this.sdk.gqlClient.request<{ reaction: GraphQLReaction[] }>(query, { postAccount: postAccount.toBase58() });
-    return result.reaction;
-  }
+  // public async getReactionsByPost(postAccount: anchor.web3.PublicKey): Promise<GraphQLReaction[]> {
+  //   const query = gql`
+  //     query GetReactionsByPost($postAccount: String!) {
+  //       reaction(where: {to_post: {_eq: $postAccount}}) {
+  //         to_post
+  //         reaction_type
+  //         from_profile
+  //         address
+  //         slot_created_at
+  //         slot_updated_at
+  //       }
+  //   }`;
+  //   const result = await this.sdk.gqlClient.request<{ reaction: GraphQLReaction[] }>(query, { postAccount: postAccount.toBase58() });
+  //   return result.reaction;
+  // }
 } 
