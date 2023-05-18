@@ -22,7 +22,6 @@ export class Connection {
   public async create(
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
     sessionTokenAccount: anchor.web3.PublicKey | null = null) {
     const instructionMethodBuilder = this.sdk.program.methods
@@ -30,7 +29,6 @@ export class Connection {
       .accounts({
         fromProfile: fromProfile,
         toProfile: toProfile,
-        user: userAccount,
         sessionToken: sessionTokenAccount,
         authority: owner,
       });
@@ -46,7 +44,6 @@ export class Connection {
     connectionAccount: anchor.web3.PublicKey,
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
     sessionTokenAccount: anchor.web3.PublicKey | null = null,
     refundReceiver: anchor.web3.PublicKey = owner) {
@@ -56,78 +53,76 @@ export class Connection {
         connection: connectionAccount,
         fromProfile: fromProfile,
         toProfile: toProfile,
-        user: userAccount,
         sessionToken: sessionTokenAccount,
         authority: owner,
         refundReceiver: refundReceiver,
       });
   }
 
-  // GraphQL Query methods
+  // // GraphQL Query methods
 
-  public async getAllConnections(): Promise<GraphQLConnection[]> {
-    const query = gql`
-      query GetAllConnections {
-        connection {
-          from_profile
-          to_profile
-          address
-          slot_created_at
-          slot_updated_at
-        }
-      }
-    `;
-    const result = await this.sdk.gqlClient.request<{ connection: GraphQLConnection[] }>(query);
-    return result.connection;
-  }
+  // public async getAllConnections(): Promise<GraphQLConnection[]> {
+  //   const query = gql`
+  //     query GetAllConnections {
+  //       connection {
+  //         from_profile
+  //         to_profile
+  //         address
+  //         slot_created_at
+  //         slot_updated_at
+  //       }
+  //     }
+  //   `;
+  //   const result = await this.sdk.gqlClient.request<{ connection: GraphQLConnection[] }>(query);
+  //   return result.connection;
+  // }
 
-  public async getConnectionsByUser(userPubKey: anchor.web3.PublicKey): Promise<GraphQLConnection[]> {
-    const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
-    const profilePDAs = profiles.map((p) => p.address) as string[];
-    const query = gql`
-      query GetConnectionsByUser {
-        connection(where: {from_profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
-          from_profile
-          to_profile
-          address
-          slot_created_at
-          slot_updated_at
-        }
-      }
-    `;
-    const result = await this.sdk.gqlClient.request<{ connection: GraphQLConnection[] }>(query);
-    return result.connection;
-  }
+  // public async getConnectionsByUser(userPubKey: anchor.web3.PublicKey): Promise<GraphQLConnection[]> {
+  //   const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
+  //   const profilePDAs = profiles.map((p) => p.address) as string[];
+  //   const query = gql`
+  //     query GetConnectionsByUser {
+  //       connection(where: {from_profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+  //         from_profile
+  //         to_profile
+  //         address
+  //         slot_created_at
+  //         slot_updated_at
+  //       }
+  //     }
+  //   `;
+  //   const result = await this.sdk.gqlClient.request<{ connection: GraphQLConnection[] }>(query);
+  //   return result.connection;
+  // }
 
-  public async getFollowersByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
-    const query = gql`
-      query GetFollowersByProfile ($profileAccount: String!) {
-        connection(where: {to_profile: {_eq: $profileAccount}}) {
-          from_profile
-        }
-      }`;
-    const variables = {
-      profileAccount: profileAccount.toBase58(),
-    };
-    const result = await this.sdk.gqlClient.request<{ connection: { from_profile: string }[] }>(query, variables);
-    const followers = result.connection.map((follower) => follower.from_profile);
-    return followers;
-  }
+  // public async getFollowersByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
+  //   const query = gql`
+  //     query GetFollowersByProfile ($profileAccount: String!) {
+  //       connection(where: {to_profile: {_eq: $profileAccount}}) {
+  //         from_profile
+  //       }
+  //     }`;
+  //   const variables = {
+  //     profileAccount: profileAccount.toBase58(),
+  //   };
+  //   const result = await this.sdk.gqlClient.request<{ connection: { from_profile: string }[] }>(query, variables);
+  //   const followers = result.connection.map((follower) => follower.from_profile);
+  //   return followers;
+  // }
 
-  public async getFollowingsByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
-    const query = gql`
-      query GetFollowingsByProfile ($profileAccount: String!) {
-        connection(where: {from_profile: {_eq: $profileAccount}}) {
-          to_profile
-        }
-      }
-    `;
-    const variables = {
-      profileAccount: profileAccount.toBase58(),
-    };
-    const result = await this.sdk.gqlClient.request<{ connection: { to_profile: string }[] }>(query, variables);
-    const followings = result.connection.map((following) => following.to_profile);
-    return followings;
-  }
-
+  // public async getFollowingsByProfile(profileAccount: anchor.web3.PublicKey): Promise<string[]> {
+  //   const query = gql`
+  //     query GetFollowingsByProfile ($profileAccount: String!) {
+  //       connection(where: {from_profile: {_eq: $profileAccount}}) {
+  //         to_profile
+  //       }
+  //     }
+  //   `;
+  //   const variables = {
+  //     profileAccount: profileAccount.toBase58(),
+  //   };
+  //   const result = await this.sdk.gqlClient.request<{ connection: { to_profile: string }[] }>(query, variables);
+  //   const followings = result.connection.map((following) => following.to_profile);
+  //   return followings;
+  // }
 }
