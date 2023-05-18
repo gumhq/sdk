@@ -12,6 +12,7 @@ import gpl_core_idl from "./idl/gpl_core.json";
 import { GraphQLClient } from "graphql-request";
 import { SessionTokenManager } from "./sessionTokenManager";
 import { PostMetadata } from "./postMetadata";
+import { GumNameService } from "./nameservice";
 
 export {
   GPLCORE_PROGRAMS,
@@ -26,6 +27,7 @@ export {
   GraphQLReaction,
   SessionTokenManager,
   PostMetadata,
+  GumNameService,
 };
 
 export class SDK {
