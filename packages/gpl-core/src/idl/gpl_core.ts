@@ -1,12 +1,12 @@
 export type GplCore = {
-  "version": "0.1.0",
+  "version": "1.0.0",
   "name": "gpl_core",
   "instructions": [
     {
-      "name": "createUser",
+      "name": "createProfile",
       "accounts": [
         {
-          "name": "user",
+          "name": "profile",
           "isMut": true,
           "isSigner": false,
           "pda": {
@@ -14,7 +14,7 @@ export type GplCore = {
               {
                 "kind": "const",
                 "type": "string",
-                "value": "user"
+                "value": "profile"
               },
               {
                 "kind": "arg",
@@ -28,6 +28,14 @@ export type GplCore = {
               }
             ]
           }
+        },
+        {
+          "name": "screenName",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK that this PDA is either SNS, ANS or GPL Nameservice"
+          ]
         },
         {
           "name": "authority",
@@ -49,104 +57,15 @@ export type GplCore = {
               32
             ]
           }
+        },
+        {
+          "name": "metadataUri",
+          "type": "string"
         }
       ]
     },
     {
-      "name": "updateUser",
-      "accounts": [
-        {
-          "name": "user",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "newAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "deleteUser",
-      "accounts": [
-        {
-          "name": "user",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "createProfile",
+      "name": "updateProfile",
       "accounts": [
         {
           "name": "profile",
@@ -160,31 +79,6 @@ export type GplCore = {
                 "value": "profile"
               },
               {
-                "kind": "arg",
-                "type": "string",
-                "path": "namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
                 "kind": "account",
                 "type": {
                   "array": [
@@ -192,8 +86,8 @@ export type GplCore = {
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           },
@@ -202,19 +96,22 @@ export type GplCore = {
           ]
         },
         {
+          "name": "screenName",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK that this PDA is either SNS, ANS or GPL Nameservice and is owned by the user"
+          ]
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": [
         {
-          "name": "namespace",
+          "name": "metadataUri",
           "type": "string"
         }
       ]
@@ -236,44 +133,13 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "profile.user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           },
@@ -285,307 +151,6 @@ export type GplCore = {
           "name": "authority",
           "isMut": true,
           "isSigner": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "createProfileMetadata",
-      "accounts": [
-        {
-          "name": "profileMetadata",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile_metadata"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "profile"
-              }
-            ]
-          }
-        },
-        {
-          "name": "profile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "metadataUri",
-          "type": "string"
-        }
-      ]
-    },
-    {
-      "name": "updateProfileMetadata",
-      "accounts": [
-        {
-          "name": "profileMetadata",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile_metadata"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "profile"
-              }
-            ]
-          },
-          "relations": [
-            "profile"
-          ]
-        },
-        {
-          "name": "profile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "metadataUri",
-          "type": "string"
-        }
-      ]
-    },
-    {
-      "name": "deleteProfileMetadata",
-      "accounts": [
-        {
-          "name": "profileMetadata",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile_metadata"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "profile"
-              }
-            ]
-          },
-          "relations": [
-            "profile"
-          ]
-        },
-        {
-          "name": "profile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": []
@@ -631,44 +196,13 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           }
@@ -751,44 +285,13 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           }
@@ -858,44 +361,13 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           }
@@ -1003,44 +475,13 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           }
@@ -1112,75 +553,21 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "from_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "from_profile.user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "toProfile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "to_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "to_profile.user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "from_profile.random_hash"
               }
             ]
           }
+        },
+        {
+          "name": "toProfile",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "sessionToken",
@@ -1248,75 +635,21 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "from_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "from_profile.user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "toProfile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "to_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "to_profile.user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "from_profile.random_hash"
               }
             ]
           }
+        },
+        {
+          "name": "toProfile",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "sessionToken",
@@ -1379,27 +712,7 @@ export type GplCore = {
         {
           "name": "toPost",
           "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "post"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "Post",
-                "path": "to_post.random_hash"
-              }
-            ]
-          }
+          "isSigner": false
         },
         {
           "name": "fromProfile",
@@ -1415,44 +728,13 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "from_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "from_profile.random_hash"
               }
             ]
           }
@@ -1525,27 +807,7 @@ export type GplCore = {
         {
           "name": "toPost",
           "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "post"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "Post",
-                "path": "to_post.random_hash"
-              }
-            ]
-          }
+          "isSigner": false
         },
         {
           "name": "fromProfile",
@@ -1561,44 +823,13 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "from_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "from_profile.random_hash"
               }
             ]
           }
@@ -1626,9 +857,525 @@ export type GplCore = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "createBadge",
+      "accounts": [
+        {
+          "name": "badge",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "badge"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Profile",
+                "path": "holder"
+              }
+            ]
+          }
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
+        },
+        {
+          "name": "holder",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Profile",
+                "path": "holder.random_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "updateAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "CHECK the update_authority of the badge issuer"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "updateBadge",
+      "accounts": [
+        {
+          "name": "badge",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "badge"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Badge",
+                "path": "badge.holder"
+              }
+            ]
+          },
+          "relations": [
+            "issuer"
+          ]
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "burnBadge",
+      "accounts": [
+        {
+          "name": "badge",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "badge"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          },
+          "relations": [
+            "issuer",
+            "holder"
+          ]
+        },
+        {
+          "name": "holder",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Profile",
+                "path": "holder.random_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deleteIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createSchema",
+      "accounts": [
+        {
+          "name": "schema",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "arg",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "path": "random_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        },
+        {
+          "name": "randomHash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateSchema",
+      "accounts": [
+        {
+          "name": "schema",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteSchema",
+      "accounts": [
+        {
+          "name": "schema",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
+    {
+      "name": "badge",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "type": "publicKey"
+          },
+          {
+            "name": "holder",
+            "type": "publicKey"
+          },
+          {
+            "name": "updateAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "metadataUri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "issuer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "metadataUri",
+            "type": "string"
+          },
+          {
+            "name": "randomHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "connection",
       "type": {
@@ -1677,34 +1424,29 @@ export type GplCore = {
       }
     },
     {
-      "name": "profileMetadata",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "profile",
-            "type": "publicKey"
-          },
-          {
-            "name": "metadataUri",
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
       "name": "profile",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "user",
+            "name": "authority",
             "type": "publicKey"
           },
           {
-            "name": "namespace",
+            "name": "metadataUri",
+            "type": "string"
+          },
+          {
+            "name": "screenName",
+            "type": "publicKey"
+          },
+          {
+            "name": "randomHash",
             "type": {
-              "defined": "Namespace"
+              "array": [
+                "u8",
+                32
+              ]
             }
           }
         ]
@@ -1727,27 +1469,6 @@ export type GplCore = {
             "name": "reactionType",
             "type": {
               "defined": "ReactionType"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "user",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "randomHash",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
             }
           }
         ]
@@ -1789,50 +1510,27 @@ export type GplCore = {
       }
     },
     {
-      "name": "Namespace",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Professional"
-          },
-          {
-            "name": "Personal"
-          },
-          {
-            "name": "Gaming"
-          },
-          {
-            "name": "Degen"
-          }
-        ]
-      }
-    },
-    {
       "name": "ReactionType",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "Like"
+            "name": "Emoji",
+            "fields": [
+              {
+                "name": "emoji",
+                "type": "string"
+              }
+            ]
           },
           {
-            "name": "Dislike"
-          },
-          {
-            "name": "Love"
-          },
-          {
-            "name": "Haha"
-          },
-          {
-            "name": "Wow"
-          },
-          {
-            "name": "Sad"
-          },
-          {
-            "name": "Angry"
+            "name": "Custom",
+            "fields": [
+              {
+                "name": "tag",
+                "type": "string"
+              }
+            ]
           }
         ]
       }
@@ -1840,10 +1538,15 @@ export type GplCore = {
   ],
   "events": [
     {
-      "name": "UserNew",
+      "name": "ProfileNew",
       "fields": [
         {
-          "name": "user",
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
           "type": "publicKey",
           "index": false
         },
@@ -1858,64 +1561,24 @@ export type GplCore = {
           "index": false
         },
         {
-          "name": "authority",
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "screenName",
           "type": "publicKey",
           "index": false
         },
         {
-          "name": "timestamp",
-          "type": "i64",
+          "name": "metadataUri",
+          "type": "string",
           "index": false
         }
       ]
     },
     {
-      "name": "UserAuthorityChanged",
-      "fields": [
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "newAuthority",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "oldAuthority",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "UserDeleted",
-      "fields": [
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "authority",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "ProfileNew",
+      "name": "ProfileUpdated",
       "fields": [
         {
           "name": "profile",
@@ -1923,20 +1586,18 @@ export type GplCore = {
           "index": false
         },
         {
-          "name": "user",
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "screenName",
           "type": "publicKey",
           "index": false
         },
         {
-          "name": "namespace",
-          "type": {
-            "defined": "Namespace"
-          },
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
+          "name": "metadataUri",
+          "type": "string",
           "index": false
         }
       ]
@@ -1950,20 +1611,18 @@ export type GplCore = {
           "index": false
         },
         {
-          "name": "user",
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "screenName",
           "type": "publicKey",
           "index": false
         },
         {
-          "name": "namespace",
-          "type": {
-            "defined": "Namespace"
-          },
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
+          "name": "metadataUri",
+          "type": "string",
           "index": false
         }
       ]
@@ -1978,11 +1637,6 @@ export type GplCore = {
         },
         {
           "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
           "type": "publicKey",
           "index": false
         },
@@ -2022,11 +1676,6 @@ export type GplCore = {
           "index": false
         },
         {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
           "name": "metadataUri",
           "type": "string",
           "index": false
@@ -2052,11 +1701,6 @@ export type GplCore = {
           "index": false
         },
         {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
           "name": "timestamp",
           "type": "i64",
           "index": false
@@ -2073,11 +1717,6 @@ export type GplCore = {
         },
         {
           "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
           "type": "publicKey",
           "index": false
         },
@@ -2117,11 +1756,6 @@ export type GplCore = {
           "index": false
         },
         {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
           "name": "fromProfile",
           "type": "publicKey",
           "index": false
@@ -2143,11 +1777,6 @@ export type GplCore = {
       "fields": [
         {
           "name": "connection",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
           "type": "publicKey",
           "index": false
         },
@@ -2178,14 +1807,7 @@ export type GplCore = {
         },
         {
           "name": "reactionType",
-          "type": {
-            "defined": "ReactionType"
-          },
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
+          "type": "string",
           "index": false
         },
         {
@@ -2215,14 +1837,7 @@ export type GplCore = {
         },
         {
           "name": "reactionType",
-          "type": {
-            "defined": "ReactionType"
-          },
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
+          "type": "string",
           "index": false
         },
         {
@@ -2241,110 +1856,41 @@ export type GplCore = {
           "index": false
         }
       ]
-    },
-    {
-      "name": "ProfileMetadataNew",
-      "fields": [
-        {
-          "name": "profileMetadata",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "metadataUri",
-          "type": "string",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "ProfileMetadataUpdated",
-      "fields": [
-        {
-          "name": "profileMetadata",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "metadataUri",
-          "type": "string",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "ProfileMetadataDeleted",
-      "fields": [
-        {
-          "name": "profileMetadata",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
+      "name": "URITooLong"
+    },
+    {
+      "code": 6001,
+      "name": "CannotConnectToSelf"
+    },
+    {
+      "code": 6002,
       "name": "UnauthorizedSigner"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidEmoji"
+    },
+    {
+      "code": 6004,
+      "name": "CustomTagTooLong"
     }
   ]
 };
 
 export const IDL: GplCore = {
-  "version": "0.1.0",
+  "version": "1.0.0",
   "name": "gpl_core",
   "instructions": [
     {
-      "name": "createUser",
+      "name": "createProfile",
       "accounts": [
         {
-          "name": "user",
+          "name": "profile",
           "isMut": true,
           "isSigner": false,
           "pda": {
@@ -2352,7 +1898,7 @@ export const IDL: GplCore = {
               {
                 "kind": "const",
                 "type": "string",
-                "value": "user"
+                "value": "profile"
               },
               {
                 "kind": "arg",
@@ -2366,6 +1912,14 @@ export const IDL: GplCore = {
               }
             ]
           }
+        },
+        {
+          "name": "screenName",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK that this PDA is either SNS, ANS or GPL Nameservice"
+          ]
         },
         {
           "name": "authority",
@@ -2387,104 +1941,15 @@ export const IDL: GplCore = {
               32
             ]
           }
+        },
+        {
+          "name": "metadataUri",
+          "type": "string"
         }
       ]
     },
     {
-      "name": "updateUser",
-      "accounts": [
-        {
-          "name": "user",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "newAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "deleteUser",
-      "accounts": [
-        {
-          "name": "user",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "createProfile",
+      "name": "updateProfile",
       "accounts": [
         {
           "name": "profile",
@@ -2498,31 +1963,6 @@ export const IDL: GplCore = {
                 "value": "profile"
               },
               {
-                "kind": "arg",
-                "type": "string",
-                "path": "namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
                 "kind": "account",
                 "type": {
                   "array": [
@@ -2530,8 +1970,8 @@ export const IDL: GplCore = {
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           },
@@ -2540,19 +1980,22 @@ export const IDL: GplCore = {
           ]
         },
         {
+          "name": "screenName",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK that this PDA is either SNS, ANS or GPL Nameservice and is owned by the user"
+          ]
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": [
         {
-          "name": "namespace",
+          "name": "metadataUri",
           "type": "string"
         }
       ]
@@ -2574,44 +2017,13 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "profile.user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           },
@@ -2623,307 +2035,6 @@ export const IDL: GplCore = {
           "name": "authority",
           "isMut": true,
           "isSigner": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "createProfileMetadata",
-      "accounts": [
-        {
-          "name": "profileMetadata",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile_metadata"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "profile"
-              }
-            ]
-          }
-        },
-        {
-          "name": "profile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "metadataUri",
-          "type": "string"
-        }
-      ]
-    },
-    {
-      "name": "updateProfileMetadata",
-      "accounts": [
-        {
-          "name": "profileMetadata",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile_metadata"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "profile"
-              }
-            ]
-          },
-          "relations": [
-            "profile"
-          ]
-        },
-        {
-          "name": "profile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "metadataUri",
-          "type": "string"
-        }
-      ]
-    },
-    {
-      "name": "deleteProfileMetadata",
-      "accounts": [
-        {
-          "name": "profileMetadata",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile_metadata"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "profile"
-              }
-            ]
-          },
-          "relations": [
-            "profile"
-          ]
-        },
-        {
-          "name": "profile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "User",
-                "path": "user.random_hash"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": []
@@ -2969,44 +2080,13 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           }
@@ -3089,44 +2169,13 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           }
@@ -3196,44 +2245,13 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           }
@@ -3341,44 +2359,13 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "profile.random_hash"
               }
             ]
           }
@@ -3450,75 +2437,21 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "from_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "from_profile.user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "toProfile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "to_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "to_profile.user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "from_profile.random_hash"
               }
             ]
           }
+        },
+        {
+          "name": "toProfile",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "sessionToken",
@@ -3586,75 +2519,21 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "from_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "from_profile.user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "toProfile",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "profile"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "to_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "Profile",
-                "path": "to_profile.user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "from_profile.random_hash"
               }
             ]
           }
+        },
+        {
+          "name": "toProfile",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "sessionToken",
@@ -3717,27 +2596,7 @@ export const IDL: GplCore = {
         {
           "name": "toPost",
           "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "post"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "Post",
-                "path": "to_post.random_hash"
-              }
-            ]
-          }
+          "isSigner": false
         },
         {
           "name": "fromProfile",
@@ -3753,44 +2612,13 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "from_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "from_profile.random_hash"
               }
             ]
           }
@@ -3863,27 +2691,7 @@ export const IDL: GplCore = {
         {
           "name": "toPost",
           "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "post"
-              },
-              {
-                "kind": "account",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                "account": "Post",
-                "path": "to_post.random_hash"
-              }
-            ]
-          }
+          "isSigner": false
         },
         {
           "name": "fromProfile",
@@ -3899,44 +2707,13 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": {
-                  "defined": "Namespace"
-                },
-                "account": "Profile",
-                "path": "from_profile.namespace"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "account": "User",
-                "path": "user"
-              }
-            ]
-          },
-          "relations": [
-            "user"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "user"
-              },
-              {
-                "kind": "account",
-                "type": {
                   "array": [
                     "u8",
                     32
                   ]
                 },
-                "account": "User",
-                "path": "user.random_hash"
+                "account": "Profile",
+                "path": "from_profile.random_hash"
               }
             ]
           }
@@ -3964,9 +2741,525 @@ export const IDL: GplCore = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "createBadge",
+      "accounts": [
+        {
+          "name": "badge",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "badge"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Profile",
+                "path": "holder"
+              }
+            ]
+          }
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
+        },
+        {
+          "name": "holder",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Profile",
+                "path": "holder.random_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "updateAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "CHECK the update_authority of the badge issuer"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "updateBadge",
+      "accounts": [
+        {
+          "name": "badge",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "badge"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Badge",
+                "path": "badge.holder"
+              }
+            ]
+          },
+          "relations": [
+            "issuer"
+          ]
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "burnBadge",
+      "accounts": [
+        {
+          "name": "badge",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "badge"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          },
+          "relations": [
+            "issuer",
+            "holder"
+          ]
+        },
+        {
+          "name": "holder",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "profile"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Profile",
+                "path": "holder.random_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deleteIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Issuer",
+                "path": "issuer"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createSchema",
+      "accounts": [
+        {
+          "name": "schema",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "arg",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "path": "random_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        },
+        {
+          "name": "randomHash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateSchema",
+      "accounts": [
+        {
+          "name": "schema",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "metadataUri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteSchema",
+      "accounts": [
+        {
+          "name": "schema",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
+    {
+      "name": "badge",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "type": "publicKey"
+          },
+          {
+            "name": "holder",
+            "type": "publicKey"
+          },
+          {
+            "name": "updateAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "metadataUri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "issuer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "metadataUri",
+            "type": "string"
+          },
+          {
+            "name": "randomHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "connection",
       "type": {
@@ -4015,34 +3308,29 @@ export const IDL: GplCore = {
       }
     },
     {
-      "name": "profileMetadata",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "profile",
-            "type": "publicKey"
-          },
-          {
-            "name": "metadataUri",
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
       "name": "profile",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "user",
+            "name": "authority",
             "type": "publicKey"
           },
           {
-            "name": "namespace",
+            "name": "metadataUri",
+            "type": "string"
+          },
+          {
+            "name": "screenName",
+            "type": "publicKey"
+          },
+          {
+            "name": "randomHash",
             "type": {
-              "defined": "Namespace"
+              "array": [
+                "u8",
+                32
+              ]
             }
           }
         ]
@@ -4065,27 +3353,6 @@ export const IDL: GplCore = {
             "name": "reactionType",
             "type": {
               "defined": "ReactionType"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "user",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "randomHash",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
             }
           }
         ]
@@ -4127,50 +3394,27 @@ export const IDL: GplCore = {
       }
     },
     {
-      "name": "Namespace",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Professional"
-          },
-          {
-            "name": "Personal"
-          },
-          {
-            "name": "Gaming"
-          },
-          {
-            "name": "Degen"
-          }
-        ]
-      }
-    },
-    {
       "name": "ReactionType",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "Like"
+            "name": "Emoji",
+            "fields": [
+              {
+                "name": "emoji",
+                "type": "string"
+              }
+            ]
           },
           {
-            "name": "Dislike"
-          },
-          {
-            "name": "Love"
-          },
-          {
-            "name": "Haha"
-          },
-          {
-            "name": "Wow"
-          },
-          {
-            "name": "Sad"
-          },
-          {
-            "name": "Angry"
+            "name": "Custom",
+            "fields": [
+              {
+                "name": "tag",
+                "type": "string"
+              }
+            ]
           }
         ]
       }
@@ -4178,10 +3422,15 @@ export const IDL: GplCore = {
   ],
   "events": [
     {
-      "name": "UserNew",
+      "name": "ProfileNew",
       "fields": [
         {
-          "name": "user",
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
           "type": "publicKey",
           "index": false
         },
@@ -4196,64 +3445,24 @@ export const IDL: GplCore = {
           "index": false
         },
         {
-          "name": "authority",
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "screenName",
           "type": "publicKey",
           "index": false
         },
         {
-          "name": "timestamp",
-          "type": "i64",
+          "name": "metadataUri",
+          "type": "string",
           "index": false
         }
       ]
     },
     {
-      "name": "UserAuthorityChanged",
-      "fields": [
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "newAuthority",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "oldAuthority",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "UserDeleted",
-      "fields": [
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "authority",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "ProfileNew",
+      "name": "ProfileUpdated",
       "fields": [
         {
           "name": "profile",
@@ -4261,20 +3470,18 @@ export const IDL: GplCore = {
           "index": false
         },
         {
-          "name": "user",
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "screenName",
           "type": "publicKey",
           "index": false
         },
         {
-          "name": "namespace",
-          "type": {
-            "defined": "Namespace"
-          },
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
+          "name": "metadataUri",
+          "type": "string",
           "index": false
         }
       ]
@@ -4288,20 +3495,18 @@ export const IDL: GplCore = {
           "index": false
         },
         {
-          "name": "user",
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "screenName",
           "type": "publicKey",
           "index": false
         },
         {
-          "name": "namespace",
-          "type": {
-            "defined": "Namespace"
-          },
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
+          "name": "metadataUri",
+          "type": "string",
           "index": false
         }
       ]
@@ -4316,11 +3521,6 @@ export const IDL: GplCore = {
         },
         {
           "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
           "type": "publicKey",
           "index": false
         },
@@ -4360,11 +3560,6 @@ export const IDL: GplCore = {
           "index": false
         },
         {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
           "name": "metadataUri",
           "type": "string",
           "index": false
@@ -4390,11 +3585,6 @@ export const IDL: GplCore = {
           "index": false
         },
         {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
           "name": "timestamp",
           "type": "i64",
           "index": false
@@ -4411,11 +3601,6 @@ export const IDL: GplCore = {
         },
         {
           "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
           "type": "publicKey",
           "index": false
         },
@@ -4455,11 +3640,6 @@ export const IDL: GplCore = {
           "index": false
         },
         {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
           "name": "fromProfile",
           "type": "publicKey",
           "index": false
@@ -4481,11 +3661,6 @@ export const IDL: GplCore = {
       "fields": [
         {
           "name": "connection",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
           "type": "publicKey",
           "index": false
         },
@@ -4516,14 +3691,7 @@ export const IDL: GplCore = {
         },
         {
           "name": "reactionType",
-          "type": {
-            "defined": "ReactionType"
-          },
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
+          "type": "string",
           "index": false
         },
         {
@@ -4553,14 +3721,7 @@ export const IDL: GplCore = {
         },
         {
           "name": "reactionType",
-          "type": {
-            "defined": "ReactionType"
-          },
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
+          "type": "string",
           "index": false
         },
         {
@@ -4579,97 +3740,28 @@ export const IDL: GplCore = {
           "index": false
         }
       ]
-    },
-    {
-      "name": "ProfileMetadataNew",
-      "fields": [
-        {
-          "name": "profileMetadata",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "metadataUri",
-          "type": "string",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "ProfileMetadataUpdated",
-      "fields": [
-        {
-          "name": "profileMetadata",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "metadataUri",
-          "type": "string",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "ProfileMetadataDeleted",
-      "fields": [
-        {
-          "name": "profileMetadata",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "profile",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "user",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
+      "name": "URITooLong"
+    },
+    {
+      "code": 6001,
+      "name": "CannotConnectToSelf"
+    },
+    {
+      "code": 6002,
       "name": "UnauthorizedSigner"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidEmoji"
+    },
+    {
+      "code": 6004,
+      "name": "CustomTagTooLong"
     }
   ]
 };
