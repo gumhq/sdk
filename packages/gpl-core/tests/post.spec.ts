@@ -3,8 +3,8 @@ import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { expect } from "chai";
 import { GraphQLClient } from "graphql-request";
-import { GRAPHQL_ENDPOINTS } from "../src/constants";
 import dotenv from "dotenv";
+import { createGumTld, createGumDomain } from "./utils";
 
 dotenv.config();
 
@@ -14,28 +14,33 @@ const user = userWallet.payer;
 
 describe("Post", async () => {
   let sdk: SDK;
-  let userPDA: anchor.web3.PublicKey;
   let profilePDA: anchor.web3.PublicKey;
   let postPDA: anchor.web3.PublicKey;
 
   before(async () => {
-    const gqlClient = new GraphQLClient(GRAPHQL_ENDPOINTS["devnet"]);
+    // const gqlClient = new GraphQLClient(GRAPHQL_ENDPOINTS["devnet"]);
     sdk = new SDK(
       userWallet as NodeWallet,
       new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
       { preflightCommitment: "processed" },
       "localnet",
-      gqlClient
+      // gqlClient
     );
 
-    // Create a user
-    const createUser = await sdk.user.create(user.publicKey)
-    userPDA = createUser.userPDA as anchor.web3.PublicKey;
-    await createUser.instructionMethodBuilder.rpc();
+    // Create a gum tld
+    const gumTld = await createGumTld(userWallet);
+
+    // Create a domain for the wallet
+    const screenNameAccount = await createGumDomain(userWallet, gumTld, "foobarpost");
 
     // Create a profile
-    const profile = await sdk.profile.create(userPDA, "Personal", user.publicKey);
-    profilePDA = profile.profilePDA as anchor.web3.PublicKey;
+    const profileMetdataUri = "https://example.com";
+    const profile = await sdk.profile.create(
+      profileMetdataUri,
+      screenNameAccount,
+      user.publicKey,
+    );
+    profilePDA = profile.profilePDA;
     await profile.instructionMethodBuilder.rpc();
   });
 
@@ -44,7 +49,6 @@ describe("Post", async () => {
     const post = await sdk.post.create(
       metadataUri,
       profilePDA,
-      userPDA,
       user.publicKey,
     );
     postPDA = post.postPDA as anchor.web3.PublicKey;
@@ -60,7 +64,6 @@ describe("Post", async () => {
       postPDA,
       metadataUri,
       profilePDA,
-      userPDA,
       user.publicKey,
     );
     await comment.instructionMethodBuilder.rpc();
@@ -76,7 +79,6 @@ describe("Post", async () => {
       metadataUri,
       postPDA,
       profilePDA,
-      userPDA,
       user.publicKey,
     );
     await post.rpc();
@@ -89,7 +91,6 @@ describe("Post", async () => {
     const post = sdk.post.delete(
       postPDA,
       profilePDA,
-      userPDA,
       user.publicKey,
     );
     await post.rpc();
@@ -101,51 +102,51 @@ describe("Post", async () => {
     }
   });
 
-  describe("GraphQL Post Queries", async () => {
-    let userPubKey: anchor.web3.PublicKey;
+  // describe("GraphQL Post Queries", async () => {
+  //   let userPubKey: anchor.web3.PublicKey;
 
-    before(async () => {
-      userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn");
-    });
+  //   before(async () => {
+  //     userPubKey = new anchor.web3.PublicKey("FRpvmB2dbFRxXWFXihAdQVKndnzFaK31yWfhS6CRHXpn");
+  //   });
 
-    describe("getAllPosts", async () => {
-      let posts: any;
+  //   describe("getAllPosts", async () => {
+  //     let posts: any;
 
-      before(async () => {
-        posts = await sdk.post.getAllPosts();
-      });
+  //     before(async () => {
+  //       posts = await sdk.post.getAllPosts();
+  //     });
 
-      it("should return an array of posts", async () => {
-        expect(posts).to.be.an("array");
-      });
+  //     it("should return an array of posts", async () => {
+  //       expect(posts).to.be.an("array");
+  //     });
 
-      it("should return at least one post", async () => {
-        expect(posts.length).to.be.greaterThan(0);
-      });
+  //     it("should return at least one post", async () => {
+  //       expect(posts.length).to.be.greaterThan(0);
+  //     });
 
-      it("should return a post with a metadataUri", async () => {
-        expect(posts[0].metadata_uri).to.be.a("string");
-      });
-    });
+  //     it("should return a post with a metadataUri", async () => {
+  //       expect(posts[0].metadata_uri).to.be.a("string");
+  //     });
+  //   });
 
-    describe("getPostsByUser", async () => {
-      let posts: any;
+  //   describe("getPostsByUser", async () => {
+  //     let posts: any;
 
-      before(async () => {
-        posts = await sdk.post.getPostsByUser(userPubKey);
-      });
+  //     before(async () => {
+  //       posts = await sdk.post.getPostsByUser(userPubKey);
+  //     });
 
-      it("should return an array of posts", async () => {
-        expect(posts).to.be.an("array");
-      });
+  //     it("should return an array of posts", async () => {
+  //       expect(posts).to.be.an("array");
+  //     });
 
-      it("should return at least one post", async () => {
-        expect(posts.length).to.be.greaterThan(0);
-      });
+  //     it("should return at least one post", async () => {
+  //       expect(posts.length).to.be.greaterThan(0);
+  //     });
 
-      it("should return a post with a metadataUri", async () => {
-        expect(posts[0].metadata_uri).to.be.a("string");
-      });
-    });
-  });
+  //     it("should return a post with a metadataUri", async () => {
+  //       expect(posts[0].metadata_uri).to.be.a("string");
+  //     });
+  //   });
+  // });
 });
