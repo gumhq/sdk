@@ -24,7 +24,14 @@ export const GPLSESSION_PROGRAMS = {
   ),
 };
 
-export const GRAPHQL_ENDPOINTS = {
-  devnet: "https://gum-indexer-devnet-lafkve5tyq-uc.a.run.app/v1/graphql",
-  "mainnet-beta": "https://gum-indexer-mainnet-lafkve5tyq-uc.a.run.app/v1/graphql"
+export const GPL_NAMESERVICE_PROGRAMS = {
+  "mainnet-beta": new anchor.web3.PublicKey(
+    "7LEuQxAEegasvBSq7dDrMregc3mrDtTyHiytNK9pU68u"
+  ),
+  devnet: new anchor.web3.PublicKey(
+    "7LEuQxAEegasvBSq7dDrMregc3mrDtTyHiytNK9pU68u"
+  ),
+  localnet: new anchor.web3.PublicKey(
+    "7LEuQxAEegasvBSq7dDrMregc3mrDtTyHiytNK9pU68u"
+  ),
 };
