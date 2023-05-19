@@ -9,8 +9,32 @@ export class Badge {
     this.sdk = sdk;
   }
 
-  public async get(userAccount: anchor.web3.PublicKey) {
+  public async getBadge(userAccount: anchor.web3.PublicKey) {
     return await this.sdk.program.account.badge.fetch(userAccount);
+  }
+
+  public async getOrCreateBadge(
+    metadataUri: string,
+    issuer: anchor.web3.PublicKey,
+    holder: anchor.web3.PublicKey,
+    updateAuthority: anchor.web3.PublicKey,
+    authority: anchor.web3.PublicKey,
+  ) {
+    const [badgePDA, _] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("badge"),
+        issuer.toBuffer(),
+        holder.toBuffer(),
+      ],
+      this.sdk.program.programId
+    );
+
+    try {
+      await this.getBadge(badgePDA);
+    } catch (err) {
+      await (await this.createBadge(metadataUri, issuer, holder, updateAuthority, authority)).instructionMethodBuilder.rpc();
+    }
+    return badgePDA;
   }
 
   public async createBadge(
@@ -18,14 +42,14 @@ export class Badge {
     issuer: anchor.web3.PublicKey,
     holderProfile: anchor.web3.PublicKey,
     updateAuthority: anchor.web3.PublicKey,
-    owner: anchor.web3.PublicKey) {
+    authority: anchor.web3.PublicKey) {
     const instructionMethodBuilder = this.sdk.program.methods
       .createBadge(metadataUri)
       .accounts({
         issuer,
         holder: holderProfile,
         updateAuthority,
-        authority: owner,
+        authority,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const badgePDA = pubKeys.badge as anchor.web3.PublicKey;
@@ -66,6 +90,25 @@ export class Badge {
       });
   }
 
+  public async getOrCreateIssuer(
+    authority: anchor.web3.PublicKey,
+  ) {
+    const [issuer, _] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("issuer"),
+        authority.toBuffer(),
+      ],
+      this.sdk.program.programId
+    );
+
+    try {
+      await this.getIssuer(issuer);
+    } catch (err) {
+      await (await this.createIssuer(authority)).instructionMethodBuilder.rpc();
+    }
+    return issuer;
+  }
+
   public async createIssuer(
     authority: anchor.web3.PublicKey,
   ) {
@@ -83,6 +126,10 @@ export class Badge {
     };
   }
 
+  public async getIssuer(issuerAccount: anchor.web3.PublicKey) {
+    return await this.sdk.program.account.issuer.fetch(issuerAccount);
+  }
+
   public async deleteIssuer(
     issuerAccount: anchor.web3.PublicKey,
     authority: anchor.web3.PublicKey,
@@ -95,13 +142,17 @@ export class Badge {
       });
   }
 
+  public async getSchema(schemaAccount: anchor.web3.PublicKey) {
+    return await this.sdk.program.account.schema.fetch(schemaAccount);
+  }
+
   public async createSchema(
     metadataUri: string,
     authority: anchor.web3.PublicKey,
   ) {
     const randomHash = randomBytes(32);
     const instructionMethodBuilder = this.sdk.program.methods
-      .createSchema(randomHash, metadataUri)
+      .createSchema(metadataUri, randomHash)
       .accounts({
         authority,
       });
