@@ -61,6 +61,7 @@ export class Post {
 
     const randomHash = randomBytes(32);
     const instructionMethodBuilder = this.sdk.program.methods
+      // @ts-ignore
       .createPost(metadataUri, randomHash)
       .accounts({
         profile: profileAccount,
@@ -129,6 +130,7 @@ export class Post {
     }
     const randomHash = randomBytes(32);
     const instructionMethodBuilder = this.sdk.program.methods
+      // @ts-ignore
       .createComment(metadataUri, randomHash)
       .accounts({
         profile: profileAccount,

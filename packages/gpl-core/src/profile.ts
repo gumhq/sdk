@@ -64,6 +64,7 @@ export class Profile {
     authority: anchor.web3.PublicKey) {
     const randomHash = randomBytes(32);
     const instructionMethodBuilder = this.sdk.program.methods
+      // @ts-ignore
       .createProfile(randomHash, metadataUri)
       .accounts({
         screenName: screenNameAccount,
@@ -83,6 +84,7 @@ export class Profile {
     screenNameAccount: anchor.web3.PublicKey,
     authority: anchor.web3.PublicKey) {
     return this.sdk.program.methods
+      // @ts-ignore
       .updateProfile(metadataUri)
       .accounts({
         profile: profileAccount,

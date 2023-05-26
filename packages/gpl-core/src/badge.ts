@@ -16,6 +16,7 @@ export class Badge {
   public async getOrCreateBadge(
     metadataUri: string,
     issuer: anchor.web3.PublicKey,
+    schema: anchor.web3.PublicKey,
     holder: anchor.web3.PublicKey,
     updateAuthority: anchor.web3.PublicKey,
     authority: anchor.web3.PublicKey,
@@ -24,6 +25,7 @@ export class Badge {
       [
         Buffer.from("badge"),
         issuer.toBuffer(),
+        schema.toBuffer(),
         holder.toBuffer(),
       ],
       this.sdk.program.programId
@@ -32,7 +34,7 @@ export class Badge {
     try {
       await this.getBadge(badgePDA);
     } catch (err) {
-      await (await this.createBadge(metadataUri, issuer, holder, updateAuthority, authority)).instructionMethodBuilder.rpc();
+      await (await this.createBadge(metadataUri, issuer, schema, holder, updateAuthority, authority)).instructionMethodBuilder.rpc();
     }
     return badgePDA;
   }
@@ -40,6 +42,7 @@ export class Badge {
   public async createBadge(
     metadataUri: string,
     issuer: anchor.web3.PublicKey,
+    schema: anchor.web3.PublicKey,
     holderProfile: anchor.web3.PublicKey,
     updateAuthority: anchor.web3.PublicKey,
     authority: anchor.web3.PublicKey) {
@@ -47,6 +50,7 @@ export class Badge {
       .createBadge(metadataUri)
       .accounts({
         issuer,
+        schema,
         holder: holderProfile,
         updateAuthority,
         authority,
@@ -63,6 +67,7 @@ export class Badge {
     metadataUri: string,
     badgeAccount: anchor.web3.PublicKey,
     issuer: anchor.web3.PublicKey,
+    schema: anchor.web3.PublicKey,
     signer: anchor.web3.PublicKey
   ) {
     return this.sdk.program.methods
@@ -70,6 +75,7 @@ export class Badge {
       .accounts({
         badge: badgeAccount,
         issuer,
+        schema,
         signer,
       });
   }
@@ -77,6 +83,7 @@ export class Badge {
   public async burnBadge(
     badgeAccount: anchor.web3.PublicKey,
     issuer: anchor.web3.PublicKey,
+    schema: anchor.web3.PublicKey,
     holder: anchor.web3.PublicKey,
     signer: anchor.web3.PublicKey
   ) {
@@ -85,6 +92,7 @@ export class Badge {
       .accounts({
         badge: badgeAccount,
         issuer,
+        schema,
         holder,
         signer,
       });
@@ -160,6 +168,7 @@ export class Badge {
   ) {
     const randomHash = randomBytes(32);
     const instructionMethodBuilder = this.sdk.program.methods
+      // @ts-ignore
       .createSchema(metadataUri, randomHash)
       .accounts({
         authority,

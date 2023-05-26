@@ -75,7 +75,7 @@ describe("Badge", async () => {
 
     schemaPDA = schema.schemaPDA;
     const schemaAccount = await sdk.badge.getSchema(schemaPDA);
-    expect(schemaAccount.issuer.toBase58()).is.equal(issuerPDA.toBase58());
+    expect(schemaAccount.authority.toBase58()).is.equal(user.publicKey.toBase58());
   });
 
   it("should create a badge", async () => {
@@ -88,6 +88,7 @@ describe("Badge", async () => {
     const badge = await sdk.badge.getOrCreateBadge(
       badgeMetdataUri,
       issuer,
+      schemaPDA,
       profilePDA,
       updateAuthority,
       user.publicKey,
@@ -108,6 +109,7 @@ describe("Badge", async () => {
       badgeMetdataUri,
       badgePDA,
       issuerPDA,
+      schemaPDA,
       user.publicKey,
     );
     await badge.rpc();
@@ -120,6 +122,7 @@ describe("Badge", async () => {
     const badge = await sdk.badge.burnBadge(
       badgePDA,
       issuerPDA,
+      schemaPDA,
       profilePDA,
       user.publicKey,
     );
