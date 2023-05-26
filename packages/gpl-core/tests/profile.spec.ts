@@ -15,7 +15,6 @@ const user = userWallet.payer;
 
 describe("Profile", async () => {
   let sdk: SDK;
-  let userPDA: anchor.web3.PublicKey;
   let profilePDA: anchor.web3.PublicKey;
   let gumTld: anchor.web3.PublicKey;
   let screenNameAccount: anchor.web3.PublicKey;

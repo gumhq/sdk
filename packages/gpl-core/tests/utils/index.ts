@@ -18,7 +18,6 @@ export async function createGumTld(userWallet: NodeWallet) {
   )
 
   const gumTld = await nameservice.getOrCreateTLD("gum");
-  console.log("gumTld", JSON.stringify(gumTld, null, 2));
   return gumTld;
 }
 

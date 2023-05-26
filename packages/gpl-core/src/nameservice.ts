@@ -41,7 +41,6 @@ export class GumNameService {
       ],
       this.program.programId
     );
-    console.log("Program ID", this.program.programId.toBase58());
     try {
       await this.get(tldAccount);
     } catch (err) {
