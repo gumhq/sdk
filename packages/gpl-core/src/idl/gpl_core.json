@@ -901,8 +901,7 @@
               {
                 "kind": "account",
                 "type": "publicKey",
-                "account": "Issuer",
-                "path": "issuer"
+                "path": "authority"
               }
             ]
           },
@@ -1009,7 +1008,7 @@
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Issuer",
-                "path": "issuer"
+                "path": "issuer.authority"
               }
             ]
           }
@@ -1046,6 +1045,12 @@
                 "type": "publicKey",
                 "account": "Issuer",
                 "path": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Profile",
+                "path": "holder"
               }
             ]
           },
@@ -1094,7 +1099,7 @@
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Issuer",
-                "path": "issuer"
+                "path": "issuer.authority"
               }
             ]
           }
@@ -1143,6 +1148,22 @@
       "args": []
     },
     {
+      "name": "verifyIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "signer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "deleteIssuer",
       "accounts": [
         {
@@ -1159,8 +1180,7 @@
               {
                 "kind": "account",
                 "type": "publicKey",
-                "account": "Issuer",
-                "path": "issuer"
+                "path": "authority"
               }
             ]
           },
@@ -1202,6 +1222,28 @@
               }
             ]
           }
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -1258,6 +1300,28 @@
             ]
           },
           "relations": [
+            "issuer"
+          ]
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          },
+          "relations": [
             "authority"
           ]
         },
@@ -1298,6 +1362,28 @@
                 },
                 "account": "Schema",
                 "path": "schema.random_hash"
+              }
+            ]
+          },
+          "relations": [
+            "issuer"
+          ]
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
               }
             ]
           },
@@ -1347,6 +1433,10 @@
           {
             "name": "authority",
             "type": "publicKey"
+          },
+          {
+            "name": "verified",
+            "type": "bool"
           }
         ]
       }
@@ -1357,7 +1447,7 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
+            "name": "issuer",
             "type": "publicKey"
           },
           {
@@ -1878,6 +1968,14 @@
     {
       "code": 6004,
       "name": "CustomTagTooLong"
+    },
+    {
+      "code": 6005,
+      "name": "UnverifiedIssuer"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidSignerToVerify"
     }
   ]
 }

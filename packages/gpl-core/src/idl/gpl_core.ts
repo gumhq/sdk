@@ -901,8 +901,7 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
-                "account": "Issuer",
-                "path": "issuer"
+                "path": "authority"
               }
             ]
           },
@@ -1009,7 +1008,7 @@ export type GplCore = {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Issuer",
-                "path": "issuer"
+                "path": "issuer.authority"
               }
             ]
           }
@@ -1046,6 +1045,12 @@ export type GplCore = {
                 "type": "publicKey",
                 "account": "Issuer",
                 "path": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Profile",
+                "path": "holder"
               }
             ]
           },
@@ -1094,7 +1099,7 @@ export type GplCore = {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Issuer",
-                "path": "issuer"
+                "path": "issuer.authority"
               }
             ]
           }
@@ -1143,6 +1148,22 @@ export type GplCore = {
       "args": []
     },
     {
+      "name": "verifyIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "signer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "deleteIssuer",
       "accounts": [
         {
@@ -1159,8 +1180,7 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
-                "account": "Issuer",
-                "path": "issuer"
+                "path": "authority"
               }
             ]
           },
@@ -1202,6 +1222,28 @@ export type GplCore = {
               }
             ]
           }
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -1258,6 +1300,28 @@ export type GplCore = {
             ]
           },
           "relations": [
+            "issuer"
+          ]
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          },
+          "relations": [
             "authority"
           ]
         },
@@ -1298,6 +1362,28 @@ export type GplCore = {
                 },
                 "account": "Schema",
                 "path": "schema.random_hash"
+              }
+            ]
+          },
+          "relations": [
+            "issuer"
+          ]
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
               }
             ]
           },
@@ -1347,6 +1433,10 @@ export type GplCore = {
           {
             "name": "authority",
             "type": "publicKey"
+          },
+          {
+            "name": "verified",
+            "type": "bool"
           }
         ]
       }
@@ -1357,7 +1447,7 @@ export type GplCore = {
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
+            "name": "issuer",
             "type": "publicKey"
           },
           {
@@ -1878,6 +1968,14 @@ export type GplCore = {
     {
       "code": 6004,
       "name": "CustomTagTooLong"
+    },
+    {
+      "code": 6005,
+      "name": "UnverifiedIssuer"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidSignerToVerify"
     }
   ]
 };
@@ -2785,8 +2883,7 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
-                "account": "Issuer",
-                "path": "issuer"
+                "path": "authority"
               }
             ]
           },
@@ -2893,7 +2990,7 @@ export const IDL: GplCore = {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Issuer",
-                "path": "issuer"
+                "path": "issuer.authority"
               }
             ]
           }
@@ -2930,6 +3027,12 @@ export const IDL: GplCore = {
                 "type": "publicKey",
                 "account": "Issuer",
                 "path": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Profile",
+                "path": "holder"
               }
             ]
           },
@@ -2978,7 +3081,7 @@ export const IDL: GplCore = {
                 "kind": "account",
                 "type": "publicKey",
                 "account": "Issuer",
-                "path": "issuer"
+                "path": "issuer.authority"
               }
             ]
           }
@@ -3027,6 +3130,22 @@ export const IDL: GplCore = {
       "args": []
     },
     {
+      "name": "verifyIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "signer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "deleteIssuer",
       "accounts": [
         {
@@ -3043,8 +3162,7 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
-                "account": "Issuer",
-                "path": "issuer"
+                "path": "authority"
               }
             ]
           },
@@ -3086,6 +3204,28 @@ export const IDL: GplCore = {
               }
             ]
           }
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          },
+          "relations": [
+            "authority"
+          ]
         },
         {
           "name": "authority",
@@ -3142,6 +3282,28 @@ export const IDL: GplCore = {
             ]
           },
           "relations": [
+            "issuer"
+          ]
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
+              }
+            ]
+          },
+          "relations": [
             "authority"
           ]
         },
@@ -3182,6 +3344,28 @@ export const IDL: GplCore = {
                 },
                 "account": "Schema",
                 "path": "schema.random_hash"
+              }
+            ]
+          },
+          "relations": [
+            "issuer"
+          ]
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "issuer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "authority"
               }
             ]
           },
@@ -3231,6 +3415,10 @@ export const IDL: GplCore = {
           {
             "name": "authority",
             "type": "publicKey"
+          },
+          {
+            "name": "verified",
+            "type": "bool"
           }
         ]
       }
@@ -3241,7 +3429,7 @@ export const IDL: GplCore = {
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
+            "name": "issuer",
             "type": "publicKey"
           },
           {
@@ -3762,6 +3950,14 @@ export const IDL: GplCore = {
     {
       "code": 6004,
       "name": "CustomTagTooLong"
+    },
+    {
+      "code": 6005,
+      "name": "UnverifiedIssuer"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidSignerToVerify"
     }
   ]
 };
