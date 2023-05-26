@@ -881,6 +881,12 @@
               {
                 "kind": "account",
                 "type": "publicKey",
+                "account": "Schema",
+                "path": "schema"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
                 "account": "Profile",
                 "path": "holder"
               }
@@ -935,6 +941,31 @@
           }
         },
         {
+          "name": "schema",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
+              }
+            ]
+          }
+        },
+        {
           "name": "updateAuthority",
           "isMut": false,
           "isSigner": false,
@@ -984,13 +1015,20 @@
               {
                 "kind": "account",
                 "type": "publicKey",
+                "account": "Schema",
+                "path": "schema"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
                 "account": "Badge",
                 "path": "badge.holder"
               }
             ]
           },
           "relations": [
-            "issuer"
+            "issuer",
+            "schema"
           ]
         },
         {
@@ -1009,6 +1047,31 @@
                 "type": "publicKey",
                 "account": "Issuer",
                 "path": "issuer.authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "schema",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
               }
             ]
           }
@@ -1049,6 +1112,12 @@
               {
                 "kind": "account",
                 "type": "publicKey",
+                "account": "Schema",
+                "path": "schema"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
                 "account": "Profile",
                 "path": "holder"
               }
@@ -1056,7 +1125,8 @@
           },
           "relations": [
             "issuer",
-            "holder"
+            "holder",
+            "schema"
           ]
         },
         {
@@ -1100,6 +1170,31 @@
                 "type": "publicKey",
                 "account": "Issuer",
                 "path": "issuer.authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "schema",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
               }
             ]
           }
@@ -1224,28 +1319,6 @@
           }
         },
         {
-          "name": "issuer",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "issuer"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "path": "authority"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
@@ -1300,28 +1373,6 @@
             ]
           },
           "relations": [
-            "issuer"
-          ]
-        },
-        {
-          "name": "issuer",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "issuer"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "path": "authority"
-              }
-            ]
-          },
-          "relations": [
             "authority"
           ]
         },
@@ -1366,28 +1417,6 @@
             ]
           },
           "relations": [
-            "issuer"
-          ]
-        },
-        {
-          "name": "issuer",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "issuer"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "path": "authority"
-              }
-            ]
-          },
-          "relations": [
             "authority"
           ]
         },
@@ -1419,6 +1448,10 @@
             "type": "publicKey"
           },
           {
+            "name": "schema",
+            "type": "publicKey"
+          },
+          {
             "name": "metadataUri",
             "type": "string"
           }
@@ -1447,7 +1480,7 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "issuer",
+            "name": "authority",
             "type": "publicKey"
           },
           {

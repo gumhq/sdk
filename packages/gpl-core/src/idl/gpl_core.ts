@@ -881,6 +881,12 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
+                "account": "Schema",
+                "path": "schema"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
                 "account": "Profile",
                 "path": "holder"
               }
@@ -935,6 +941,31 @@ export type GplCore = {
           }
         },
         {
+          "name": "schema",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
+              }
+            ]
+          }
+        },
+        {
           "name": "updateAuthority",
           "isMut": false,
           "isSigner": false,
@@ -984,13 +1015,20 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
+                "account": "Schema",
+                "path": "schema"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
                 "account": "Badge",
                 "path": "badge.holder"
               }
             ]
           },
           "relations": [
-            "issuer"
+            "issuer",
+            "schema"
           ]
         },
         {
@@ -1009,6 +1047,31 @@ export type GplCore = {
                 "type": "publicKey",
                 "account": "Issuer",
                 "path": "issuer.authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "schema",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
               }
             ]
           }
@@ -1049,6 +1112,12 @@ export type GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
+                "account": "Schema",
+                "path": "schema"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
                 "account": "Profile",
                 "path": "holder"
               }
@@ -1056,7 +1125,8 @@ export type GplCore = {
           },
           "relations": [
             "issuer",
-            "holder"
+            "holder",
+            "schema"
           ]
         },
         {
@@ -1100,6 +1170,31 @@ export type GplCore = {
                 "type": "publicKey",
                 "account": "Issuer",
                 "path": "issuer.authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "schema",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
               }
             ]
           }
@@ -1224,28 +1319,6 @@ export type GplCore = {
           }
         },
         {
-          "name": "issuer",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "issuer"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "path": "authority"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
@@ -1300,28 +1373,6 @@ export type GplCore = {
             ]
           },
           "relations": [
-            "issuer"
-          ]
-        },
-        {
-          "name": "issuer",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "issuer"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "path": "authority"
-              }
-            ]
-          },
-          "relations": [
             "authority"
           ]
         },
@@ -1366,28 +1417,6 @@ export type GplCore = {
             ]
           },
           "relations": [
-            "issuer"
-          ]
-        },
-        {
-          "name": "issuer",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "issuer"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "path": "authority"
-              }
-            ]
-          },
-          "relations": [
             "authority"
           ]
         },
@@ -1419,6 +1448,10 @@ export type GplCore = {
             "type": "publicKey"
           },
           {
+            "name": "schema",
+            "type": "publicKey"
+          },
+          {
             "name": "metadataUri",
             "type": "string"
           }
@@ -1447,7 +1480,7 @@ export type GplCore = {
         "kind": "struct",
         "fields": [
           {
-            "name": "issuer",
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -2863,6 +2896,12 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
+                "account": "Schema",
+                "path": "schema"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
                 "account": "Profile",
                 "path": "holder"
               }
@@ -2917,6 +2956,31 @@ export const IDL: GplCore = {
           }
         },
         {
+          "name": "schema",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
+              }
+            ]
+          }
+        },
+        {
           "name": "updateAuthority",
           "isMut": false,
           "isSigner": false,
@@ -2966,13 +3030,20 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
+                "account": "Schema",
+                "path": "schema"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
                 "account": "Badge",
                 "path": "badge.holder"
               }
             ]
           },
           "relations": [
-            "issuer"
+            "issuer",
+            "schema"
           ]
         },
         {
@@ -2991,6 +3062,31 @@ export const IDL: GplCore = {
                 "type": "publicKey",
                 "account": "Issuer",
                 "path": "issuer.authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "schema",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
               }
             ]
           }
@@ -3031,6 +3127,12 @@ export const IDL: GplCore = {
               {
                 "kind": "account",
                 "type": "publicKey",
+                "account": "Schema",
+                "path": "schema"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
                 "account": "Profile",
                 "path": "holder"
               }
@@ -3038,7 +3140,8 @@ export const IDL: GplCore = {
           },
           "relations": [
             "issuer",
-            "holder"
+            "holder",
+            "schema"
           ]
         },
         {
@@ -3082,6 +3185,31 @@ export const IDL: GplCore = {
                 "type": "publicKey",
                 "account": "Issuer",
                 "path": "issuer.authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "schema",
+          "isMut": false,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "schema"
+              },
+              {
+                "kind": "account",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                "account": "Schema",
+                "path": "schema.random_hash"
               }
             ]
           }
@@ -3206,28 +3334,6 @@ export const IDL: GplCore = {
           }
         },
         {
-          "name": "issuer",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "issuer"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "path": "authority"
-              }
-            ]
-          },
-          "relations": [
-            "authority"
-          ]
-        },
-        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
@@ -3282,28 +3388,6 @@ export const IDL: GplCore = {
             ]
           },
           "relations": [
-            "issuer"
-          ]
-        },
-        {
-          "name": "issuer",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "issuer"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "path": "authority"
-              }
-            ]
-          },
-          "relations": [
             "authority"
           ]
         },
@@ -3348,28 +3432,6 @@ export const IDL: GplCore = {
             ]
           },
           "relations": [
-            "issuer"
-          ]
-        },
-        {
-          "name": "issuer",
-          "isMut": false,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "issuer"
-              },
-              {
-                "kind": "account",
-                "type": "publicKey",
-                "path": "authority"
-              }
-            ]
-          },
-          "relations": [
             "authority"
           ]
         },
@@ -3401,6 +3463,10 @@ export const IDL: GplCore = {
             "type": "publicKey"
           },
           {
+            "name": "schema",
+            "type": "publicKey"
+          },
+          {
             "name": "metadataUri",
             "type": "string"
           }
@@ -3429,7 +3495,7 @@ export const IDL: GplCore = {
         "kind": "struct",
         "fields": [
           {
-            "name": "issuer",
+            "name": "authority",
             "type": "publicKey"
           },
           {
