@@ -11,7 +11,7 @@ anchor.setProvider(anchor.AnchorProvider.env());
 const userWallet = (anchor.getProvider() as any).wallet;
 const user = userWallet.payer;
 
-describe("Profile", async () => {
+describe("Badge", async () => {
   let sdk: SDK;
   let profilePDA: anchor.web3.PublicKey;
   let gumTld: anchor.web3.PublicKey;
@@ -51,6 +51,31 @@ describe("Profile", async () => {
     issuerPDA = issuer;
     const issuerAccount = await sdk.badge.getIssuer(issuerPDA);
     expect(issuerAccount.authority.toBase58()).is.equal(user.publicKey.toBase58());
+  });
+
+  it("should verify the issuer", async () => {
+    // Verify the issuer
+    const issuer = await sdk.badge.verifyIssuer(
+      issuerPDA,
+    );
+    await issuer.rpc();
+    const issuerAccount = await sdk.badge.getIssuer(issuerPDA);
+
+    expect(issuerAccount.verified).is.equal(true);
+  });
+
+  it("should create a schema", async () => {
+    // Create a schema
+    const schemaMetdataUri = "https://example.com";
+    const schema = await sdk.badge.createSchema(
+      schemaMetdataUri,
+      user.publicKey,
+    );
+    await schema.instructionMethodBuilder.rpc();
+
+    schemaPDA = schema.schemaPDA;
+    const schemaAccount = await sdk.badge.getSchema(schemaPDA);
+    expect(schemaAccount.issuer.toBase58()).is.equal(issuerPDA.toBase58());
   });
 
   it("should create a badge", async () => {
@@ -107,20 +132,6 @@ describe("Profile", async () => {
       expect(e).to.be.an("error");
       expect(e.toString()).to.contain("Account does not exist");
     }
-  });
-
-  it("should create a schema", async () => {
-    // Create a schema
-    const schemaMetdataUri = "https://example.com";
-    const schema = await sdk.badge.createSchema(
-      schemaMetdataUri,
-      user.publicKey,
-    );
-    await schema.instructionMethodBuilder.rpc();
-
-    schemaPDA = schema.schemaPDA;
-    const schemaAccount = await sdk.badge.getSchema(schemaPDA);
-    expect(schemaAccount.authority.toBase58()).is.equal(user.publicKey.toBase58());
   });
 
   it("should update a schema", async () => {
