@@ -11,6 +11,7 @@ export {
   useCreateProfile,
   useCreatePost,
   useBadge,
+  useNameService,
   useUploader,
   useArweaveStorage,
   useShadowStorage,

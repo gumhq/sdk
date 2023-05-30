@@ -1,5 +1,6 @@
 export { useProfile, useCreateProfile } from "./profile";
 export { useBadge } from "./badge";
+export { useNameService } from "./nameservice";
 export { usePost, useCreatePost, useFeed, useExploreFeed } from "./post";
 export { useReaction } from "./reaction";
 export { useFollow, useUnfollow } from "./connection";
