@@ -25,6 +25,7 @@ export {
   GumDecodedProfile,
   Reaction,
   GraphQLReaction,
+  Badge,
   SessionTokenManager,
   PostMetadata,
   GumNameService,
