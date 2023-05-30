@@ -1,6 +1,5 @@
 export {
   useGum,
-  useUser,
   useProfile,
   usePost,
   useSessionKeyManager,
@@ -9,9 +8,9 @@ export {
   useReaction,
   useFollow,
   useUnfollow,
-  useCreateUser,
   useCreateProfile,
   useCreatePost,
+  useBadge,
   useUploader,
   useArweaveStorage,
   useShadowStorage,
@@ -28,7 +27,7 @@ export {
 
 export {
   SDK,
-  GRAPHQL_ENDPOINTS,
+  // GRAPHQL_ENDPOINTS,
 } from "@gumhq/sdk";
 
 export type { SessionWalletInterface } from "./hooks";
