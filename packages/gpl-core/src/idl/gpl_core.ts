@@ -6,6 +6,11 @@ export type GplCore = {
       "name": "createProfile",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "profile",
           "isMut": true,
           "isSigner": false,
@@ -39,7 +44,7 @@ export type GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -159,6 +164,11 @@ export type GplCore = {
       "name": "createPost",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "post",
           "isMut": true,
           "isSigner": false,
@@ -215,7 +225,7 @@ export type GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -324,6 +334,11 @@ export type GplCore = {
       "name": "createComment",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "post",
           "isMut": true,
           "isSigner": false,
@@ -405,7 +420,7 @@ export type GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -514,6 +529,11 @@ export type GplCore = {
       "name": "createConnection",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "connection",
           "isMut": true,
           "isSigner": false,
@@ -577,7 +597,7 @@ export type GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -679,6 +699,11 @@ export type GplCore = {
       "name": "createReaction",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "reaction",
           "isMut": true,
           "isSigner": false,
@@ -747,7 +772,7 @@ export type GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -779,9 +804,7 @@ export type GplCore = {
               },
               {
                 "kind": "account",
-                "type": {
-                  "defined": "ReactionType"
-                },
+                "type": "string",
                 "account": "Reaction",
                 "path": "reaction.reaction_type"
               },
@@ -1590,9 +1613,7 @@ export type GplCore = {
           },
           {
             "name": "reactionType",
-            "type": {
-              "defined": "ReactionType"
-            }
+            "type": "string"
           }
         ]
       }
@@ -1628,32 +1649,6 @@ export type GplCore = {
         "variants": [
           {
             "name": "CannotConnectToSelf"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ReactionType",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Emoji",
-            "fields": [
-              {
-                "name": "emoji",
-                "type": "string"
-              }
-            ]
-          },
-          {
-            "name": "Custom",
-            "fields": [
-              {
-                "name": "tag",
-                "type": "string"
-              }
-            ]
           }
         ]
       }
@@ -1996,19 +1991,15 @@ export type GplCore = {
     },
     {
       "code": 6003,
-      "name": "InvalidEmoji"
-    },
-    {
-      "code": 6004,
-      "name": "CustomTagTooLong"
-    },
-    {
-      "code": 6005,
       "name": "UnverifiedIssuer"
     },
     {
-      "code": 6006,
+      "code": 6004,
       "name": "InvalidSignerToVerify"
+    },
+    {
+      "code": 6005,
+      "name": "ReactionTypeTooLong"
     }
   ]
 };
@@ -2021,6 +2012,11 @@ export const IDL: GplCore = {
       "name": "createProfile",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "profile",
           "isMut": true,
           "isSigner": false,
@@ -2054,7 +2050,7 @@ export const IDL: GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -2174,6 +2170,11 @@ export const IDL: GplCore = {
       "name": "createPost",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "post",
           "isMut": true,
           "isSigner": false,
@@ -2230,7 +2231,7 @@ export const IDL: GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -2339,6 +2340,11 @@ export const IDL: GplCore = {
       "name": "createComment",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "post",
           "isMut": true,
           "isSigner": false,
@@ -2420,7 +2426,7 @@ export const IDL: GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -2529,6 +2535,11 @@ export const IDL: GplCore = {
       "name": "createConnection",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "connection",
           "isMut": true,
           "isSigner": false,
@@ -2592,7 +2603,7 @@ export const IDL: GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -2694,6 +2705,11 @@ export const IDL: GplCore = {
       "name": "createReaction",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "reaction",
           "isMut": true,
           "isSigner": false,
@@ -2762,7 +2778,7 @@ export const IDL: GplCore = {
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -2794,9 +2810,7 @@ export const IDL: GplCore = {
               },
               {
                 "kind": "account",
-                "type": {
-                  "defined": "ReactionType"
-                },
+                "type": "string",
                 "account": "Reaction",
                 "path": "reaction.reaction_type"
               },
@@ -3605,9 +3619,7 @@ export const IDL: GplCore = {
           },
           {
             "name": "reactionType",
-            "type": {
-              "defined": "ReactionType"
-            }
+            "type": "string"
           }
         ]
       }
@@ -3643,32 +3655,6 @@ export const IDL: GplCore = {
         "variants": [
           {
             "name": "CannotConnectToSelf"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ReactionType",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Emoji",
-            "fields": [
-              {
-                "name": "emoji",
-                "type": "string"
-              }
-            ]
-          },
-          {
-            "name": "Custom",
-            "fields": [
-              {
-                "name": "tag",
-                "type": "string"
-              }
-            ]
           }
         ]
       }
@@ -4011,19 +3997,15 @@ export const IDL: GplCore = {
     },
     {
       "code": 6003,
-      "name": "InvalidEmoji"
-    },
-    {
-      "code": 6004,
-      "name": "CustomTagTooLong"
-    },
-    {
-      "code": 6005,
       "name": "UnverifiedIssuer"
     },
     {
-      "code": 6006,
+      "code": 6004,
       "name": "InvalidSignerToVerify"
+    },
+    {
+      "code": 6005,
+      "name": "ReactionTypeTooLong"
     }
   ]
 };

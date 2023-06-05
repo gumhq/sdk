@@ -6,6 +6,11 @@
       "name": "createProfile",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "profile",
           "isMut": true,
           "isSigner": false,
@@ -39,7 +44,7 @@
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -159,6 +164,11 @@
       "name": "createPost",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "post",
           "isMut": true,
           "isSigner": false,
@@ -215,7 +225,7 @@
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -324,6 +334,11 @@
       "name": "createComment",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "post",
           "isMut": true,
           "isSigner": false,
@@ -405,7 +420,7 @@
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -514,6 +529,11 @@
       "name": "createConnection",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "connection",
           "isMut": true,
           "isSigner": false,
@@ -577,7 +597,7 @@
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -679,6 +699,11 @@
       "name": "createReaction",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "reaction",
           "isMut": true,
           "isSigner": false,
@@ -747,7 +772,7 @@
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -779,9 +804,7 @@
               },
               {
                 "kind": "account",
-                "type": {
-                  "defined": "ReactionType"
-                },
+                "type": "string",
                 "account": "Reaction",
                 "path": "reaction.reaction_type"
               },
@@ -1590,9 +1613,7 @@
           },
           {
             "name": "reactionType",
-            "type": {
-              "defined": "ReactionType"
-            }
+            "type": "string"
           }
         ]
       }
@@ -1628,32 +1649,6 @@
         "variants": [
           {
             "name": "CannotConnectToSelf"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ReactionType",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Emoji",
-            "fields": [
-              {
-                "name": "emoji",
-                "type": "string"
-              }
-            ]
-          },
-          {
-            "name": "Custom",
-            "fields": [
-              {
-                "name": "tag",
-                "type": "string"
-              }
-            ]
           }
         ]
       }
@@ -1996,19 +1991,15 @@
     },
     {
       "code": 6003,
-      "name": "InvalidEmoji"
-    },
-    {
-      "code": 6004,
-      "name": "CustomTagTooLong"
-    },
-    {
-      "code": 6005,
       "name": "UnverifiedIssuer"
     },
     {
-      "code": 6006,
+      "code": 6004,
       "name": "InvalidSignerToVerify"
+    },
+    {
+      "code": 6005,
+      "name": "ReactionTypeTooLong"
     }
   ]
 }
