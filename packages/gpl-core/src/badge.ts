@@ -1,6 +1,20 @@
 import { SDK } from ".";
+import { gql } from "graphql-request";
 import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
+
+export interface GraphQLBadge {
+  address: string;
+  issuer: string;
+  holder: string;
+  update_authority: string;
+  schema: string;
+  metadata_uri: string;
+  refreshed_at?: Date;
+  slot_created_at?: Date;
+  slot_updated_at?: Date;
+  created_at?: Date;
+}
 
 export class Badge {
   private readonly sdk: SDK;
@@ -206,4 +220,67 @@ export class Badge {
         authority,
       });
   }
+
+  // GraphQL Query methods
+
+  public async getAllBadges(): Promise<GraphQLBadge[]> {
+    const query = gql`
+      query GetAllBadges {
+        badge {
+          address
+          issuer
+          holder
+          update_authority
+          schema
+          metadata_uri
+          refreshed_at
+          slot_created_at
+          slot_updated_at
+          created_at
+        }
+    }`;
+    const data = await this.sdk.gqlClient.request<{ badge: GraphQLBadge[] }>(query);
+    return data.badge;
+  }
+
+  public async getBadgesByIssuer(issuer: string): Promise<GraphQLBadge[]> {
+    const query = gql`
+      query GetBadgesByIssuer($issuer: String!) {
+        badge(where: {issuer: {_eq: $issuer}}) {
+          address
+          issuer
+          holder
+          update_authority
+          schema
+          metadata_uri
+          refreshed_at
+          slot_created_at
+          slot_updated_at
+          created_at
+        }
+    }`;
+    const data = await this.sdk.gqlClient.request<{ badge: GraphQLBadge[] }>(query, { issuer });
+    return data.badge;
+  }
+
+  public async getBadgesByHolder(holder: string): Promise<GraphQLBadge[]> {
+    const query = gql`
+      query GetBadgesByHolder($holder: String!) {
+        badge(where: {holder: {_eq: $holder}}) {
+          address
+          issuer
+          holder
+          update_authority
+          schema
+          metadata_uri
+          refreshed_at
+          slot_created_at
+          slot_updated_at
+          created_at
+        }
+    }`;
+    const data = await this.sdk.gqlClient.request<{ badge: GraphQLBadge[] }>(query, { holder });
+    return data.badge;
+  }
+
 }
