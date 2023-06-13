@@ -14,13 +14,8 @@ const useUnfollow = (sdk: SDK) => {
       connectionAccount: PublicKey,
       fromProfile: PublicKey,
       toProfile: PublicKey,
-      userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount?: PublicKey,
       refundReceiver: PublicKey = owner,
-      sendTransaction?: sendTransactionFn,
-      connection?: Connection,
-      options?: SendTransactionOptions
     ) => {
       setConnectionLoading(true);
       setConnectionError(null);
@@ -30,20 +25,54 @@ const useUnfollow = (sdk: SDK) => {
           connectionAccount,
           fromProfile,
           toProfile,
-          userAccount,
           owner,
+          refundReceiver
+        );
+        
+        if (ixMethodBuilder) {
+          return await ixMethodBuilder.rpc();
+        } else {
+          const error = new Error('ixMethodBuilder is undefined');
+          setConnectionError(error);
+          return Promise.reject(error);
+        }
+      } catch (err: any) {
+        setConnectionError(err);
+      } finally {
+        setConnectionLoading(false);
+      }
+    },
+    [sdk]);
+
+  const unfollowUsingSession = useCallback(
+    async (
+      connectionAccount: PublicKey,
+      fromProfile: PublicKey,
+      toProfile: PublicKey,
+      sessionPublicKey: PublicKey,
+      sessionAccount: PublicKey,
+      sendTransaction: sendTransactionFn,
+      refundReceiver: PublicKey = sessionPublicKey,
+      connection?: Connection,
+      options?: SendTransactionOptions
+    ) => {
+      setConnectionLoading(true);
+      setConnectionError(null);
+
+      try {
+        const ixMethodBuilder = await deleteConnectionUsingSessionIxMethodBuilder(
+          connectionAccount,
+          fromProfile,
+          toProfile,
+          sessionPublicKey,
           sessionAccount,
           refundReceiver
         );
         
         if (ixMethodBuilder) {
-          if (sendTransaction) {
-            const tx = await ixMethodBuilder.transaction();
-            if (tx) {
-              return await sendTransaction(tx, connection, options);
-            }
-          } else {
-            return await ixMethodBuilder.rpc();
+          const tx = await ixMethodBuilder.transaction();
+          if (tx) {
+            return await sendTransaction(tx, connection, options);
           }
         } else {
           const error = new Error('ixMethodBuilder is undefined');
@@ -63,9 +92,7 @@ const useUnfollow = (sdk: SDK) => {
       connectionAccount: PublicKey,
       fromProfile: PublicKey,
       toProfile: PublicKey,
-      userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount?: PublicKey,
       refundReceiver: PublicKey = owner
     ) => {
       try {
@@ -73,8 +100,33 @@ const useUnfollow = (sdk: SDK) => {
           connectionAccount,
           fromProfile,
           toProfile,
-          userAccount,
           owner,
+          refundReceiver
+        );
+        return connection;
+      } catch (err: any) {
+        setConnectionError(err);
+        return null;
+      }
+    },
+    [sdk]
+  );
+
+  const deleteConnectionUsingSessionIxMethodBuilder = useCallback(
+    async (
+      connectionAccount: PublicKey,
+      fromProfile: PublicKey,
+      toProfile: PublicKey,
+      sessionPublicKey: PublicKey,
+      sessionAccount: PublicKey,
+      refundReceiver: PublicKey = sessionPublicKey
+    ) => {
+      try {
+        const connection = sdk.connection.deleteUsingSession(
+          connectionAccount,
+          fromProfile,
+          toProfile,
+          sessionPublicKey,
           sessionAccount,
           refundReceiver
         );
@@ -89,7 +141,9 @@ const useUnfollow = (sdk: SDK) => {
 
   return {
     unfollow,
+    unfollowUsingSession,
     deleteConnectionIxMethodBuilder,
+    deleteConnectionUsingSessionIxMethodBuilder,
     connectionLoading,
     connectionError
   };

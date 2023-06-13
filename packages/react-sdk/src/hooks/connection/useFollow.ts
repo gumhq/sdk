@@ -14,12 +14,8 @@ const useFollow = (sdk: SDK) => {
     async (
       fromProfile: PublicKey,
       toProfile: PublicKey,
-      userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount?: PublicKey,
-      sendTransaction?: sendTransactionFn,
-      connection?: Connection,
-      options?: SendTransactionOptions
+      payer: PublicKey = owner,
     ) => {
       setConnectionLoading(true);
       setConnectionError(null);
@@ -28,19 +24,53 @@ const useFollow = (sdk: SDK) => {
         const ixMethodBuilder = await createConnectionIxMethodBuilder(
           fromProfile,
           toProfile,
-          userAccount,
           owner,
-          sessionAccount
+          payer
         );
         
         if (ixMethodBuilder) {
-          if (sendTransaction) {
-            const tx = await ixMethodBuilder.transaction();
-            if (tx) {
-              return await sendTransaction(tx, connection, options);
-            }
-          } else {
-            return await ixMethodBuilder.rpc();
+          return await ixMethodBuilder.rpc();
+        } else {
+          const error = new Error('ixMethodBuilder is undefined');
+          setConnectionError(error);
+          return Promise.reject(error);
+        }
+      } catch (err: any) {
+        setConnectionError(err);
+      } finally {
+        setConnectionLoading(false);
+      }
+    },
+    [sdk]
+  );
+
+  const followUsingSession = useCallback(
+    async (
+      fromProfile: PublicKey,
+      toProfile: PublicKey,
+      sessionPublicKey: PublicKey,
+      sessionAccount: PublicKey,
+      sendTransaction: sendTransactionFn,
+      payer: PublicKey = sessionPublicKey,
+      connection?: Connection,
+      options?: SendTransactionOptions
+    ) => {
+      setConnectionLoading(true);
+      setConnectionError(null);
+
+      try {
+        const ixMethodBuilder = await createConnectionUsingSessionIxMethodBuilder(
+          fromProfile,
+          toProfile,
+          sessionPublicKey,
+          sessionAccount,
+          payer
+        );
+        
+        if (ixMethodBuilder) {
+          const tx = await ixMethodBuilder.transaction();
+          if (tx) {
+            return await sendTransaction(tx, connection, options);
           }
         } else {
           const error = new Error('ixMethodBuilder is undefined');
@@ -60,17 +90,41 @@ const useFollow = (sdk: SDK) => {
     async (
       fromProfile: PublicKey,
       toProfile: PublicKey,
-      userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount?: PublicKey
+      payer: PublicKey = owner,
     ) => {
       try {
         const connection = await sdk.connection.create(
           fromProfile,
           toProfile,
-          userAccount,
           owner,
-          sessionAccount
+          payer
+        );
+        setConnectionPDA(connection.connectionPDA);
+        return connection.instructionMethodBuilder;
+      } catch (err: any) {
+        setConnectionError(err);
+        return null;
+      }
+    },
+    [sdk]
+  );
+
+  const createConnectionUsingSessionIxMethodBuilder = useCallback(
+    async (
+      fromProfile: PublicKey,
+      toProfile: PublicKey,
+      sessionPublicKey: PublicKey,
+      sessionAccount: PublicKey,
+      payer: PublicKey = sessionPublicKey,
+    ) => {
+      try {
+        const connection = await sdk.connection.createUsingSession(
+          fromProfile,
+          toProfile,
+          sessionPublicKey,
+          sessionAccount,
+          payer
         );
         setConnectionPDA(connection.connectionPDA);
         return connection.instructionMethodBuilder;
@@ -84,7 +138,9 @@ const useFollow = (sdk: SDK) => {
 
   return {
     follow,
+    followUsingSession,
     createConnectionIxMethodBuilder,
+    createConnectionUsingSessionIxMethodBuilder,
     connectionPDA,
     connectionLoading,
     connectionError
