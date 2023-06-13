@@ -30,10 +30,10 @@ describe("Profile", async () => {
     );
 
     // Create a gum tld
-    gumTld = await createGumTld(userWallet);
+    gumTld = await createGumTld(sdk);
 
     // Create a domain for the wallet
-    screenNameAccount = await createGumDomain(userWallet, gumTld, "profiletest");
+    screenNameAccount = await createGumDomain(sdk, gumTld, "profiletest");
   });
 
   it("should create a profile", async () => {

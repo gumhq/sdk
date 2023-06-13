@@ -27,10 +27,10 @@ describe("Connection", async () => {
     );
 
     // Create a gum tld
-    const gumTld = await createGumTld(userWallet);
+    const gumTld = await createGumTld(sdk);
 
     // Create a domain for the wallet
-    const screenNameAccount = await createGumDomain(userWallet, gumTld, "foobar");
+    const screenNameAccount = await createGumDomain(sdk, gumTld, "foobar");
 
     // Create a profile
     const profileMetdataUri = "https://example.com";
@@ -48,7 +48,7 @@ describe("Connection", async () => {
     await airdrop(testUser.publicKey);
 
     // Create a user nameservice account
-    const screenNameAccount2 = await createGumDomain(testUserWallet, gumTld, "foobarr");
+    const screenNameAccount2 = await createGumDomain(sdk, gumTld, "foobarr");
 
     // Create a testProfile
     const testProfile = await sdk.profile.create(

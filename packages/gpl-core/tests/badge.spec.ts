@@ -29,9 +29,9 @@ describe("Badge", async () => {
     );
 
     // Create a gum tld
-    gumTld = await createGumTld(userWallet);
+    gumTld = await createGumTld(sdk);
     // Create a domain for the wallet
-    screenNameAccount = await createGumDomain(userWallet, gumTld, "gumbadge");
+    screenNameAccount = await createGumDomain(sdk, gumTld, "gumbadge");
 
     const profileMetdataUri = "https://example.com";
     const profile = await sdk.profile.create(

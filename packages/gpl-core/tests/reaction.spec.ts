@@ -23,10 +23,10 @@ describe("Reaction", async () => {
     );
 
     // Create a gum tld
-    const gumTld = await createGumTld(userWallet);
+    const gumTld = await createGumTld(sdk);
 
     // Create a domain for the wallet
-    const screenNameAccount = await createGumDomain(userWallet, gumTld, "reactiontest");
+    const screenNameAccount = await createGumDomain(sdk, gumTld, "reactiontest");
 
     // Create a profile
     const profileMetdataUri = "https://example.com";
@@ -62,7 +62,7 @@ describe("Reaction", async () => {
     const reactionAccount = await sdk.reaction.get(reactionPDA);
     expect(reactionAccount.toPost.toBase58()).to.equal(postPDA.toBase58());
     expect(reactionAccount.fromProfile.toBase58()).to.equal(profilePDA.toBase58());
-    expect(reactionAccount.reactionType.emoji?.emoji).to.equal("🧈");
+    expect(reactionAccount.reactionType).to.equal("🧈");
   });
 
   it("should delete a reaction", async () => {

@@ -1,7 +1,6 @@
 import * as anchor from '@project-serum/anchor';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { GumNameService } from '../../src';
-import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
+import { GumNameService, SDK } from '../../src';
 
 const provider = anchor.getProvider();
 
@@ -10,24 +9,16 @@ export async function airdrop(key: PublicKey) {
   return provider.connection.confirmTransaction(airdropSig);
 }
 
-export async function createGumTld(userWallet: NodeWallet) {
-  const nameservice = new GumNameService(
-    userWallet,
-    new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
-    "localnet"
-  )
+export async function createGumTld(sdk: SDK) {
+  const nameservice = new GumNameService(sdk);
 
   const gumTld = await nameservice.getOrCreateTLD("gum");
   return gumTld;
 }
 
-export async function createGumDomain(userWallet: NodeWallet, gumTld: anchor.web3.PublicKey, domain: string) {
-  const nameservice = new GumNameService(
-    userWallet,
-    new anchor.web3.Connection("http://127.0.0.1:8899", "processed"),
-    "localnet"
-  );
-  const user = userWallet.publicKey;
+export async function createGumDomain(sdk: SDK, gumTld: anchor.web3.PublicKey, domain: string) {
+  const nameservice = new GumNameService(sdk);
+  const user = sdk.provider.wallet.publicKey;
   const screenName = await nameservice.getOrCreateDomain(gumTld, domain, user);
   return screenName;
 }

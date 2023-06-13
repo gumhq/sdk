@@ -28,10 +28,10 @@ describe("Post", async () => {
     );
 
     // Create a gum tld
-    const gumTld = await createGumTld(userWallet);
+    const gumTld = await createGumTld(sdk);
 
     // Create a domain for the wallet
-    const screenNameAccount = await createGumDomain(userWallet, gumTld, "foobarpost");
+    const screenNameAccount = await createGumDomain(sdk, gumTld, "foobarpost");
 
     // Create a profile
     const profileMetdataUri = "https://example.com";
