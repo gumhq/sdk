@@ -1,31 +1,29 @@
 import * as anchor from "@project-serum/anchor";
-import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
-import { PublicKey, Cluster } from "@solana/web3.js";
-import { GplNameservice } from "./idl/gpl_nameservice";
-import gpl_nameservice from "./idl/gpl_nameservice.json";
-import { GPL_NAMESERVICE_PROGRAMS } from "./constants";
+import { PublicKey } from "@solana/web3.js";
 import { keccak_256 } from "js-sha3";
+import { gql } from "graphql-request";
+import { SDK } from "src";
+
+export interface GraphQLNameservice {
+  address: string;
+  name: string;
+  authority: string;
+  domain: string;
+  refreshed_at?: Date;
+  slot_created_at?: Date;
+  slot_updated_at?: Date;
+  created_at?: Date;
+}
 
 export class GumNameService {
-  readonly program: anchor.Program<GplNameservice>;
-  readonly provider: anchor.AnchorProvider;
-
-  constructor(
-    wallet: Wallet,
-    connection: anchor.web3.Connection,
-    cluster: Cluster | "localnet",
-  ) {
-    this.provider = new anchor.AnchorProvider(connection, wallet, {
-      preflightCommitment: "confirmed",
-    });
-    this.program = new anchor.Program(
-      gpl_nameservice as anchor.Idl,
-      GPL_NAMESERVICE_PROGRAMS[cluster] as anchor.web3.PublicKey,
-      this.provider) as anchor.Program<GplNameservice>;
+  readonly sdk: SDK;
+  
+  constructor(sdk: SDK) {
+    this.sdk = sdk;
   }
 
   public async get(tldAccount: PublicKey) {
-    return this.program.account.nameRecord.fetch(tldAccount);
+    return this.sdk.nameserviceProgram.account.nameRecord.fetch(tldAccount);
   }
 
   public async getOrCreateTLD(
@@ -39,12 +37,12 @@ export class GumNameService {
         Buffer.from(tldHash, "hex"),
         PublicKey.default.toBuffer(),
       ],
-      this.program.programId
+      this.sdk.nameserviceProgram.programId
     );
     try {
       await this.get(tldAccount);
     } catch (err) {
-      const instructionMethodBuilder = this.program.methods.createTld(tld)
+      const instructionMethodBuilder = this.sdk.nameserviceProgram.methods.createTld(tld)
         .accounts({
           nameRecord: tldAccount,
         })
@@ -64,10 +62,10 @@ export class GumNameService {
         Buffer.from(tldHash, "hex"),
         PublicKey.default.toBuffer(),
       ],
-      this.program.programId
+      this.sdk.nameserviceProgram.programId
     );
 
-    const instructionMethodBuilder = this.program.methods.createTld(tld)
+    const instructionMethodBuilder = this.sdk.nameserviceProgram.methods.createTld(tld)
       .accounts({
         nameRecord: tldAccount,
       })
@@ -89,12 +87,12 @@ export class GumNameService {
         Buffer.from(domainHash, "hex"),
         tldPDA.toBuffer(),
       ],
-      this.program.programId
+      this.sdk.nameserviceProgram.programId
     );
     try {
       await this.get(domainAccount);
     } catch (err) {
-      await this.program.methods.createNameRecord(domain)
+      await this.sdk.nameserviceProgram.methods.createNameRecord(domain)
         .accounts({
           domain: tldPDA,
           nameRecord: domainAccount,
@@ -117,10 +115,10 @@ export class GumNameService {
         Buffer.from(domainHash, "hex"),
         tldPDA.toBuffer(),
       ],
-      this.program.programId
+      this.sdk.nameserviceProgram.programId
     );
 
-    const instructionMethodBuilder = this.program.methods.createNameRecord(domain)
+    const instructionMethodBuilder = this.sdk.nameserviceProgram.methods.createNameRecord(domain)
       .accounts({
         domain: tldPDA,
         nameRecord: domainAccount,
@@ -136,11 +134,68 @@ export class GumNameService {
     currentAuthority: PublicKey,
     newAuthority: PublicKey,
   ) {
-    return this.program.methods.transferNameRecord()
+    return this.sdk.nameserviceProgram.methods.transferNameRecord()
       .accounts({
         nameRecord: domainPDA,
         authority: currentAuthority,
         newAuthority,
       })
   }
+
+  // GraphQL Query methods
+
+  public async getAllNameservices(): Promise<GraphQLNameservice[]> {
+    const query = gql`
+      query GetAllNameservices {
+        name_record {
+          address
+          name
+          authority
+          domain
+          refreshed_at
+          slot_created_at
+          slot_updated_at
+          created_at
+        }
+      }`
+    const data = await this.sdk.gqlClient.request<{ name_record: GraphQLNameservice[] }>(query);
+    return data.name_record;
+  }
+
+  public async getNameserviceByDomain(domain: string): Promise<GraphQLNameservice> {
+    const query = gql`
+      query GetNameserviceByDomain($domain: String!) {
+        name_record(where: {domain: {_eq: $domain}}) {
+          address
+          name
+          authority
+          domain
+          refreshed_at
+          slot_created_at
+          slot_updated_at
+          created_at
+        }
+      }`
+    const data = await this.sdk.gqlClient.request<{ name_record: GraphQLNameservice }>(query, { domain });
+    return data.name_record;
+  }
+
+  public async getNameservicesByAuthority(authority: string): Promise<GraphQLNameservice[]> {
+    const query = gql`
+      query GetNameservicesByAuthority($authority: String!) {
+        name_record(where: {authority: {_eq: $authority}}) {
+          address
+          name
+          authority
+          domain
+          refreshed_at
+          slot_created_at
+          slot_updated_at
+          created_at
+        }
+      }`
+    const data = await this.sdk.gqlClient.request<{ name_record: GraphQLNameservice[] }>(query, { authority });
+    return data.name_record;
+  }
+
 }
