@@ -45,7 +45,7 @@ export class Connection {
     };
   }
 
-  public async createWithSession(
+  public async createUsingSession(
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
     sessionPublicKey: anchor.web3.PublicKey,
@@ -86,7 +86,7 @@ export class Connection {
       });
   }
 
-  public deleteWithSession(
+  public deleteUsingSession(
     connectionAccount: anchor.web3.PublicKey,
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
