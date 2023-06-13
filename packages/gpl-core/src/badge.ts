@@ -16,6 +16,16 @@ export interface GraphQLBadge {
   created_at?: Date;
 }
 
+export interface GraphQLIssuer {
+  address: string;
+  authority: string;
+  verified: boolean;
+  refreshed_at?: Date;
+  slot_created_at?: Date;
+  slot_updated_at?: Date;
+  created_at?: Date;
+}
+
 export class Badge {
   private readonly sdk: SDK;
 
@@ -281,6 +291,23 @@ export class Badge {
     }`;
     const data = await this.sdk.gqlClient.request<{ badge: GraphQLBadge[] }>(query, { holder });
     return data.badge;
+  }
+
+  public async getIssuerByAuthority(authority: string): Promise<GraphQLIssuer[]> {
+    const query = gql`
+      query GetIssuerByAuthority($authority: String!) {
+        issuer(where: {authority: {_eq: $authority}}) {
+          address
+          authority
+          verified
+          refreshed_at
+          slot_created_at
+          slot_updated_at
+          created_at
+        }
+    }`;
+    const data = await this.sdk.gqlClient.request<{ issuer: GraphQLIssuer[] }>(query, { authority });
+    return data.issuer;
   }
 
 }
