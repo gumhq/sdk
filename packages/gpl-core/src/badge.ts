@@ -162,11 +162,12 @@ export class Badge {
     return await this.sdk.program.account.issuer.fetch(issuerAccount);
   }
 
-  public async verifyIssuer(issuerAccount: anchor.web3.PublicKey) {
+  public async verifyIssuer(issuerAccount: anchor.web3.PublicKey, signer: anchor.web3.PublicKey) {
     return this.sdk.program.methods
       .verifyIssuer()
       .accounts({
         issuer: issuerAccount,
+        signer
       });
   }
 

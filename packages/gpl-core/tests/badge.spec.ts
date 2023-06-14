@@ -57,6 +57,7 @@ describe("Badge", async () => {
     // Verify the issuer
     const issuer = await sdk.badge.verifyIssuer(
       issuerPDA,
+      user.publicKey,
     );
     await issuer.rpc();
     const issuerAccount = await sdk.badge.getIssuer(issuerPDA);
