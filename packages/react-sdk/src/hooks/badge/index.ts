@@ -125,14 +125,14 @@ const useBadge = (sdk: SDK) => {
         sdk.program.programId
       );
       try {
-        const gatewayResponse = await axios.post(GATEWAY_SERVICE_URL, {
+        const gatewayResponse = await axios.post(`${GATEWAY_SERVICE_URL}/issueBadge`, {
           signature,
           userWallet: holderWallet.toBase58(),
           profileAddress: holderProfile.toBase58(),
           issuerAddress: issuer.toBase58(),
           badgeAddress: badgePDA.toBase58(),
           gumTld: gumTld.toBase58(),
-          appId,
+          appName: appId,
           dateJoined,
           authority: authority.toBase58(),
         });

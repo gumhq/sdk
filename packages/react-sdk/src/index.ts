@@ -28,7 +28,8 @@ export {
 
 export {
   SDK,
-  // GRAPHQL_ENDPOINTS,
+  GumNameService,
+  GRAPHQL_ENDPOINTS,
 } from "@gumhq/sdk";
 
 export type { SessionWalletInterface } from "./hooks";
