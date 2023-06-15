@@ -45,6 +45,7 @@ export class Text {
 export class PostMetadata {
   content: Blocks | Image | Video | Json | Text;
   type: "blocks" | "image" | "video" | "json" | "text";
+  app_id: string;
   image_preview?: string;
   text_preview?: string;
   authorship: {
@@ -62,7 +63,7 @@ export class PostMetadata {
   }
 
   validate() {
-    if (!this.content || !this.type || !this.authorship) {
+    if (!this.content || !this.type || !this.authorship || !this.app_id) {
       throw new Error("Missing required fields in PostMetadata");
     }
 
