@@ -69,4 +69,5 @@ export class SDK {
   public post = new Post(this);
   public reaction = new Reaction(this);
   public badge = new Badge(this);
+  public nameservice = new GumNameService(this);
 }

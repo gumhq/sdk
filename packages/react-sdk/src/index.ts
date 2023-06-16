@@ -12,6 +12,7 @@ export {
   useCreatePost,
   useBadge,
   useNameService,
+  useDomains,
   useUploader,
   useArweaveStorage,
   useShadowStorage,

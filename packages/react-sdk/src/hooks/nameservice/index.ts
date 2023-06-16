@@ -1,43 +1,41 @@
-import { GumNameService } from "@gumhq/sdk";
+import { SDK } from "@gumhq/sdk";
 import { useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
 
-const useNameService = (nameService: GumNameService) => {
+const useNameService = (sdk: SDK) => {
   const [state, setState] = useState({
     isCreating: false,
     creationError: null as Error | null,
   });
 
-  const createTLD = useCallback(
+  const getOrCreateTLD = useCallback(
     async (tld: string) => {
       setState({ isCreating: true, creationError: null });
 
       try {
-        const { tldPDA, instructionMethodBuilder } = await nameService.createTLD(tld);
-        await instructionMethodBuilder.rpc();
+        const tldPDA = await sdk.nameservice.getOrCreateTLD(tld);
         setState({ isCreating: false, creationError: null });
         return tldPDA;
       } catch (err: any) {
         setState({ isCreating: false, creationError: err });
       }
     },
-    [nameService]
+    [sdk]
   );
 
-  const createDomain = useCallback(
+  const getOrCreateDomain = useCallback(
     async (tldPDA: PublicKey, domain: string, authority: PublicKey) => {
       setState({ isCreating: true, creationError: null });
 
       try {
-        const { gumDomainPDA, instructionMethodBuilder } = await nameService.createDomain(tldPDA, domain, authority);
-        await instructionMethodBuilder.rpc();
+        const gumDomainPDA = await sdk.nameservice.getOrCreateDomain(tldPDA, domain, authority);
         setState({ isCreating: false, creationError: null });
         return gumDomainPDA;
       } catch (err: any) {
         setState({ isCreating: false, creationError: err });
       }
     },
-    [nameService]
+    [sdk]
   );
 
   const transferDomain = useCallback(
@@ -45,22 +43,24 @@ const useNameService = (nameService: GumNameService) => {
       setState({ isCreating: true, creationError: null });
 
       try {
-        const instructionMethodBuilder = await nameService.transferDomain(domainPDA, currentAuthority, newAuthority)
+        const instructionMethodBuilder = await sdk.nameservice.transferDomain(domainPDA, currentAuthority, newAuthority)
         await instructionMethodBuilder.rpc();
         setState({ isCreating: false, creationError: null });
       } catch (err: any) {
         setState({ isCreating: false, creationError: err });
       }
     },
-    [nameService]
+    [sdk]
   );
 
   return {
-    createTLD,
-    createDomain,
+    getOrCreateTLD,
+    getOrCreateDomain,
     transferDomain,
     ...state,
   };
 };
 
 export { useNameService };
+
+export { useDomains } from "./useDomains";
