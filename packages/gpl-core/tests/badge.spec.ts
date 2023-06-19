@@ -132,7 +132,7 @@ describe("Badge", async () => {
 
     try {
       await sdk.badge.getBadge(badgePDA);
-    } catch (e) {
+    } catch (e: any) {
       expect(e).to.be.an("error");
       expect(e.toString()).to.contain("Account does not exist");
     }
@@ -164,7 +164,7 @@ describe("Badge", async () => {
 
     try {
       await sdk.badge.getSchema(schemaPDA);
-    } catch (e) {
+    } catch (e: any) {
       expect(e).to.be.an("error");
       expect(e.toString()).to.contain("Account does not exist");
     }

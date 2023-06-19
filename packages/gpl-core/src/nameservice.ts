@@ -198,4 +198,21 @@ export class GumNameService {
     return data.name_record;
   }
 
+  public async getDomainByName(domainName: string): Promise<GraphQLNameservice> {
+    const query = gql`
+      query GetDomainByName($domainName: String!) {
+        name_record(where: {name: {_eq: $domainName}}) {
+          address
+          name
+          authority
+          domain
+          refreshed_at
+          slot_created_at
+          slot_updated_at
+          created_at
+        }
+      }`
+    const data = await this.sdk.gqlClient.request<{ name_record: GraphQLNameservice }>(query, { domainName });
+    return data.name_record;
+  }
 }

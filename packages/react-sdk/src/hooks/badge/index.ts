@@ -4,7 +4,7 @@ import { PublicKey } from "@solana/web3.js";
 import axios from "axios";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 
-const GATEWAY_SERVICE_URL = "https://gateway-badge-issuer-ec4071b-lafkve5tyq-uc.a.run.app";
+const GATEWAY_SERVICE_URL = "https://issue-gateway-credentials-lafkve5tyq-uc.a.run.app";
 
 const useBadge = (sdk: SDK) => {
   const [state, setState] = useState({
@@ -136,7 +136,7 @@ const useBadge = (sdk: SDK) => {
           dateJoined,
           authority: authority.toBase58(),
         });
-        const gatewayBadge = gatewayResponse.data;
+        const gatewayBadge = gatewayResponse.data.createCredential;
         if (!gatewayBadge) {
           throw new Error("Failed to issue gateway badge");
         }
