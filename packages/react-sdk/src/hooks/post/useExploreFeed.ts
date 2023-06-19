@@ -6,25 +6,25 @@ const useExploreFeed = (sdk: SDK) => {
   const [exploreFeedLoading, setExploreFeedLoading] = useState(false);
   const [exploreFeedError, setExploreFeedError] = useState<Error | null>(null);
 
-  // const fetchExploreFeed = useCallback(
-  //   async () => {
-  //     setExploreFeedLoading(true);
-  //     setExploreFeedError(null);
+  const fetchExploreFeed = useCallback(
+    async () => {
+      setExploreFeedLoading(true);
+      setExploreFeedError(null);
 
-  //     try {
-  //       const data = await sdk.post.getPostsByNamespace(namespace);
+      try {
+        const data = await sdk.post.getAllPosts();
 
-  //       setExploreFeedData(data);
-  //     } catch (err: any) {
-  //       setExploreFeedError(err);
-  //     } finally {
-  //       setExploreFeedLoading(false);
-  //     }
-  //   }, [sdk]);
+        setExploreFeedData(data);
+      } catch (err: any) {
+        setExploreFeedError(err);
+      } finally {
+        setExploreFeedLoading(false);
+      }
+    }, [sdk]);
 
-  // useEffect(() => {
-  //   fetchExploreFeed();
-  // }, []);
+  useEffect(() => {
+    fetchExploreFeed();
+  }, []);
 
   return { exploreFeedData, exploreFeedLoading, exploreFeedError };
 };
