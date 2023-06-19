@@ -30,7 +30,12 @@ export {
 export {
   SDK,
   GumNameService,
+  GPLCORE_PROGRAMS,
   GRAPHQL_ENDPOINTS,
+  OLD_GPLCORE_PROGRAMS,
+  GRAPHQL_ENDPOINTS_OLD,
+  GPL_NAMESERVICE_PROGRAMS,
+  GPLSESSION_PROGRAMS,
 } from "@gumhq/sdk";
 
 export type { SessionWalletInterface } from "./hooks";
