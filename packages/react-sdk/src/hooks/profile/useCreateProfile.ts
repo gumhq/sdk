@@ -9,7 +9,7 @@ const useCreateProfile = (sdk: SDK) => {
   });
 
   const create = useCallback(
-    async (metadataUri: String, screenNameAccount: PublicKey, owner: PublicKey, payer: PublicKey) => {
+    async (metadataUri: string, screenNameAccount: PublicKey, owner: PublicKey, payer: PublicKey = owner) => {
       setState({ isCreatingProfile: true, createProfileError: null });
 
       try {
@@ -23,7 +23,7 @@ const useCreateProfile = (sdk: SDK) => {
     }, [sdk]);
 
   const getOrCreate = useCallback(
-    async (metadataUri: String, screenNameAccount: PublicKey, owner: PublicKey, payer: PublicKey) => {
+    async (metadataUri: string, screenNameAccount: PublicKey, owner: PublicKey, payer: PublicKey = owner) => {
       setState({ isCreatingProfile: true, createProfileError: null });
 
       try {
@@ -36,8 +36,22 @@ const useCreateProfile = (sdk: SDK) => {
       }
     }, [sdk]);
 
+  const createProfileWithDomain = useCallback(
+    async (metadataUri: string, domainName: string, authority: PublicKey, payer: PublicKey = authority) => {
+      setState({ isCreatingProfile: true, createProfileError: null });
+
+      try {
+        const ixMethodBuilder = await sdk.profile.createProfileWithGumDomain(metadataUri, domainName, authority, payer);
+        await ixMethodBuilder?.instructionMethodBuilder.rpc();
+        setState({ isCreatingProfile: false, createProfileError: null });
+        return ixMethodBuilder?.profilePDA;
+      } catch (err: any) {
+        setState({ isCreatingProfile: false, createProfileError: err });
+      }
+    }, [sdk]);
+
   const createProfileIxMethodBuilder = useCallback(
-    async (metadataUri: String, screenNameAccount: PublicKey, authority: PublicKey, payer: PublicKey) => {
+    async (metadataUri: string, screenNameAccount: PublicKey, authority: PublicKey, payer: PublicKey) => {
       setState({ isCreatingProfile: true, createProfileError: null });
 
       try {
@@ -58,6 +72,7 @@ const useCreateProfile = (sdk: SDK) => {
   return {
     create,
     getOrCreate,
+    createProfileWithDomain,
     createProfileIxMethodBuilder,
     ...state,
   };

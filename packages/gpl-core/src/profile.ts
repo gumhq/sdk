@@ -2,12 +2,22 @@ import { SDK } from ".";
 import { gql } from "graphql-request";
 import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
+import axios from "axios";
+import { keccak_256 } from "js-sha3";
+import { PublicKey, TransactionInstruction } from "@solana/web3.js";
+
+export type ProfileMetadataType = {
+  name: string;
+  bio: string;
+  avatar: string;
+};
 
 export interface GumDecodedProfile {
   address: string;
   screen_name: string;
   authority: string;
   metadata_uri: string;
+  metadata: any;
   slot_created_at: number;
   slot_updated_at: number;
 }
@@ -23,7 +33,6 @@ export class Profile {
     return await this.sdk.program.account.profile.fetch(profileAccount);
   }
 
-
   /**
    * Gets or creates a profile for a given user account and namespace.
    * 
@@ -31,7 +40,7 @@ export class Profile {
    * The client will be used to fetch profile information.
    */
   public async getOrCreate(
-    metadataUri: String,
+    metadataUri: string,
     screenNameAccount: anchor.web3.PublicKey,
     authority: anchor.web3.PublicKey,
     payer: anchor.web3.PublicKey = authority): Promise<anchor.web3.PublicKey> {
@@ -50,11 +59,18 @@ export class Profile {
   }
 
   public async create(
-    metadataUri: String,
+    metadataUri: string,
     screenNameAccount: anchor.web3.PublicKey,
     authority: anchor.web3.PublicKey,
-    payer: anchor.web3.PublicKey = authority) {
+    payer: anchor.web3.PublicKey = authority
+  ) {
+    const validation = await this.validateProfileMetadata(metadataUri);
+    if (!validation) {
+      throw new Error("Invalid profile metadata");
+    }
+
     const randomHash = randomBytes(32);
+
     const instructionMethodBuilder = this.sdk.program.methods
       // @ts-ignore
       .createProfile(randomHash, metadataUri)
@@ -63,16 +79,65 @@ export class Profile {
         authority,
         payer,
       });
+
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const profilePDA = pubKeys.profile as anchor.web3.PublicKey;
+
     return {
       instructionMethodBuilder,
       profilePDA,
     };
   }
 
+  public async createProfileWithGumDomain(
+    metadataUri: string,
+    domainName: string,
+    authority: anchor.web3.PublicKey,
+    payer: anchor.web3.PublicKey = authority
+  ) {
+    let instruction: TransactionInstruction[] = [];
+
+    let profilePDA = await this.getProfileByDomainName(domainName);
+    if (profilePDA) {
+      return {
+        instructionMethodBuilder: null,
+        profilePDA: new PublicKey(profilePDA.address),
+      }
+    }
+
+    const gumTld = await this.sdk.nameservice.getOrCreateTLD('gum');
+    if (!gumTld) {
+      throw new Error('Gum TLD not found');
+    }
+
+    const domainPDA = await this.sdk.nameservice.getDomainByName(domainName);
+
+    if (!domainPDA || !domainPDA.address) {
+    const domainAccount = await this.sdk.nameservice.createDomain(gumTld, domainName, authority);
+    const domainIx = await domainAccount.instructionMethodBuilder.instruction();
+    instruction.push(domainIx);
+    }
+
+    const domainHash = keccak_256(domainName);
+
+    const [domainAccount, _] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("name_record"),
+        Buffer.from(domainHash, "hex"),
+        gumTld.toBuffer(),
+      ],
+      this.sdk.nameserviceProgram.programId
+    );
+    const profile = await this.sdk.profile.create(metadataUri, domainAccount, authority, payer);
+    const instructionMethodBuilder = profile?.instructionMethodBuilder.preInstructions(instruction);
+    return {
+      instructionMethodBuilder,
+      profilePDA: profile?.profilePDA,
+    };
+  }
+
   public async update(
-    metadataUri: String,
+    metadataUri: string,
     profileAccount: anchor.web3.PublicKey,
     screenNameAccount: anchor.web3.PublicKey,
     authority: anchor.web3.PublicKey) {
@@ -98,6 +163,53 @@ export class Profile {
       })
   }
 
+  public async validateProfileMetadata(metadataUri: string): Promise<boolean> {
+    try {
+      const uri = new URL(metadataUri);
+      if (!uri.protocol.startsWith("http")) {
+        throw new Error("Invalid URI protocol, must be http or https");
+      }
+
+      const { data } = await axios.get<ProfileMetadataType>(metadataUri);
+
+      // Check if all required fields are present
+      const requiredFields: Array<keyof ProfileMetadataType> = ["name", "bio", "avatar"];
+      for (const field of requiredFields) {
+        if (!data[field]) {
+          throw new Error(`${field} is required but missing`);
+        }
+      }
+
+      // Check if the type of the fields are correct
+      const fields = ["name", "bio", "avatar"];
+      for (const field of fields) {
+        if (typeof data[field] !== "string") {
+          throw new Error(`${field} must be a string`);
+        }
+      }
+
+      // Check if avatar is a valid URI
+      const avatarUri = new URL(data.avatar);
+      if (!avatarUri.protocol.startsWith("http")) {
+        throw new Error("Invalid avatar URI protocol, must be http or https");
+      }
+
+      // Check if the length of the fields are correct
+      if (data.name.length > 32) {
+        throw new Error("Name must be 32 characters or fewer");
+      }
+
+      // Check if the fields are empty
+      if (data.name.trim() === "") {
+        throw new Error("Name cannot be empty");
+      }
+
+      return true;
+    } catch (error) {
+      throw new Error(`Error validating profile metadata: ${error.message}`);
+    }
+  }
+
   // GraphQL API methods
 
   public async getProfile(screenNameAccount: anchor.web3.PublicKey, authority: anchor.web3.PublicKey): Promise<GumDecodedProfile> {
@@ -113,6 +225,7 @@ export class Profile {
           screen_name
           authority
           metadata_uri
+          metadata
           slot_created_at
           slot_updated_at
         }
@@ -135,6 +248,7 @@ export class Profile {
           screen_name
           authority
           metadata_uri
+          metadata
           slot_created_at
           slot_updated_at
         }
@@ -155,6 +269,7 @@ export class Profile {
             screen_name
             authority
             metadata_uri
+            metadata
             slot_created_at
             slot_updated_at
           }
@@ -176,6 +291,7 @@ export class Profile {
             screen_name
             authority
             metadata_uri
+            metadata
             slot_created_at
             slot_updated_at
           }
@@ -189,7 +305,7 @@ export class Profile {
       return data.profile;
   }
 
-  public async getProfilesByProfileAccount(profileAccount: anchor.web3.PublicKey): Promise<GumDecodedProfile[]> {
+  public async getProfilesByProfileAccount(profileAccount: anchor.web3.PublicKey): Promise<GumDecodedProfile> {
       const query = gql`
         query ProfilesByProfileAccount ($profileAccount: String) {
           profile(where: { address: { _eq: $profileAccount } }) {
@@ -197,6 +313,7 @@ export class Profile {
             screen_name
             authority
             metadata_uri
+            metadata
             slot_created_at
             slot_updated_at
           }
@@ -207,6 +324,17 @@ export class Profile {
       };
 
       const data = await this.sdk.gqlClient.request<{ profile: GumDecodedProfile[] }>(query, variables);
-      return data.profile;
+      return data.profile[0];
+  }
+
+  public async getProfileByDomainName(domainName: string): Promise<GumDecodedProfile> {
+    const domain = await this.sdk.nameservice.getDomainByName(domainName);
+    if (!domain.address) {
+      console.log(`Domain ${domainName} not found`);
+      return;
+    }
+    const domainAccount = new anchor.web3.PublicKey(domain.address);
+    const profileAccount = await this.getProfilesByScreenName(domainAccount);
+    return profileAccount[0];
   }
 }
