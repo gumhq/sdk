@@ -1,6 +1,6 @@
 {
   "name": "@gumhq/react-sdk",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "license": "GPL-3.0",
   "description": "React SDK for Gum",
   "repository": {
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@bundlr-network/client": "^0.10.5",
-    "@gumhq/sdk": "^2.1.0",
+    "@gumhq/sdk": "^3.0.0",
     "@orca-so/sdk": "^1.2.25",
     "@project-serum/anchor": "^0.26.0",
     "@shadow-drive/sdk": "^3.3.0",
