@@ -37,32 +37,6 @@ export class Badge {
     return await this.sdk.program.account.badge.fetch(userAccount);
   }
 
-  public async getOrCreateBadge(
-    metadataUri: string,
-    issuer: anchor.web3.PublicKey,
-    schema: anchor.web3.PublicKey,
-    holder: anchor.web3.PublicKey,
-    updateAuthority: anchor.web3.PublicKey,
-    authority: anchor.web3.PublicKey,
-  ) {
-    const [badgePDA, _] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("badge"),
-        issuer.toBuffer(),
-        schema.toBuffer(),
-        holder.toBuffer(),
-      ],
-      this.sdk.program.programId
-    );
-
-    try {
-      await this.getBadge(badgePDA);
-    } catch (err) {
-      await (await this.createBadge(metadataUri, issuer, schema, holder, updateAuthority, authority)).instructionMethodBuilder.rpc();
-    }
-    return badgePDA;
-  }
-
   public async createBadge(
     metadataUri: string,
     issuer: anchor.web3.PublicKey,
@@ -120,25 +94,6 @@ export class Badge {
         holder,
         signer,
       });
-  }
-
-  public async getOrCreateIssuer(
-    authority: anchor.web3.PublicKey,
-  ) {
-    const [issuer, _] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("issuer"),
-        authority.toBuffer(),
-      ],
-      this.sdk.program.programId
-    );
-
-    try {
-      await this.getIssuer(issuer);
-    } catch (err) {
-      await (await this.createIssuer(authority)).instructionMethodBuilder.rpc();
-    }
-    return issuer;
   }
 
   public async createIssuer(
