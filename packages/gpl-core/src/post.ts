@@ -59,7 +59,7 @@ export class Post {
     };
   }
 
-  public async createUsingSession(
+  public async createWithSession(
     metadataUri: string,
     profileAccount: anchor.web3.PublicKey,
     sessionPublicKey: anchor.web3.PublicKey,
@@ -110,7 +110,7 @@ export class Post {
       });
   }
 
-  public async updateUsingSession(
+  public async updateWithSession(
     newMetadataUri: string,
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
@@ -149,7 +149,7 @@ export class Post {
       });
   }
 
-  public deleteUsingSession(
+  public deleteWithSession(
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
     sessionPublicKey: anchor.web3.PublicKey,
@@ -197,7 +197,7 @@ export class Post {
     };
   }
 
-  public async replyUsingSession(
+  public async replyWithSession(
     replyToPostAccount: anchor.web3.PublicKey,
     metadataUri: String,
     profileAccount: anchor.web3.PublicKey,

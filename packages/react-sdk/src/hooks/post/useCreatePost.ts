@@ -32,7 +32,7 @@ const useCreatePost = (sdk: SDK) => {
     [sdk]
   );
 
-  const createUsingSession = useCallback(
+  const createWithSession = useCallback(
     async (
       metadataUri: string,
       profileAccount: PublicKey,
@@ -47,7 +47,7 @@ const useCreatePost = (sdk: SDK) => {
       setCreatePostError(null);
 
       try {
-        const ixMethodBuilder = await createPostUsingSessionIxMethodBuilder(metadataUri, profileAccount, sessionPublicKey, sessionAccount, payer);
+        const ixMethodBuilder = await createPostWithSessionIxMethodBuilder(metadataUri, profileAccount, sessionPublicKey, sessionAccount, payer);
         const tx = await ixMethodBuilder?.transaction();
         if (tx) {
           return await sendTransaction(tx, connection, options);
@@ -82,7 +82,7 @@ const useCreatePost = (sdk: SDK) => {
     [sdk]
   );
 
-  const createPostUsingSessionIxMethodBuilder = useCallback(
+  const createPostWithSessionIxMethodBuilder = useCallback(
     async (
       metadataUri: string,
       profileAccount: PublicKey,
@@ -93,7 +93,7 @@ const useCreatePost = (sdk: SDK) => {
       setCreatePostError(null);
 
       try {
-        const data = await sdk.post.createUsingSession(metadataUri, profileAccount, sessionPublicKey, sessionAccount, payer);
+        const data = await sdk.post.createWithSession(metadataUri, profileAccount, sessionPublicKey, sessionAccount, payer);
         setPostPDA(data.postPDA);
         return data.instructionMethodBuilder;
       } catch (err: any) {
@@ -106,9 +106,9 @@ const useCreatePost = (sdk: SDK) => {
 
   return {
     create,
-    createUsingSession,
+    createWithSession,
     createPostIxMethodBuilder,
-    createPostUsingSessionIxMethodBuilder,
+    createPostWithSessionIxMethodBuilder,
     postPDA,
     isCreatingPost,
     createPostError

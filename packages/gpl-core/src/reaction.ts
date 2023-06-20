@@ -48,7 +48,7 @@ export class Reaction {
     };
   }
 
-  public async createUsingSession(
+  public async createWithSession(
     fromProfileAccount: anchor.web3.PublicKey,
     toPostAccount: anchor.web3.PublicKey,
     reactionType: string,
@@ -90,7 +90,7 @@ export class Reaction {
       });
   }
 
-  public deleteUsingSession(
+  public deleteWithSession(
     reactionAccount: anchor.web3.PublicKey,
     toPostAccount: anchor.web3.PublicKey,
     fromProfileAccount: anchor.web3.PublicKey,

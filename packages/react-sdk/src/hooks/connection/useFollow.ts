@@ -44,7 +44,7 @@ const useFollow = (sdk: SDK) => {
     [sdk]
   );
 
-  const followUsingSession = useCallback(
+  const followWithSession = useCallback(
     async (
       fromProfile: PublicKey,
       toProfile: PublicKey,
@@ -59,7 +59,7 @@ const useFollow = (sdk: SDK) => {
       setConnectionError(null);
 
       try {
-        const ixMethodBuilder = await createConnectionUsingSessionIxMethodBuilder(
+        const ixMethodBuilder = await createConnectionWithSessionIxMethodBuilder(
           fromProfile,
           toProfile,
           sessionPublicKey,
@@ -110,7 +110,7 @@ const useFollow = (sdk: SDK) => {
     [sdk]
   );
 
-  const createConnectionUsingSessionIxMethodBuilder = useCallback(
+  const createConnectionWithSessionIxMethodBuilder = useCallback(
     async (
       fromProfile: PublicKey,
       toProfile: PublicKey,
@@ -119,7 +119,7 @@ const useFollow = (sdk: SDK) => {
       payer: PublicKey = sessionPublicKey,
     ) => {
       try {
-        const connection = await sdk.connection.createUsingSession(
+        const connection = await sdk.connection.createWithSession(
           fromProfile,
           toProfile,
           sessionPublicKey,
@@ -138,9 +138,9 @@ const useFollow = (sdk: SDK) => {
 
   return {
     follow,
-    followUsingSession,
+    followWithSession,
     createConnectionIxMethodBuilder,
-    createConnectionUsingSessionIxMethodBuilder,
+    createConnectionWithSessionIxMethodBuilder,
     connectionPDA,
     connectionLoading,
     connectionError

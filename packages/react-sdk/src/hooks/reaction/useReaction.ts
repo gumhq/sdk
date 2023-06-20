@@ -38,7 +38,7 @@ const useReaction = (sdk: SDK, ) => {
     [sdk]
   );
 
-  const createReactionUsingSession = useCallback(
+  const createReactionWithSession = useCallback(
     async (
       reaction: string,
       fromProfile: PublicKey,
@@ -54,7 +54,7 @@ const useReaction = (sdk: SDK, ) => {
       setCreateReactionError(null);
 
       try {
-        const ixMethodBuilder = await createReactionUsingSessionIxMethodBuilder(reaction, fromProfile, toPostAccount, sessionPublicKey, sessionAccount, payer);
+        const ixMethodBuilder = await createReactionWithSessionIxMethodBuilder(reaction, fromProfile, toPostAccount, sessionPublicKey, sessionAccount, payer);
 
         if (ixMethodBuilder) {
           const tx = await ixMethodBuilder.transaction();
@@ -93,7 +93,7 @@ const useReaction = (sdk: SDK, ) => {
     [sdk]
   );
 
-  const createReactionUsingSessionIxMethodBuilder = useCallback(
+  const createReactionWithSessionIxMethodBuilder = useCallback(
     async (
       reaction: string,
       fromProfile: PublicKey,
@@ -103,7 +103,7 @@ const useReaction = (sdk: SDK, ) => {
       payer: PublicKey = sessionPublicKey,
     ) => {
       try {
-        const data = await sdk.reaction.createUsingSession(fromProfile, toPostAccount, reaction, sessionPublicKey, sessionTokenAccount, payer);
+        const data = await sdk.reaction.createWithSession(fromProfile, toPostAccount, reaction, sessionPublicKey, sessionTokenAccount, payer);
         setReactionPDA(data.reactionPDA);
         return data.instructionMethodBuilder;
       } catch (err: any) {
@@ -141,7 +141,7 @@ const useReaction = (sdk: SDK, ) => {
     [sdk]
   );
 
-  const deleteReactionUsingSession = useCallback(
+  const deleteReactionWithSession = useCallback(
     async (
       reactionAccount: PublicKey,
       fromProfile: PublicKey,
@@ -156,7 +156,7 @@ const useReaction = (sdk: SDK, ) => {
       setIsReacting(true);
 
       try {
-        const ixMethodBuilder = deleteReactionUsingSessionIxMethodBuilder(reactionAccount, fromProfile, toPostAccount, sessionPublicKey, sessionAccount, refundReceiver);
+        const ixMethodBuilder = deleteReactionWithSessionIxMethodBuilder(reactionAccount, fromProfile, toPostAccount, sessionPublicKey, sessionAccount, refundReceiver);
         
         if (ixMethodBuilder) {
           const tx = await ixMethodBuilder.transaction();
@@ -193,7 +193,7 @@ const useReaction = (sdk: SDK, ) => {
     }
   }, [sdk]);
 
-  const deleteReactionUsingSessionIxMethodBuilder = useCallback((
+  const deleteReactionWithSessionIxMethodBuilder = useCallback((
     reactionAccount: PublicKey,
     fromProfile: PublicKey,
     toPostAccount: PublicKey,
@@ -204,7 +204,7 @@ const useReaction = (sdk: SDK, ) => {
     setCreateReactionError(null);
 
     try {
-      const data = sdk.reaction.deleteUsingSession(reactionAccount, toPostAccount, fromProfile,  sessionPublicKey, sessionAccount, refundReceiver);
+      const data = sdk.reaction.deleteWithSession(reactionAccount, toPostAccount, fromProfile,  sessionPublicKey, sessionAccount, refundReceiver);
       return data;
     } catch (err: any) {
       setCreateReactionError(err);
@@ -215,13 +215,13 @@ const useReaction = (sdk: SDK, ) => {
 
   return { 
     createReaction,
-    createReactionUsingSession,
+    createReactionWithSession,
     createReactionIxMethodBuilder,
-    createReactionUsingSessionIxMethodBuilder,
+    createReactionWithSessionIxMethodBuilder,
     deleteReaction,
-    deleteReactionUsingSession,
+    deleteReactionWithSession,
     deleteReactionIxMethodBuilder,
-    deleteReactionUsingSessionIxMethodBuilder,
+    deleteReactionWithSessionIxMethodBuilder,
     reactionPDA,
     isReacting,
     createReactionError

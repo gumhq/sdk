@@ -44,7 +44,7 @@ const useUnfollow = (sdk: SDK) => {
     },
     [sdk]);
 
-  const unfollowUsingSession = useCallback(
+  const unfollowWithSession = useCallback(
     async (
       connectionAccount: PublicKey,
       fromProfile: PublicKey,
@@ -60,7 +60,7 @@ const useUnfollow = (sdk: SDK) => {
       setConnectionError(null);
 
       try {
-        const ixMethodBuilder = await deleteConnectionUsingSessionIxMethodBuilder(
+        const ixMethodBuilder = await deleteConnectionWithSessionIxMethodBuilder(
           connectionAccount,
           fromProfile,
           toProfile,
@@ -112,7 +112,7 @@ const useUnfollow = (sdk: SDK) => {
     [sdk]
   );
 
-  const deleteConnectionUsingSessionIxMethodBuilder = useCallback(
+  const deleteConnectionWithSessionIxMethodBuilder = useCallback(
     async (
       connectionAccount: PublicKey,
       fromProfile: PublicKey,
@@ -122,7 +122,7 @@ const useUnfollow = (sdk: SDK) => {
       refundReceiver: PublicKey = sessionPublicKey
     ) => {
       try {
-        const connection = sdk.connection.deleteUsingSession(
+        const connection = sdk.connection.deleteWithSession(
           connectionAccount,
           fromProfile,
           toProfile,
@@ -141,9 +141,9 @@ const useUnfollow = (sdk: SDK) => {
 
   return {
     unfollow,
-    unfollowUsingSession,
+    unfollowWithSession,
     deleteConnectionIxMethodBuilder,
-    deleteConnectionUsingSessionIxMethodBuilder,
+    deleteConnectionWithSessionIxMethodBuilder,
     connectionLoading,
     connectionError
   };
