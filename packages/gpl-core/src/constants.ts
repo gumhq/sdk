@@ -57,3 +57,7 @@ export const GRAPHQL_ENDPOINTS = {
   "devnet": "https://gum-indexer-smartprofile-devnet-lafkve5tyq-uc.a.run.app/v1/graphql",
   "mainnet-beta": "https://gum-indexer-smartprofile-mainnet-lafkve5tyq-uc.a.run.app/v1/graphql",
 };
+
+export const GATEWAY_SERVICE_URL = "https://issue-gateway-credentials-lafkve5tyq-uc.a.run.app";
+
+export const GUM_TLD_ACCOUNT = new anchor.web3.PublicKey("DgpTGt1CJsJRGzfzvcgJ93panPf2cRZLNkakJ4wpTwta");

@@ -2,7 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { Cluster } from "@solana/web3.js";
 import { Connection, GraphQLConnection } from "./connection";
-import { GPLCORE_PROGRAMS, OLD_GPLCORE_PROGRAMS, GPL_NAMESERVICE_PROGRAMS, GPLSESSION_PROGRAMS, GRAPHQL_ENDPOINTS, GRAPHQL_ENDPOINTS_OLD } from "./constants";
+import { GPLCORE_PROGRAMS, OLD_GPLCORE_PROGRAMS, GPL_NAMESERVICE_PROGRAMS, GPLSESSION_PROGRAMS, GRAPHQL_ENDPOINTS, GRAPHQL_ENDPOINTS_OLD, GUM_TLD_ACCOUNT, GATEWAY_SERVICE_URL } from "./constants";
 import { Post, GraphQLPost, GraphQLFeed } from "./post";
 import { Profile, GumDecodedProfile } from "./profile";
 import { Reaction, GraphQLReaction } from "./reaction";
@@ -23,6 +23,8 @@ export {
   GRAPHQL_ENDPOINTS_OLD,
   GPL_NAMESERVICE_PROGRAMS,
   GPLSESSION_PROGRAMS,
+  GATEWAY_SERVICE_URL,
+  GUM_TLD_ACCOUNT,
   Connection,
   GraphQLConnection,
   Post,

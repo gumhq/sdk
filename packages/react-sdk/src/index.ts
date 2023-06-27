@@ -36,6 +36,8 @@ export {
   GRAPHQL_ENDPOINTS_OLD,
   GPL_NAMESERVICE_PROGRAMS,
   GPLSESSION_PROGRAMS,
+  GATEWAY_SERVICE_URL,
+  GUM_TLD_ACCOUNT,
 } from "@gumhq/sdk";
 
 export type { SessionWalletInterface } from "./hooks";

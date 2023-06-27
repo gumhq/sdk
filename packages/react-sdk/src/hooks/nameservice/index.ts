@@ -8,21 +8,6 @@ const useNameService = (sdk: SDK) => {
     creationError: null as Error | null,
   });
 
-  const getOrCreateTLD = useCallback(
-    async (tld: string) => {
-      setState({ isCreating: true, creationError: null });
-
-      try {
-        const tldPDA = await sdk.nameservice.getOrCreateTLD(tld);
-        setState({ isCreating: false, creationError: null });
-        return tldPDA;
-      } catch (err: any) {
-        setState({ isCreating: false, creationError: err });
-      }
-    },
-    [sdk]
-  );
-
   const getOrCreateDomain = useCallback(
     async (tldPDA: PublicKey, domain: string, authority: PublicKey) => {
       setState({ isCreating: true, creationError: null });
@@ -54,7 +39,6 @@ const useNameService = (sdk: SDK) => {
   );
 
   return {
-    getOrCreateTLD,
     getOrCreateDomain,
     transferDomain,
     ...state,

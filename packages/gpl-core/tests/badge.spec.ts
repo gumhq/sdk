@@ -45,10 +45,11 @@ describe("Badge", async () => {
 
   it("should create an issuer", async () => {
     // Create an issuer
-    const issuer = await sdk.badge.getOrCreateIssuer(
+    const issuer = await sdk.badge.createIssuer(
       user.publicKey,
     );
-    issuerPDA = issuer;
+    issuerPDA = issuer.issuerPDA;
+    await issuer.instructionMethodBuilder.rpc();
     const issuerAccount = await sdk.badge.getIssuer(issuerPDA);
     expect(issuerAccount.authority.toBase58()).is.equal(user.publicKey.toBase58());
   });
@@ -86,7 +87,7 @@ describe("Badge", async () => {
     const holderProfile = profilePDA;
     const updateAuthority = user.publicKey;
 
-    const badge = await sdk.badge.getOrCreateBadge(
+    const badge = await sdk.badge.createBadge(
       badgeMetdataUri,
       issuer,
       schemaPDA,
@@ -94,7 +95,8 @@ describe("Badge", async () => {
       updateAuthority,
       user.publicKey,
     );
-    badgePDA = badge;
+    badgePDA = badge.badgePDA;
+    await badge.instructionMethodBuilder.rpc();
 
     const badgeAccount = await sdk.badge.getBadge(badgePDA);
     expect(badgeAccount.issuer.toBase58()).is.equal(issuer.toBase58());

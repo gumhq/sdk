@@ -26,54 +26,6 @@ export class GumNameService {
     return this.sdk.nameserviceProgram.account.nameRecord.fetch(tldAccount);
   }
 
-  public async getOrCreateTLD(
-    tld: string,
-  ) {
-    const tldHash = keccak_256(tld);
-
-    const [tldAccount, _] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("name_record"),
-        Buffer.from(tldHash, "hex"),
-        PublicKey.default.toBuffer(),
-      ],
-      this.sdk.nameserviceProgram.programId
-    );
-    try {
-      await this.get(tldAccount);
-    } catch (err) {
-      const instructionMethodBuilder = this.sdk.nameserviceProgram.methods.createTld(tld)
-        .accounts({
-          nameRecord: tldAccount,
-        })
-      await instructionMethodBuilder.rpc();
-    }
-    return tldAccount;
-  }
-
-  public async createTLD(
-    tld: string,
-  ) {
-    const tldHash = keccak_256(tld);
-
-    const [tldAccount, _] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("name_record"),
-        Buffer.from(tldHash, "hex"),
-        PublicKey.default.toBuffer(),
-      ],
-      this.sdk.nameserviceProgram.programId
-    );
-
-    const instructionMethodBuilder = this.sdk.nameserviceProgram.methods.createTld(tld)
-      .accounts({
-        nameRecord: tldAccount,
-      })
-    const pubKeys = await instructionMethodBuilder.pubkeys();
-    const tldPDA = pubKeys.nameRecord as PublicKey;
-    return { tldPDA, instructionMethodBuilder };
-  }
-
   public async getOrCreateDomain(
     tldPDA: PublicKey,
     domain: string,
@@ -90,8 +42,14 @@ export class GumNameService {
       this.sdk.nameserviceProgram.programId
     );
     try {
-      await this.get(domainAccount);
+      const existingDomain = await this.get(domainAccount);
+      if (!existingDomain.authority.equals(authority) || domain == "gum") {
+        throw new Error("Domain already exists with different authority");
+      } 
     } catch (err) {
+      if (!err.message.toString().includes("Account does not exist")) {
+        throw err;
+      }
       await this.sdk.nameserviceProgram.methods.createNameRecord(domain)
         .accounts({
           domain: tldPDA,

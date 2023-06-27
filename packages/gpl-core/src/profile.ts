@@ -1,4 +1,4 @@
-import { SDK } from ".";
+import { GUM_TLD_ACCOUNT, SDK } from ".";
 import { gql } from "graphql-request";
 import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
@@ -96,31 +96,37 @@ export class Profile {
     payer: anchor.web3.PublicKey = authority
   ) {
     let instruction: TransactionInstruction[] = [];
+    const gumTld = GUM_TLD_ACCOUNT;
 
+    // Check if a profile with the provided domain name already exists
     let profilePDA = await this.getProfileByDomainName(domainName);
     if (profilePDA) {
       return {
         instructionMethodBuilder: null,
         profilePDA: new PublicKey(profilePDA.address),
+      };
+    }
+
+    // Fetch existing domain by name
+    let domainPDA = await this.sdk.nameservice.getDomainByName(domainName);
+
+    // If the domain exists, check its authority against provided authority
+    if (domainPDA && domainPDA.address) {
+      console.log("Domain exists, checking authority");
+      if (domainPDA.authority !== authority.toBase58()) {
+        throw new Error("You must be the owner of the domain to perform this action. Please ensure you're using the correct authority.");
       }
+    } else {
+      // If the domain doesn't exist, create it
+      console.log("Domain doesn't exist, creating");
+      const domainAccount = await this.sdk.nameservice.createDomain(gumTld, domainName, authority);
+      const domainIx = await domainAccount.instructionMethodBuilder.instruction();
+      instruction.push(domainIx);
     }
 
-    const gumTld = await this.sdk.nameservice.getOrCreateTLD('gum');
-    if (!gumTld) {
-      throw new Error('Gum TLD not found');
-    }
-
-    const domainPDA = await this.sdk.nameservice.getDomainByName(domainName);
-
-    if (!domainPDA || !domainPDA.address) {
-    const domainAccount = await this.sdk.nameservice.createDomain(gumTld, domainName, authority);
-    const domainIx = await domainAccount.instructionMethodBuilder.instruction();
-    instruction.push(domainIx);
-    }
-
+    // Generate domainAccount for profile creation
     const domainHash = keccak_256(domainName);
-
-    const [domainAccount, _] = anchor.web3.PublicKey.findProgramAddressSync(
+    const [domainAccount] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("name_record"),
         Buffer.from(domainHash, "hex"),
@@ -128,8 +134,11 @@ export class Profile {
       ],
       this.sdk.nameserviceProgram.programId
     );
+
+    // Create profile with domain
     const profile = await this.sdk.profile.create(metadataUri, domainAccount, authority, payer);
     const instructionMethodBuilder = profile?.instructionMethodBuilder.preInstructions(instruction);
+
     return {
       instructionMethodBuilder,
       profilePDA: profile?.profilePDA,
