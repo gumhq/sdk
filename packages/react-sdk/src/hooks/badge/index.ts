@@ -1,10 +1,8 @@
-import { SDK } from "@gumhq/sdk";
+import { GATEWAY_SERVICE_URL, SDK } from "@gumhq/sdk";
 import { useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
 import axios from "axios";
 import { WalletContextState } from "@solana/wallet-adapter-react";
-
-const GATEWAY_SERVICE_URL = "https://issue-gateway-credentials-lafkve5tyq-uc.a.run.app";
 
 const useBadge = (sdk: SDK) => {
   const [state, setState] = useState({

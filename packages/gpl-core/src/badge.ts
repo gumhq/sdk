@@ -1,7 +1,8 @@
-import { SDK } from ".";
+import { GATEWAY_SERVICE_URL, SDK } from ".";
 import { gql } from "graphql-request";
 import * as anchor from "@project-serum/anchor";
 import randomBytes from "randombytes";
+import axios from "axios";
 
 export interface GraphQLBadge {
   address: string;
@@ -187,6 +188,48 @@ export class Badge {
       });
   }
 
+  public async getCredentialsByIssuerGatewayId(issuerGatewayId: string) {
+    try {
+      const response = await axios.get(`${GATEWAY_SERVICE_URL}/getCredentials`, {
+        params: {
+          issuerGatewayId
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw new Error('An error occurred while fetching credentials by issuerGatewayId');
+    }
+  }
+
+  public async getCredentialsByCredentialId(credentialId: string) {
+    try {
+      const response = await axios.get(`${GATEWAY_SERVICE_URL}/getCredentialsById`, {
+        params: {
+          credentialId
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw new Error('An error occurred while fetching credentials by credentialId');
+    }
+  }
+
+  public async getCredentialsByUserWallet(userWallet) {
+    try {
+      const response = await axios.get(`${GATEWAY_SERVICE_URL}/getCredentialsByUserWallet`, {
+        params: {
+          userWallet
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw new Error('An error occurred while fetching credentials by userWallet');
+    }
+  }
+
   // GraphQL Query methods
 
   public async getAllBadges(): Promise<GraphQLBadge[]> {
@@ -266,4 +309,20 @@ export class Badge {
     return data.issuer;
   }
 
+  public async getIssuerByAddress(address: string): Promise<GraphQLIssuer> {
+    const query = gql`
+      query GetIssuerByAddress($address: String!) {
+        issuer(where: {address: {_eq: $address}}) {
+          address
+          authority
+          verified
+          refreshed_at
+          slot_created_at
+          slot_updated_at
+          created_at
+        }
+    }`;
+    const data = await this.sdk.gqlClient.request<{ issuer: GraphQLIssuer }>(query, { address });
+    return data.issuer;
+  }
 }
