@@ -1,7 +1,6 @@
 import { SDK } from "@gumhq/sdk";
 import { useState, useEffect, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { Namespace } from "@gumhq/sdk/lib/profile";
 
 const useProfile = (sdk: SDK, profileAccount: PublicKey) => {
   const [profile, setProfile] = useState<any>(null);
@@ -14,7 +13,7 @@ const useProfile = (sdk: SDK, profileAccount: PublicKey) => {
       setProfileError(null);
 
       try {
-        const data = await sdk.profileMetadata.getProfileMetadataByProfile(profileAccount);
+        const data = await sdk.profile.getProfilesByProfileAccount(profileAccount);
 
         setProfile(data);
       } catch (err: any) {

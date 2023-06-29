@@ -17,46 +17,68 @@ For more detailed documentation, please visit the [Gum documentation](https://do
 
 ## Usage
 
-The `useGum` hook provides the Gum SDK instance and the `useCreateUser` hook provides a function to create a new user.
+The `useGumContext`, `useCreateProfile`, and `useUploaderContext` hooks provide the necessary utilities to create a new profile.
 
 ```tsx
-import { useGum, useCreateUser } from "@gumhq/react-sdk";
-import { AnchorWallet, useAnchorWallet } from "@solana/wallet-adapter-react";
-import { Connection, PublicKey } from "@solana/web3.js";
-import { useMemo } from "react";
+import {
+  useCreateProfile,
+  useGumContext,
+  useUploaderContext,
+} from "@gumhq/react-sdk";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useState } from "react";
 
-const App = () => {
-  const anchorWallet = useAnchorWallet() as AnchorWallet;
-  const connection = useMemo(
-    () => new Connection("https://api.devnet.solana.com", "confirmed"),
-    []
-  );
-  const sdk = useGum(
-    anchorWallet,
-    connection,
-    { preflightCommitment: "confirmed" },
-    "devnet"
-  );
+export function ProfileCreation() {
+  const [profileName, setProfileName] = useState("");
+  const [profileBio, setProfileBio] = useState("");
+  const [profileUsername, setProfileUsername] = useState("");
+  const [profileAvatar, setProfileAvatar] = useState("");
 
-  const { create, error, loading } = useCreateUser(sdk!);
+  const wallet = useWallet();
+  const { publicKey } = wallet;
+  const { sdk } = useGumContext(); // access the Gum SDK
+  const { createProfileWithDomain } = useCreateProfile(sdk); // create a new profile
+  const { handleUpload } = useUploaderContext(); // upload metadata to Arweave/GenesysGo
 
-  return (
-    <button
-      onClick={() => {
-        create(anchorWallet?.publicKey as PublicKey);
-      }}
-    >
-      Create User
-    </button>
-  );
-};
+  const createProfile = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-export default App;
+    const profileMetadata = {
+      name: profileName,
+      bio: profileBio,
+      avatar: profileAvatar,
+    };
+
+    const uploadResponse = await handleUpload(profileMetadata, wallet);
+    if (!uploadResponse) {
+      console.error("Error uploading profile metadata");
+      return false;
+    }
+
+    const profileResponse = await createProfileWithDomain(
+      uploadResponse.url,
+      profileUsername,
+      publicKey
+    );
+    if (!profileResponse) {
+      console.error("Error creating profile");
+      return false;
+    }
+
+    console.log("Profile created successfully", profileResponse);
+  };
+
+  // Your HTML form and fields would go here
+}
 ```
+
+## Gum Quickstart
+
+The Gum Quickstart is an excellent starting point for developers aiming to leverage Gum in their Next.js applications. This ready-to-use template not only expedites the setup process, but also includes functional examples and components to facilitate the creation of domain profiles, posts, and more. Check out the [Gum Quickstart](https://github.com/gumhq/gum-quickstart) to get started.
 
 ## Example App
 
-Check out the [example app](https://github.com/gumhq/gum-example-app) that uses the react-sdk to demonstrate its capabilities. The app is a simple React app that showcases the creation of a user, profile, and post.
+Check out the [example app](https://github.com/gumhq/gum-example-app) that uses the Gum SDK to demonstrate its capabilities. The app is a simple React app that showcases the creation of a domain, profile, and posts.
 
 ## Contributing
 

@@ -6,6 +6,10 @@ export interface GraphQLConnection {
   from_profile: string;
   to_profile: string;
   address: string;
+  refreshed_at?: Date;
+  slot_created_at?: number;
+  slot_updated_at?: number;
+  created_at?: Date;
 }
 
 export class Connection {
@@ -22,17 +26,39 @@ export class Connection {
   public async create(
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount: anchor.web3.PublicKey | null = null) {
+    payer: anchor.web3.PublicKey = owner) {
     const instructionMethodBuilder = this.sdk.program.methods
       .createConnection()
       .accounts({
         fromProfile: fromProfile,
         toProfile: toProfile,
-        user: userAccount,
-        sessionToken: sessionTokenAccount,
+        sessionToken: null,
         authority: owner,
+        payer: payer,
+      });
+    const pubKeys = await instructionMethodBuilder.pubkeys();
+    const connectionPDA = pubKeys.connection as anchor.web3.PublicKey;
+    return {
+      instructionMethodBuilder,
+      connectionPDA,
+    };
+  }
+
+  public async createWithSession(
+    fromProfile: anchor.web3.PublicKey,
+    toProfile: anchor.web3.PublicKey,
+    sessionPublicKey: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey,
+    payer: anchor.web3.PublicKey = sessionPublicKey) {
+    const instructionMethodBuilder = this.sdk.program.methods
+      .createConnection()
+      .accounts({
+        fromProfile: fromProfile,
+        toProfile: toProfile,
+        sessionToken: sessionTokenAccount,
+        authority: sessionPublicKey,
+        payer: payer,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const connectionPDA = pubKeys.connection as anchor.web3.PublicKey;
@@ -46,9 +72,7 @@ export class Connection {
     connectionAccount: anchor.web3.PublicKey,
     fromProfile: anchor.web3.PublicKey,
     toProfile: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount: anchor.web3.PublicKey | null = null,
     refundReceiver: anchor.web3.PublicKey = owner) {
     return this.sdk.program.methods
       .deleteConnection()
@@ -56,9 +80,27 @@ export class Connection {
         connection: connectionAccount,
         fromProfile: fromProfile,
         toProfile: toProfile,
-        user: userAccount,
-        sessionToken: sessionTokenAccount,
+        sessionToken: null,
         authority: owner,
+        refundReceiver: refundReceiver,
+      });
+  }
+
+  public deleteWithSession(
+    connectionAccount: anchor.web3.PublicKey,
+    fromProfile: anchor.web3.PublicKey,
+    toProfile: anchor.web3.PublicKey,
+    sessionPublicKey: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey | null = null,
+    refundReceiver: anchor.web3.PublicKey = sessionPublicKey) {
+    return this.sdk.program.methods
+      .deleteConnection()
+      .accounts({
+        connection: connectionAccount,
+        fromProfile: fromProfile,
+        toProfile: toProfile,
+        sessionToken: sessionTokenAccount,
+        authority: sessionPublicKey,
         refundReceiver: refundReceiver,
       });
   }
@@ -72,8 +114,10 @@ export class Connection {
           from_profile
           to_profile
           address
+          refreshed_at
           slot_created_at
           slot_updated_at
+          created_at
         }
       }
     `;
@@ -81,21 +125,26 @@ export class Connection {
     return result.connection;
   }
 
-  public async getConnectionsByUser(userPubKey: anchor.web3.PublicKey): Promise<GraphQLConnection[]> {
-    const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
+  public async getConnectionsByAuthority(userPubKey: anchor.web3.PublicKey): Promise<GraphQLConnection[]> {
+    const profiles = await this.sdk.profile.getProfilesByAuthority(userPubKey);
     const profilePDAs = profiles.map((p) => p.address) as string[];
     const query = gql`
-      query GetConnectionsByUser {
-        connection(where: {from_profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
+      query GetConnectionsByAuthority ($profilePDAs: [String!]) {
+        connection(where: {from_profile: {_in: $profilePDAs }}) {
           from_profile
           to_profile
           address
+          refreshed_at
           slot_created_at
           slot_updated_at
+          created_at
         }
       }
     `;
-    const result = await this.sdk.gqlClient.request<{ connection: GraphQLConnection[] }>(query);
+    const variables = {
+      profilePDAs,
+    };
+    const result = await this.sdk.gqlClient.request<{ connection: GraphQLConnection[] }>(query, variables);
     return result.connection;
   }
 

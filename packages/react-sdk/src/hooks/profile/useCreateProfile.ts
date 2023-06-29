@@ -1,7 +1,6 @@
 import { SDK } from "@gumhq/sdk";
 import { useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { Namespace } from "@gumhq/sdk/lib/profile";
 
 const useCreateProfile = (sdk: SDK) => {
   const [state, setState] = useState({
@@ -10,11 +9,11 @@ const useCreateProfile = (sdk: SDK) => {
   });
 
   const create = useCallback(
-    async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
+    async (metadataUri: string, screenNameAccount: PublicKey, owner: PublicKey, payer: PublicKey = owner) => {
       setState({ isCreatingProfile: true, createProfileError: null });
 
       try {
-        const ixMethodBuilder = await createProfileIxMethodBuilder(metadataUri, namespace, userAccount, owner);
+        const ixMethodBuilder = await createProfileIxMethodBuilder(metadataUri, screenNameAccount, owner, payer);
         await ixMethodBuilder?.instructionMethodBuilder.rpc();
         setState({ isCreatingProfile: false, createProfileError: null });
         return ixMethodBuilder?.profilePDA;
@@ -24,11 +23,11 @@ const useCreateProfile = (sdk: SDK) => {
     }, [sdk]);
 
   const getOrCreate = useCallback(
-    async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
+    async (metadataUri: string, screenNameAccount: PublicKey, owner: PublicKey, payer: PublicKey = owner) => {
       setState({ isCreatingProfile: true, createProfileError: null });
 
       try {
-        const profilePDA = await sdk.profile.getOrCreate(metadataUri, userAccount, namespace, owner);
+        const profilePDA = await sdk.profile.getOrCreate(metadataUri, screenNameAccount, owner, payer);
         setState({ isCreatingProfile: false, createProfileError: null });
         return profilePDA;
       }
@@ -37,18 +36,29 @@ const useCreateProfile = (sdk: SDK) => {
       }
     }, [sdk]);
 
-  const createProfileIxMethodBuilder = useCallback(
-    async (metadataUri: String, namespace: Namespace, userAccount: PublicKey, owner: PublicKey) => {
+  const createProfileWithDomain = useCallback(
+    async (metadataUri: string, domainName: string, authority: PublicKey, payer: PublicKey = authority) => {
       setState({ isCreatingProfile: true, createProfileError: null });
 
       try {
-        const createProfile = await sdk.profile.create(userAccount, namespace, owner);
-        const profileMetadata = await sdk.profileMetadata.create(metadataUri, createProfile.profilePDA, userAccount, owner);
-        const profileMetadataIx = await profileMetadata.instructionMethodBuilder.instruction();
+        const ixMethodBuilder = await sdk.profile.createProfileWithGumDomain(metadataUri, domainName, authority, payer);
+        await ixMethodBuilder?.instructionMethodBuilder.rpc();
+        setState({ isCreatingProfile: false, createProfileError: null });
+        return ixMethodBuilder?.profilePDA;
+      } catch (err: any) {
+        setState({ isCreatingProfile: false, createProfileError: err });
+      }
+    }, [sdk]);
+
+  const createProfileIxMethodBuilder = useCallback(
+    async (metadataUri: string, screenNameAccount: PublicKey, authority: PublicKey, payer: PublicKey) => {
+      setState({ isCreatingProfile: true, createProfileError: null });
+
+      try {
+        const createProfile = await sdk.profile.create(metadataUri, screenNameAccount, authority, payer);
 
         const data = {
-          instructionMethodBuilder: createProfile.instructionMethodBuilder.postInstructions(
-            [profileMetadataIx]),
+          instructionMethodBuilder: createProfile.instructionMethodBuilder,
           profilePDA: createProfile.profilePDA,
         }
         setState({ isCreatingProfile: false, createProfileError: null });
@@ -62,6 +72,7 @@ const useCreateProfile = (sdk: SDK) => {
   return {
     create,
     getOrCreate,
+    createProfileWithDomain,
     createProfileIxMethodBuilder,
     ...state,
   };

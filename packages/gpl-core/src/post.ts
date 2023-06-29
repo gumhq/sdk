@@ -4,23 +4,21 @@ import randomBytes from "randombytes";
 import { PostMetadata } from "./postMetadata";
 import axios from "axios";
 import { gql } from "graphql-request";
-import { Namespace } from "./profile";
 
 export interface GraphQLPost {
   address: string;
-  metadata: string;
+  metadata: any;
   metadata_uri: string;
   profile: string;
+  random_hash: number;
+  reply_to?: string;
+  refreshed_at?: Date;
+  slot_created_at?: Date;
+  slot_updated_at?: Date;
+  created_at?: Date;
 }
 
-export interface GraphQLFeed {
-  address: string;
-  metadata: string;
-  metadata_uri: string;
-  profile: string;
-  profile_metadata: string;
-  profile_metadata_uri: string;
-}
+export interface GraphQLFeed extends GraphQLPost { }
 
 export class Post {
   readonly sdk: SDK;
@@ -33,42 +31,54 @@ export class Post {
     return await this.sdk.program.account.post.fetch(postAccount);
   }
 
-  /**
-   * @deprecated This function is slow and may cause performance issues. Consider using getPostsByUser instead.
-   */
-  public async getPostAccountsByUser(userPubKey: anchor.web3.PublicKey): Promise<anchor.ProgramAccount<any>[]> {
-    const profiles = await this.sdk.profile.getProfileAccountsByUser(userPubKey);
-    const profilePDAs = profiles.map((p) => p.publicKey);
-    let posts = [];
-    for (const profilePDA of profilePDAs) {
-      const post = await this.sdk.program.account.post.all([
-        { memcmp: { offset: 8, bytes: profilePDA.toBase58() } },
-      ]);
-      posts = [...posts, ...post];
-    }
-    return posts;
-  }
-
   public async create(
     metadataUri: string,
     profileAccount: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount: anchor.web3.PublicKey | null = null) {
+    payer: anchor.web3.PublicKey = owner) {
     const metadata = await axios.get(metadataUri);
     const postMetadata = new PostMetadata(metadata.data);
     if (!postMetadata.validate()) {
       throw new Error("Invalid post metadata");
     }
-
     const randomHash = randomBytes(32);
     const instructionMethodBuilder = this.sdk.program.methods
+      // @ts-ignore
       .createPost(metadataUri, randomHash)
       .accounts({
         profile: profileAccount,
-        user: userAccount,
-        sessionToken: sessionTokenAccount,
+        sessionToken: null,
         authority: owner,
+        payer: payer,
+      });
+    const pubKeys = await instructionMethodBuilder.pubkeys();
+    const postPDA = pubKeys.post as anchor.web3.PublicKey;
+    return {
+      instructionMethodBuilder,
+      postPDA,
+    };
+  }
+
+  public async createWithSession(
+    metadataUri: string,
+    profileAccount: anchor.web3.PublicKey,
+    sessionPublicKey: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey,
+    payer: anchor.web3.PublicKey = sessionPublicKey) {
+    const metadata = await axios.get(metadataUri);
+    const postMetadata = new PostMetadata(metadata.data);
+    if (!postMetadata.validate()) {
+      throw new Error("Invalid post metadata");
+    }
+    const randomHash = randomBytes(32);
+    const instructionMethodBuilder = this.sdk.program.methods
+      // @ts-ignore
+      .createPost(metadataUri, randomHash)
+      .accounts({
+        profile: profileAccount,
+        sessionToken: sessionTokenAccount,
+        authority: sessionPublicKey,
+        payer: payer,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const postPDA = pubKeys.post as anchor.web3.PublicKey;
@@ -82,9 +92,7 @@ export class Post {
     newMetadataUri: string,
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey,
-    owner: anchor.web3.PublicKey,
-    sessionTokenAccount: anchor.web3.PublicKey | null = null) {
+    owner: anchor.web3.PublicKey) {
 
     const metadata = await axios.get(newMetadataUri);
     const postMetadata = new PostMetadata(metadata.data);
@@ -97,38 +105,73 @@ export class Post {
       .accounts({
         post: postAccount,
         profile: profileAccount,
-        user: userAccount,
-        sessionToken: sessionTokenAccount,
+        sessionToken: null,
         authority: owner,
+      });
+  }
+
+  public async updateWithSession(
+    newMetadataUri: string,
+    postAccount: anchor.web3.PublicKey,
+    profileAccount: anchor.web3.PublicKey,
+    sessionPublicKey: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey) {
+
+    const metadata = await axios.get(newMetadataUri);
+    const postMetadata = new PostMetadata(metadata.data);
+    if (!postMetadata.validate()) {
+      throw new Error("Invalid post metadata");
+    }
+
+    return this.sdk.program.methods
+      .updatePost(newMetadataUri)
+      .accounts({
+        post: postAccount,
+        profile: profileAccount,
+        sessionToken: sessionTokenAccount,
+        authority: sessionPublicKey,
       });
   }
 
   public delete(
     postAccount: anchor.web3.PublicKey,
     profileAccount: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount: anchor.web3.PublicKey | null = null,
     refundReceiver: anchor.web3.PublicKey = owner) {
     return this.sdk.program.methods
       .deletePost()
       .accounts({
         post: postAccount,
         profile: profileAccount,
-        user: userAccount,
-        sessionToken: sessionTokenAccount,
+        sessionToken: null,
         authority: owner,
         refundReceiver,
       });
   }
-  
+
+  public deleteWithSession(
+    postAccount: anchor.web3.PublicKey,
+    profileAccount: anchor.web3.PublicKey,
+    sessionPublicKey: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey,
+    refundReceiver: anchor.web3.PublicKey = sessionPublicKey) {
+    return this.sdk.program.methods
+      .deletePost()
+      .accounts({
+        post: postAccount,
+        profile: profileAccount,
+        sessionToken: sessionTokenAccount,
+        authority: sessionPublicKey,
+        refundReceiver,
+      });
+  }
+
   public async reply(
     replyToPostAccount: anchor.web3.PublicKey,
     metadataUri: String,
     profileAccount: anchor.web3.PublicKey,
-    userAccount: anchor.web3.PublicKey,
     owner: anchor.web3.PublicKey,
-    sessionTokenAccount: anchor.web3.PublicKey | null = null
+    payer: anchor.web3.PublicKey = owner
   ) {
     const metadata = await axios.get(metadataUri as string);
     const postMetadata = new PostMetadata(metadata.data);
@@ -137,13 +180,46 @@ export class Post {
     }
     const randomHash = randomBytes(32);
     const instructionMethodBuilder = this.sdk.program.methods
+      // @ts-ignore
       .createComment(metadataUri, randomHash)
       .accounts({
         profile: profileAccount,
-        user: userAccount,
         authority: owner,
         replyTo: replyToPostAccount,
+        sessionToken: null,
+        payer: payer,
+      });
+    const pubKeys = await instructionMethodBuilder.pubkeys();
+    const postPDA = pubKeys.post as anchor.web3.PublicKey;
+    return {
+      instructionMethodBuilder,
+      postPDA,
+    };
+  }
+
+  public async replyWithSession(
+    replyToPostAccount: anchor.web3.PublicKey,
+    metadataUri: String,
+    profileAccount: anchor.web3.PublicKey,
+    sessionPublicKey: anchor.web3.PublicKey,
+    sessionTokenAccount: anchor.web3.PublicKey,
+    payer: anchor.web3.PublicKey = sessionPublicKey
+  ) {
+    const metadata = await axios.get(metadataUri as string);
+    const postMetadata = new PostMetadata(metadata.data);
+    if (!postMetadata.validate()) {
+      throw new Error("Invalid post metadata");
+    }
+    const randomHash = randomBytes(32);
+    const instructionMethodBuilder = this.sdk.program.methods
+      // @ts-ignore
+      .createComment(metadataUri, randomHash)
+      .accounts({
+        profile: profileAccount,
+        authority: sessionPublicKey,
+        replyTo: replyToPostAccount,
         sessionToken: sessionTokenAccount,
+        payer: payer,
       });
     const pubKeys = await instructionMethodBuilder.pubkeys();
     const postPDA = pubKeys.post as anchor.web3.PublicKey;
@@ -163,26 +239,11 @@ export class Post {
           metadata
           metadata_uri
           profile
+          reply_to
+          refreshed_at
           slot_created_at
           slot_updated_at
-        }
-      }`
-    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
-    return data.post;
-  }
-
-  public async getPostsByUser(userPubKey: anchor.web3.PublicKey): Promise<GraphQLPost[]> {
-    const profiles = await this.sdk.profile.getProfilesByUser(userPubKey);
-    const profilePDAs = profiles.map((p) => p.address) as string[];
-    const query = gql`
-      query GetPostsByUser {
-        post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
-          address
-          metadata
-          metadata_uri
-          profile
-          slot_created_at
-          slot_updated_at
+          created_at
         }
       }`
     const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
@@ -191,81 +252,78 @@ export class Post {
 
   public async getPostsByProfile(profilePubKey: anchor.web3.PublicKey): Promise<GraphQLPost[]> {
     const query = gql`
-      query GetPostsByProfile {
-        post(where: {profile: {_eq: "${profilePubKey}"}}) {
+      query GetPostsByProfile ($profilePubKey: String) {
+        post(where: {profile: {_eq: $profilePubKey}}) {
           address
           metadata
           metadata_uri
           profile
+          random_hash
+          reply_to
+          refreshed_at
           slot_created_at
           slot_updated_at
+          created_at
         }
       }`
-    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
+    const variables = {
+      profilePubKey: profilePubKey.toBase58(),
+    };
+    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query, variables);
     return data.post;
   }
 
-  public async getPostsByNamespace(namespace: Namespace): Promise<GraphQLPost[]> {
-    const profiles = await this.sdk.profile.getProfilesByNamespace(namespace);
-    const profilePDAs = profiles.map((p) => p.address) as string[];
-    const query = gql`
-      query GetPostsByNamespace {
-        post(where: {profile: {_in: [${profilePDAs.map((pda) => `"${pda}"`).join(",")}] }}) {
-          address
-          metadata
-          metadata_uri
-          profile
-          slot_created_at
-          slot_updated_at
-        }
-      }`
-    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
-    return data.post;
+  public async getPostsByAuthority(authorityPubKey: anchor.web3.PublicKey): Promise<GraphQLPost[]> {
+      // get all the profiles owned by the authority
+      const profiles = await this.sdk.profile.getProfilesByAuthority(authorityPubKey);
+      const profilePubKeys = profiles.map(profile => profile.address);
+      const query = gql`
+        query GetPostsByAuthority ($profilePubKeys: [String!]) {
+          post(where: {profile: {_in: $profilePubKeys}}) {
+            address
+            metadata
+            metadata_uri
+            profile
+            random_hash
+            reply_to
+            refreshed_at
+            slot_created_at
+            slot_updated_at
+            created_at
+          }
+        }`
+      const variables = {
+        profilePubKeys,
+      };
+
+      const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query, variables);
+      return data.post;
   }
 
-  public async getPostsByFollowedUsers(profileAccount: anchor.web3.PublicKey): Promise<GraphQLPost[]> {
-    const followedUsersProfileAccounts = await this.sdk.connection.getFollowingsByProfile(profileAccount);
-    const query = gql`
-      query GetPostsByFollowedUsers {
-        post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
-          address
-          metadata
-          metadata_uri
-          profile
-          slot_created_at
-          slot_updated_at
-        }
-      }`
-    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
-    return data.post;
-  }
 
   public async getFeedsByFollowedUsers(profileAccount: anchor.web3.PublicKey): Promise<GraphQLFeed[]> {
     const followedUsersProfileAccounts = await this.sdk.connection.getFollowingsByProfile(profileAccount);
     const query = gql`
-      query GetFeedsByFollowedUsers {
-        post(where: {profile: {_in: [${followedUsersProfileAccounts.map((pda) => `"${pda}"`).join(",")}] }}) {
+      query GetFeedsByFollowedUsers ($followedUsersProfileAccounts: [String!]) {
+        post(where: {profile: {_in: $followedUsersProfileAccounts}}) {
           address
           metadata
           metadata_uri
           profile
+          random_hash
+          reply_to
+          refreshed_at
           slot_created_at
           slot_updated_at
+          created_at
         }
       }
     `;
-    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query);
-    const feed = await Promise.all(data.post.map(async (post: GraphQLPost) => {
-      const profileData = await this.sdk.profileMetadata.getProfileMetadataByProfile(new anchor.web3.PublicKey(post.profile));
-      return {
-        address: post.address,
-        metadata: post.metadata,
-        metadata_uri: post.metadata_uri,
-        profile: profileData.profile,
-        profile_metadata: profileData.metadata,
-        profile_metadata_uri: profileData.metadata_uri,
-      };
-    }));
+    const variables = {
+      followedUsersProfileAccounts,
+    };
+    const data = await this.sdk.gqlClient.request<{ post: GraphQLPost[] }>(query, variables);
+    const feed = data.post;
     return feed;
   }
 }

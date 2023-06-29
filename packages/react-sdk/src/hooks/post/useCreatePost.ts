@@ -14,10 +14,32 @@ const useCreatePost = (sdk: SDK) => {
     async (
       metadataUri: string,
       profileAccount: PublicKey,
-      userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount?: PublicKey,
-      sendTransaction?: sendTransactionFn,
+      payer: PublicKey = owner,
+    ) => {
+      setIsCreatingPost(true);
+      setCreatePostError(null);
+
+      try {
+        const ixMethodBuilder = await createPostIxMethodBuilder(metadataUri, profileAccount, owner, payer);
+        return await ixMethodBuilder?.rpc();
+      } catch (err: any) {
+        setCreatePostError(err);
+      } finally {
+        setIsCreatingPost(false);
+      }
+    },
+    [sdk]
+  );
+
+  const createWithSession = useCallback(
+    async (
+      metadataUri: string,
+      profileAccount: PublicKey,
+      sessionPublicKey: PublicKey,
+      sessionAccount: PublicKey,
+      sendTransaction: sendTransactionFn,
+      payer: PublicKey = sessionPublicKey,
       connection?: Connection,
       options?: SendTransactionOptions
     ) => {
@@ -25,15 +47,10 @@ const useCreatePost = (sdk: SDK) => {
       setCreatePostError(null);
 
       try {
-        const ixMethodBuilder = await createPostIxMethodBuilder(metadataUri, profileAccount, userAccount, owner, sessionAccount);
+        const ixMethodBuilder = await createPostWithSessionIxMethodBuilder(metadataUri, profileAccount, sessionPublicKey, sessionAccount, payer);
         const tx = await ixMethodBuilder?.transaction();
-
-        if (sendTransaction) {
-          if (tx) {
-            return await sendTransaction(tx, connection, options);
-          }
-        } else {
-          return await ixMethodBuilder?.rpc();
+        if (tx) {
+          return await sendTransaction(tx, connection, options);
         }
       } catch (err: any) {
         setCreatePostError(err);
@@ -48,14 +65,35 @@ const useCreatePost = (sdk: SDK) => {
     async (
       metadataUri: string,
       profileAccount: PublicKey,
-      userAccount: PublicKey,
       owner: PublicKey,
-      sessionAccount?: PublicKey
+      payer: PublicKey = owner,
     ) => {
       setCreatePostError(null);
 
       try {
-        const data = await sdk.post.create(metadataUri, profileAccount, userAccount, owner, sessionAccount);
+        const data = await sdk.post.create(metadataUri, profileAccount, owner, payer);
+        setPostPDA(data.postPDA);
+        return data.instructionMethodBuilder;
+      } catch (err: any) {
+        setCreatePostError(err);
+        return null;
+      }
+    },
+    [sdk]
+  );
+
+  const createPostWithSessionIxMethodBuilder = useCallback(
+    async (
+      metadataUri: string,
+      profileAccount: PublicKey,
+      sessionPublicKey: PublicKey,
+      sessionAccount: PublicKey,
+      payer: PublicKey = sessionPublicKey
+    ) => {
+      setCreatePostError(null);
+
+      try {
+        const data = await sdk.post.createWithSession(metadataUri, profileAccount, sessionPublicKey, sessionAccount, payer);
         setPostPDA(data.postPDA);
         return data.instructionMethodBuilder;
       } catch (err: any) {
@@ -68,7 +106,9 @@ const useCreatePost = (sdk: SDK) => {
 
   return {
     create,
+    createWithSession,
     createPostIxMethodBuilder,
+    createPostWithSessionIxMethodBuilder,
     postPDA,
     isCreatingPost,
     createPostError

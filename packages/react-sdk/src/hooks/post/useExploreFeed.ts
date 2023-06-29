@@ -1,8 +1,7 @@
 import { SDK } from "@gumhq/sdk";
 import { useState, useEffect, useCallback } from "react";
-import { Namespace } from "@gumhq/sdk/lib/profile";
 
-const useExploreFeed = (sdk: SDK, namespace: Namespace) => {
+const useExploreFeed = (sdk: SDK) => {
   const [exploreFeedData, setExploreFeedData] = useState<any>(null);
   const [exploreFeedLoading, setExploreFeedLoading] = useState(false);
   const [exploreFeedError, setExploreFeedError] = useState<Error | null>(null);
@@ -13,7 +12,7 @@ const useExploreFeed = (sdk: SDK, namespace: Namespace) => {
       setExploreFeedError(null);
 
       try {
-        const data = await sdk.post.getPostsByNamespace(namespace);
+        const data = await sdk.post.getAllPosts();
 
         setExploreFeedData(data);
       } catch (err: any) {
@@ -21,7 +20,7 @@ const useExploreFeed = (sdk: SDK, namespace: Namespace) => {
       } finally {
         setExploreFeedLoading(false);
       }
-    }, [sdk, namespace]);
+    }, [sdk]);
 
   useEffect(() => {
     fetchExploreFeed();

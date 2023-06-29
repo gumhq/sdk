@@ -1,8 +1,7 @@
-import { SDK } from "../src";
+import { GumNameService, SDK } from "../src";
 import * as anchor from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
-import randombytes from "randombytes";
-import { airdrop } from "./utils";
+import { airdrop, createGumDomain, createGumTld } from "./utils";
 import { expect } from "chai";
 import { sendAndConfirmTransaction } from "@solana/web3.js";
 
@@ -12,10 +11,9 @@ const user = userWallet.payer;
 
 describe("Connection", async () => {
   let sdk: SDK;
+  let nameservice: GumNameService;
   let testUser: anchor.web3.Keypair;
   let testUserWallet: NodeWallet;
-  let userPDA: anchor.web3.PublicKey;
-  let testUserPDA: anchor.web3.PublicKey;
   let profilePDA: anchor.web3.PublicKey;
   let testProfilePDA: anchor.web3.PublicKey;
   let connectionPDA: anchor.web3.PublicKey;
@@ -28,32 +26,34 @@ describe("Connection", async () => {
       "localnet"
     );
 
-    // Create a user
-    const createUser = await sdk.user.create(user.publicKey)
-    userPDA = createUser.userPDA;
-    await createUser.instructionMethodBuilder.rpc();
+    // Create a gum tld
+    const gumTld = await createGumTld(sdk);
+
+    // Create a domain for the wallet
+    const screenNameAccount = await createGumDomain(sdk, gumTld, "foobar");
 
     // Create a profile
-    const profile = await sdk.profile.create(userPDA, "Personal", user.publicKey);
+    const profileMetdataUri = "https://example.com";
+    const profile = await sdk.profile.create(
+      profileMetdataUri,
+      screenNameAccount,
+      user.publicKey,
+    );
     profilePDA = profile.profilePDA;
     await profile.instructionMethodBuilder.rpc();
 
-    // Create a testUser
+    // Create a testUser nameservice account
     testUser = anchor.web3.Keypair.generate();
     testUserWallet = new NodeWallet(testUser);
     await airdrop(testUser.publicKey);
-    const createTestUser = await sdk.user.create(testUser.publicKey);
-    testUserPDA = createTestUser.userPDA as anchor.web3.PublicKey;
-    const testUserTx = await createTestUser.instructionMethodBuilder.transaction();
-    testUserTx.recentBlockhash = (await sdk.rpcConnection.getLatestBlockhash()).blockhash;
-    testUserTx.feePayer = testUser.publicKey;
-    const signedTestUserTransaction = await testUserWallet.signTransaction(testUserTx);
-    await sendAndConfirmTransaction(sdk.rpcConnection, signedTestUserTransaction, [testUser]);
+
+    // Create a user nameservice account
+    const screenNameAccount2 = await createGumDomain(sdk, gumTld, "foobarr");
 
     // Create a testProfile
     const testProfile = await sdk.profile.create(
-      testUserPDA,
-      "Personal",
+      profileMetdataUri,
+      screenNameAccount2,
       testUser.publicKey,
     );
     testProfilePDA = testProfile.profilePDA as anchor.web3.PublicKey;
@@ -68,12 +68,10 @@ describe("Connection", async () => {
     const connection = await sdk.connection.create(
       profilePDA,
       testProfilePDA,
-      userPDA,
       user.publicKey,
     );
     connectionPDA = connection.connectionPDA as anchor.web3.PublicKey;
     await connection.instructionMethodBuilder.rpc();
-
     const connectionAccount = await sdk.connection.get(connectionPDA);
     expect(connectionAccount.fromProfile.toBase58()).to.equal(profilePDA.toBase58());
     expect(connectionAccount.toProfile.toBase58()).to.equal(testProfilePDA.toBase58());
@@ -84,7 +82,6 @@ describe("Connection", async () => {
       connectionPDA,
       profilePDA,
       testProfilePDA,
-      userPDA,
       user.publicKey,
     );
     await connection.rpc();

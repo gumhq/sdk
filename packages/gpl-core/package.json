@@ -1,6 +1,6 @@
 {
   "name": "@gumhq/sdk",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "main": "lib/index.js",
   "license": "GPL-3.0",
   "description": "Gum Protocol SDK",
@@ -27,6 +27,7 @@
     "axios": "^1.2.6",
     "graphql": "^16.6.0",
     "graphql-request": "^5.1.0",
+    "js-sha3": "^0.8.0",
     "randombytes": "^2.1.0",
     "tweetnacl": "^1.0.3"
   },

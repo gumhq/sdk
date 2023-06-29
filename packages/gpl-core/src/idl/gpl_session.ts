@@ -1,5 +1,5 @@
 export type GplSession = {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "gpl_session",
   "instructions": [
     {
@@ -171,7 +171,7 @@ export type GplSession = {
 };
 
 export const IDL: GplSession = {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "gpl_session",
   "instructions": [
     {
