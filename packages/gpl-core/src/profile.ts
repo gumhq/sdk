@@ -182,7 +182,7 @@ export class Profile {
       const { data } = await axios.get<ProfileMetadataType>(metadataUri);
 
       // Check if all required fields are present
-      const requiredFields: Array<keyof ProfileMetadataType> = ["name", "bio", "avatar"];
+      const requiredFields: Array<keyof ProfileMetadataType> = ["name", "avatar"];
       for (const field of requiredFields) {
         if (!data[field]) {
           throw new Error(`${field} is required but missing`);
