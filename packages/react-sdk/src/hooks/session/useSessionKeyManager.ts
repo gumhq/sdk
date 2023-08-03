@@ -66,7 +66,7 @@ export function useSessionKeyManager(wallet: AnchorWallet, connection: Connectio
       .catch(() => {
         resetSessionData();
       });
-  }, [wallet, wallet?.publicKey, cluster]);
+  }, [wallet?.publicKey, cluster]);
 
   const deleteSessionData = async () => {
     try {
