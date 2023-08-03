@@ -50,6 +50,43 @@ The Gum Quickstart is an excellent starting point for developers aiming to lever
 
 Check out the [example app](https://github.com/gumhq/gum-example-app) that uses the Gum SDK to demonstrate its capabilities. The app is a simple React app that showcases the creation of a domain, profile, and posts.
 
+## Usage with xNFT
+
+If you're using the Gum SDK in a project with xNFT, you might need to create a custom Webpack configuration to properly handle certain dependencies.
+Create a new file in your project root named webpack.config.js and add the following:
+```javascript
+const createExpoWebpackConfigAsync = require('@expo/webpack-config');
+const webpack = require('webpack')
+
+module.exports = async function (env, argv) {
+  const config = await createExpoWebpackConfigAsync(env, argv);
+
+  config.resolve.alias['crypto'] = 'crypto-browserify';
+  config.resolve.alias['stream'] = 'stream-browserify';
+  config.resolve.alias['process'] = 'process';
+  config.resolve.alias['zlib'] = 'browserify-zlib';
+  config.resolve.alias['path'] = 'path-browserify';
+
+  config.plugins.push(new webpack.ProvidePlugin({
+    process: "process",
+    Buffer: ["buffer", "Buffer"],
+    path: 'path-browserify',
+    zlib: 'browserify-zlib'
+  }));
+
+  if (config.mode === 'development') {
+    config.devServer.compress = false;
+  }
+
+  if (config.mode === 'production') {
+    config.optimization.minimize = false;
+  }
+
+  return config;
+};
+```
+This configuration resolves modules that are typically node.js-specific so they work in the browser and turns off compression and minimization in development and production modes, respectively.
+
 ## Contributing
 
 We welcome contributions to improve the SDK. Please raise an issue or submit a pull request with any suggestions or bug fixes.
